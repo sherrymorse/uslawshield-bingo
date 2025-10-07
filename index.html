@@ -736,6 +736,17 @@
     </div>
   </div>
 
+  <!-- Admin Edit Modal -->
+  <div id="adminEditModal" class="bingo-modal" style="display: none;">
+    <div class="bingo-modal-content" style="max-width: 95%; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-family: 'Anton', sans-serif; color: #0e1d61; margin: 0;">👑 Admin Edit Mode</h2>
+        <button class="btn-secondary close-btn" onclick="closeAdminEdit()">Exit Edit Mode</button>
+      </div>
+      <div id="adminEditContent"></div>
+    </div>
+  </div>
+
   <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -970,8 +981,129 @@
         return;
       }
       
-      alert('Admin Edit Mode: You can now click on any cell in any player\'s cards to mark/unmark them. This feature will be available in the next update.');
-      // TODO: Implement modal to show player's cards and allow editing
+      const gameRef = ref(database, 'games/' + targetPlayerId);
+      const playerRef = ref(database, 'players/' + targetPlayerId);
+      
+      const [gameSnapshot, playerSnapshot] = await Promise.all([
+        get(gameRef),
+        get(playerRef)
+      ]);
+      
+      if (!gameSnapshot.exists() || !playerSnapshot.exists()) {
+        alert('Player not found');
+        return;
+      }
+      
+      const targetGame = gameSnapshot.val();
+      const targetPlayer = playerSnapshot.val();
+      
+      showAdminEditModal(targetPlayerId, targetPlayer.name, targetGame);
+    }
+    
+    function showAdminEditModal(targetPlayerId, playerName, targetGame) {
+      const modal = document.getElementById('adminEditModal');
+      const content = document.getElementById('adminEditContent');
+      
+      let html = `<h3 style="color: #d51e47; margin-bottom: 20px;">Editing: ${playerName}</h3>`;
+      html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">`;
+      
+      targetGame.cards.forEach((cardData, cardIndex) => {
+        html += `<div style="background: white; border: 3px solid #0e1d61; border-radius: 10px; padding: 15px;">`;
+        html += `<h4 style="text-align: center; color: #d51e47; margin-bottom: 10px;">Card ${cardIndex + 1}</h4>`;
+        html += `<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #0e1d61; border: 2px solid #0e1d61; border-radius: 5px;">`;
+        
+        // Header row
+        ['B', 'I', 'N', 'G', 'O'].forEach(letter => {
+          html += `<div style="background: #0e1d61; color: #d51e47; font-weight: bold; padding: 8px; text-align: center; font-size: 1.2em;">${letter}</div>`;
+        });
+        
+        // Grid cells
+        cardData.items.forEach((item, cellIndex) => {
+          const isMarked = cardData.marked[cellIndex];
+          const memberId = cardData.memberIds[cellIndex];
+          const isFree = item === 'FREE';
+          
+          const bgColor = isFree ? 'linear-gradient(135deg, #d51e47 0%, #e7d386 100%)' : (isMarked ? '#e3f2fd' : 'white');
+          const textColor = isFree ? 'white' : '#0e1d61';
+          const cursor = isFree ? 'default' : 'pointer';
+          
+          html += `<div onclick="adminToggleCell('${targetPlayerId}', ${cardIndex}, ${cellIndex})" 
+                        style="background: ${bgColor}; color: ${textColor}; padding: 10px 5px; min-height: 70px; 
+                               display: flex; flex-direction: column; align-items: center; justify-content: center; 
+                               text-align: center; font-size: 0.75em; cursor: ${cursor}; position: relative; border: 1px solid #e0e0e0;">`;
+          
+          if (isFree) {
+            html += `<strong>FREE<br>SPACE</strong>`;
+          } else {
+            html += `<div style="font-weight: 600;">${item}</div>`;
+            if (isMarked && memberId) {
+              html += `<div style="background: #d51e47; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.9em; margin-top: 3px; font-family: monospace;">${memberId}</div>`;
+            }
+            if (isMarked) {
+              html += `<div style="position: absolute; top: 2px; right: 2px; background: #4caf50; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em;">✓</div>`;
+            }
+          }
+          
+          html += `</div>`;
+        });
+        
+        html += `</div></div>`;
+      });
+      
+      html += `</div>`;
+      html += `<div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px;">`;
+      html += `<strong>Instructions:</strong> Click any cell to toggle mark/unmark. Changes save automatically.`;
+      html += `</div>`;
+      
+      content.innerHTML = html;
+      modal.style.display = 'block';
+    }
+    
+    window.adminToggleCell = async function(targetPlayerId, cardIndex, cellIndex) {
+      const gameRef = ref(database, 'games/' + targetPlayerId);
+      const snapshot = await get(gameRef);
+      
+      if (!snapshot.exists()) return;
+      
+      const targetGame = snapshot.val();
+      const cell = targetGame.cards[cardIndex];
+      
+      if (cell.items[cellIndex] === 'FREE') return; // Can't toggle FREE space
+      
+      const isCurrentlyMarked = cell.marked[cellIndex];
+      
+      if (isCurrentlyMarked) {
+        // Unmark the cell
+        cell.marked[cellIndex] = false;
+        cell.memberIds[cellIndex] = null;
+      } else {
+        // Mark the cell - prompt for member ID
+        const memberId = prompt('Enter Member ID (or leave blank for no ID):');
+        if (memberId !== null) {
+          cell.marked[cellIndex] = true;
+          cell.memberIds[cellIndex] = memberId.trim().toUpperCase() || 'ADMIN';
+        } else {
+          return; // User cancelled
+        }
+      }
+      
+      await set(gameRef, targetGame);
+      
+      // Refresh the modal
+      const playerSnapshot = await get(ref(database, 'players/' + targetPlayerId));
+      if (playerSnapshot.exists()) {
+        showAdminEditModal(targetPlayerId, playerSnapshot.val().name, targetGame);
+      }
+    }
+    
+    window.closeAdminEdit = function() {
+      document.getElementById('adminEditModal').style.display = 'none';
+      
+      // Refresh player list and own cards if needed
+      if (gameState) {
+        renderCards();
+        updatePlayerListPanel();
+      }
     }
 
     // Save game state to Firebase
@@ -1382,6 +1514,7 @@
         isAdmin = (gameState.playerName === ADMIN_NAME);
         showPlayerInfo();
         renderCards();
+        updatePlayerListPanel();
       } else {
         document.getElementById('nameModal').style.display = 'block';
         document.getElementById('nameInput').focus();
@@ -1390,13 +1523,17 @@
       // Set up real-time listener for player list updates
       const playersRef = ref(database, 'players');
       onValue(playersRef, () => {
-        updatePlayerListPanel();
+        if (gameState) {
+          updatePlayerListPanel();
+        }
       });
       
       // Also listen to games for bingo distance updates
       const gamesRef = ref(database, 'games');
       onValue(gamesRef, () => {
-        updatePlayerListPanel();
+        if (gameState) {
+          updatePlayerListPanel();
+        }
       });
     };
   </script>
