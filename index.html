@@ -17,6 +17,7 @@
       background: linear-gradient(135deg, #0e1d61 0%, #1a2a7a 100%);
       padding: 20px;
       min-height: 100vh;
+      position: relative;
     }
     
     .header {
@@ -84,6 +85,44 @@
       font-weight: 600;
     }
     
+    .active-players {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 3px solid #0e1d61;
+      border-radius: 10px;
+      padding: 15px;
+      max-width: 250px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+    }
+    
+    .active-players h3 {
+      font-family: 'Oswald', sans-serif;
+      color: #0e1d61;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .player-list {
+      font-size: 0.85em;
+      color: #333;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .player-list-item {
+      padding: 5px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .player-list-item:last-child {
+      border-bottom: none;
+    }
+    
     .controls {
       text-align: center;
       margin-bottom: 30px;
@@ -137,6 +176,7 @@
       gap: 30px;
       max-width: 1600px;
       margin: 0 auto;
+      padding-bottom: 100px;
     }
     
     .bingo-card {
@@ -259,6 +299,7 @@
     
     .bingo-cell.marked {
       position: relative;
+      background: #f0f8ff !important;
     }
     
     .bingo-cell.marked::after {
@@ -496,7 +537,7 @@
       body {
         background: white;
       }
-      .header, .controls, .player-info {
+      .header, .controls, .player-info, .active-players {
         display: none;
       }
       .bingo-card {
@@ -515,6 +556,11 @@
       .bingo-title {
         font-size: 3em;
         letter-spacing: 10px;
+      }
+      .active-players {
+        bottom: 10px;
+        right: 10px;
+        max-width: 200px;
       }
     }
   </style>
@@ -548,6 +594,12 @@
   </div>
 
   <div class="cards-container" id="cardsContainer"></div>
+
+  <!-- Active Players Panel -->
+  <div class="active-players" id="activePlayers">
+    <h3>🎮 Active Players</h3>
+    <div class="player-list" id="playerListPanel"></div>
+  </div>
 
   <!-- Name Entry Modal -->
   <div id="nameModal" class="modal" style="display: none;">
@@ -632,6 +684,39 @@
     let currentCardIndex = null;
     let gameState = null;
 
+    function getAllPlayers() {
+      const players = [];
+      for (let i = 1; i <= MAX_PLAYERS; i++) {
+        const playerKey = 'uslBingoGame_player_' + i;
+        const playerData = localStorage.getItem(playerKey);
+        if (playerData) {
+          try {
+            const parsed = JSON.parse(playerData);
+            const expirationDate = new Date(parsed.expiresAt);
+            if (expirationDate > new Date()) {
+              players.push({ id: 'player_' + i, name: parsed.playerName });
+            }
+          } catch (e) {
+            // Invalid data, skip
+          }
+        }
+      }
+      return players;
+    }
+
+    function updatePlayerListPanel() {
+      const players = getAllPlayers();
+      const panel = document.getElementById('playerListPanel');
+      
+      if (players.length === 0) {
+        panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
+      } else {
+        panel.innerHTML = players.map((p, idx) => 
+          `<div class="player-list-item">${idx + 1}. ${p.name}</div>`
+        ).join('');
+      }
+    }
+
     function getGlobalPlayerCount() {
       let count = localStorage.getItem('uslBingoGlobalPlayerCount');
       return count ? parseInt(count) : 0;
@@ -662,6 +747,7 @@
       
       gameState.expiresAt = expirationDate.toISOString();
       localStorage.setItem('uslBingoGame_' + gameState.playerId, JSON.stringify(gameState));
+      updatePlayerListPanel();
     }
 
     function loadGameState() {
@@ -833,7 +919,10 @@
       closeModal();
       renderCards();
       
-      setTimeout(() => checkForBingo(currentCardIndex), 300);
+      setTimeout(() => {
+        console.log('Checking for bingo on card', currentCardIndex);
+        checkForBingo(currentCardIndex);
+      }, 300);
     }
 
     function closeModal() {
@@ -845,6 +934,9 @@
     function checkForBingo(cardIndex) {
       const card = gameState.cards[cardIndex];
       const bingoPatterns = [];
+      
+      console.log('Checking bingo for card', cardIndex);
+      console.log('Marked cells:', card.marked);
       
       // Check rows
       for (let row = 0; row < 5; row++) {
@@ -858,10 +950,12 @@
           }
         }
         if (rowComplete) {
-          bingoPatterns.push({ type: 'BINGO - Row ' + (row + 1), indices: rowIndices });
+          console.log('BINGO FOUND: Row', row + 1);
+          bingoPatterns.push({ type: '🎉 BINGO - Row ' + (row + 1), indices: rowIndices });
         }
       }
       
+      // Check columns
       for (let col = 0; col < 5; col++) {
         const colIndices = [];
         let colComplete = true;
@@ -870,52 +964,60 @@
           colIndices.push(index);
           if (!card.marked[index]) {
             colComplete = false;
-            break;
           }
         }
         if (colComplete) {
-          bingoPatterns.push({ type: 'Column ' + ['B', 'I', 'N', 'G', 'O'][col], indices: colIndices });
+          console.log('BINGO FOUND: Column', ['B', 'I', 'N', 'G', 'O'][col]);
+          bingoPatterns.push({ type: '🎉 BINGO - Column ' + ['B', 'I', 'N', 'G', 'O'][col], indices: colIndices });
         }
       }
       
+      // Check diagonals
       const diagonal1 = [0, 6, 12, 18, 24];
       if (diagonal1.every(i => card.marked[i])) {
-        bingoPatterns.push({ type: 'Diagonal (Top-Left to Bottom-Right)', indices: diagonal1 });
+        console.log('BINGO FOUND: Diagonal \\');
+        bingoPatterns.push({ type: '🎉 BINGO - Diagonal \\', indices: diagonal1 });
       }
       
       const diagonal2 = [4, 8, 12, 16, 20];
       if (diagonal2.every(i => card.marked[i])) {
-        bingoPatterns.push({ type: 'Diagonal (Top-Right to Bottom-Left)', indices: diagonal2 });
+        console.log('BINGO FOUND: Diagonal /');
+        bingoPatterns.push({ type: '🎉 BINGO - Diagonal /', indices: diagonal2 });
       }
       
+      // Check four corners
       const fourCorners = [0, 4, 20, 24];
       if (fourCorners.every(i => card.marked[i])) {
-        bingoPatterns.push({ type: 'Four Corners', indices: fourCorners });
+        console.log('BINGO FOUND: Four Corners');
+        bingoPatterns.push({ type: '🎉 BINGO - Four Corners', indices: fourCorners });
       }
       
-      const tPattern = [0, 1, 2, 3, 4, 12, 17, 22];
+      // Check T pattern (top row + middle column)
+      const tPattern = [0, 1, 2, 3, 4, 7, 12, 17, 22];
       if (tPattern.every(i => card.marked[i])) {
-        bingoPatterns.push({ type: 'T Pattern', indices: tPattern });
+        console.log('BINGO FOUND: T Pattern');
+        bingoPatterns.push({ type: '🎉 BINGO - T Pattern', indices: tPattern });
       }
       
+      // Check X pattern (both diagonals)
       const xPattern = [0, 4, 6, 8, 12, 16, 18, 20, 24];
       if (xPattern.every(i => card.marked[i])) {
-        bingoPatterns.push({ type: 'X Pattern', indices: xPattern });
+        console.log('BINGO FOUND: X Pattern');
+        bingoPatterns.push({ type: '🎉 BINGO - X Pattern', indices: xPattern });
       }
       
-      let allMarked = true;
-      for (let i = 0; i < 25; i++) {
-        if (!card.marked[i]) {
-          allMarked = false;
-          break;
-        }
-      }
-      if (allMarked) {
-        bingoPatterns.push({ type: 'BLACKOUT (Full Card)', indices: Array.from({length: 25}, (_, i) => i) });
+      // Check blackout
+      const allIndices = Array.from({length: 25}, (_, i) => i);
+      if (allIndices.every(i => card.marked[i])) {
+        console.log('BINGO FOUND: BLACKOUT!!!');
+        bingoPatterns.push({ type: '🎉🎉🎉 BLACKOUT!!!', indices: allIndices });
       }
       
       if (bingoPatterns.length > 0) {
+        console.log('Showing bingo modal with patterns:', bingoPatterns);
         showBingoModal(cardIndex, bingoPatterns);
+      } else {
+        console.log('No bingo patterns found');
       }
     }
 
@@ -933,7 +1035,7 @@
         const memberId = gameState.cards[cardIndex].memberIds[index];
         const item = gameState.cards[cardIndex].items[index];
         
-        if (memberId) {
+        if (memberId || item === 'FREE') {
           const memberItem = document.createElement('div');
           memberItem.className = 'member-item';
           
@@ -943,7 +1045,7 @@
           
           memberItem.innerHTML = `
             <span class="member-position">${position}: ${item}</span>
-            <span class="member-id">${memberId}</span>
+            <span class="member-id">${memberId || 'FREE SPACE'}</span>
           `;
           memberList.appendChild(memberItem);
         }
@@ -990,6 +1092,7 @@
     };
 
     window.onload = function() {
+      updatePlayerListPanel();
       const saved = loadGameState();
       if (saved) {
         gameState = saved;
