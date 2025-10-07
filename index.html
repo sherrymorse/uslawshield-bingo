@@ -1258,7 +1258,7 @@
       }
     }
     
-    // FIXED: Atomic write to prevent race conditions during refresh
+    // FIXED: Atomic write with proper array serialization
     async function saveGameState(silent = false) {
       if (offlineMode) {
         localStorage.setItem('offlineGameState', JSON.stringify(gameState));
@@ -1271,6 +1271,21 @@
       expirationDate.setDate(expirationDate.getDate() + 7);
       gameState.expiresAt = expirationDate.toISOString();
       
+      // CRITICAL: Ensure cards is a proper array before saving
+      if (!Array.isArray(gameState.cards)) {
+        gameState.cards = Object.values(gameState.cards || []);
+      }
+      
+      // Deep clone and ensure all nested arrays are preserved
+      const gameStateToSave = {
+        ...gameState,
+        cards: gameState.cards.map(card => ({
+          items: Array.isArray(card.items) ? [...card.items] : Object.values(card.items || []),
+          marked: Array.isArray(card.marked) ? [...card.marked] : Object.values(card.marked || []),
+          memberIds: Array.isArray(card.memberIds) ? [...card.memberIds] : Object.values(card.memberIds || [])
+        }))
+      };
+      
       const playerData = {
         id: playerId,
         name: gameState.playerName,
@@ -1280,10 +1295,9 @@
         isHiddenSpectator: isHiddenSpectator || undefined
       };
       
-      // CRITICAL FIX: Write both simultaneously to prevent race condition
       try {
         await Promise.all([
-          set(ref(database, 'games/' + playerId), gameState),
+          set(ref(database, 'games/' + playerId), gameStateToSave),
           set(ref(database, 'players/' + playerId), playerData)
         ]);
         
