@@ -665,10 +665,18 @@
   </div>
   <div class="player-info" id="playerInfo" style="display: none;"></div>
   <div class="controls">
-    <button class="btn-secondary" onclick="window.print()">Print Cards (PDF)</button>
+    <button class="btn-secondary" onclick="goOffline()">Offline Game</button>
     <button class="btn-secondary" onclick="confirmClearProgress()" style="background: #dc3545; color: white; border-color: #dc3545;">Clear All Progress</button>
     <button id="adminClearAllBtn" class="btn-secondary" onclick="adminClearAllPlayers()" style="background: #8b0000; color: white; border-color: #8b0000; display: none;">🚫 Remove All Players</button>
     <button id="adminManageRequestsBtn" class="btn-secondary" onclick="manageRequests()" style="display: none;">Manage Requests</button>
+    <select id="gameTypeSelect" style="display: none; padding: 10px; margin: 0 10px; border-radius: 8px;" onchange="setGameType(this.value)">
+      <option value="">Set Game Type</option>
+      <option value="Any Line">Any Line</option>
+      <option value="Four Corners">Four Corners</option>
+      <option value="X">X</option>
+      <option value="T">T</option>
+      <option value="Blackout">Blackout</option>
+    </select>
   </div>
   <div class="cards-container" id="cardsContainer"></div>
   <!-- Active Players Panel -->
@@ -794,6 +802,7 @@
     let playerId = null;
     let isAdmin = false;
     let currentGameType = "Any Line"; // Default game type
+    let offlineMode = false;
     // Get or create player ID from localStorage
     function getOrCreatePlayerId() {
       let id = localStorage.getItem('uslBingoPlayerId');
@@ -932,7 +941,7 @@
         for (let col = 0; col < 5; col++) {
           rowIndices.push(row * 5 + col);
         }
-        patterns.push({ indices: rowIndices });
+        patterns.push({ indices: rowIndices, type: 'Row ' + (row + 1) });
       }
       // Columns
       for (let col = 0; col < 5; col++) {
@@ -940,17 +949,19 @@
         for (let row = 0; row < 5; row++) {
           colIndices.push(row * 5 + col);
         }
-        patterns.push({ indices: colIndices });
+        patterns.push({ indices: colIndices, type: 'Column ' + ['B', 'I', 'N', 'G', 'O'][col] });
       }
       // Diagonals
-      patterns.push({ indices: [0, 6, 12, 18, 24] });
-      patterns.push({ indices: [4, 8, 12, 16, 20] });
+      patterns.push({ indices: [0, 6, 12, 18, 24], type: 'Diagonal \\' });
+      patterns.push({ indices: [4, 8, 12, 16, 20], type: 'Diagonal /' });
       // Four corners
-      patterns.push({ indices: [0, 4, 20, 24] });
+      patterns.push({ indices: [0, 4, 20, 24], type: 'Four Corners' });
       // T pattern
-      patterns.push({ indices: [0, 1, 2, 3, 4, 7, 12, 17, 22] });
+      patterns.push({ indices: [0, 1, 2, 3, 4, 7, 12, 17, 22], type: 'T Pattern' });
       // X pattern
-      patterns.push({ indices: [0, 4, 6, 8, 12, 16, 18, 20, 24] });
+      patterns.push({ indices: [0, 4, 6, 8, 12, 16, 18, 20, 24], type: 'X Pattern' });
+      // Blackout
+      patterns.push({ indices: Array.from({length: 25}, (_, i) => i), type: 'Blackout' });
       return patterns;
     }
     // Admin: Clear a player's cards
@@ -1173,6 +1184,10 @@
     }
     // Save game state to Firebase
     async function saveGameState() {
+      if (offlineMode) {
+        localStorage.setItem('offlineGameState', JSON.stringify(gameState));
+        return; // Don't save in offline mode
+      }
       if (!gameState || !playerId) return;
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + 7);
@@ -1247,6 +1262,9 @@
       showPlayerInfo();
       renderCards();
       updatePlayerListPanel();
+      if (isAdmin) {
+        document.getElementById('gameTypeSelect').style.display = 'inline-block';
+      }
     }
     function showPlayerInfo() {
       const playerInfo = document.getElementById('playerInfo');
@@ -1328,6 +1346,14 @@
       if (gameState.cards[cardIndex].marked[cellIndex]) {
         return;
       }
+      if (offlineMode) {
+        // In offline, mark without ID
+        gameState.cards[cardIndex].marked[cellIndex] = true;
+        gameState.cards[cardIndex].memberIds[cellIndex] = '';
+        renderCards();
+        checkForBingo(cardIndex);
+        return;
+      }
       currentCardIndex = cardIndex;
       currentCell = cellIndex;
       document.getElementById('memberModal').style.display = 'block';
@@ -1370,75 +1396,16 @@
     }
     function checkForBingo(cardIndex) {
       const card = gameState.cards[cardIndex];
-      const bingoPatterns = [];
-      console.log('Checking bingo for card', cardIndex);
-      // Check rows
-      for (let row = 0; row < 5; row++) {
-        const rowIndices = [];
-        let rowComplete = true;
-        for (let col = 0; col < 5; col++) {
-          const index = row * 5 + col;
-          rowIndices.push(index);
-          if (!card.marked[index]) {
-            rowComplete = false;
-          }
-        }
-        if (rowComplete) {
-          console.log('BINGO FOUND: Row', row + 1);
-          bingoPatterns.push({ type: '🎉 BINGO - Row ' + (row + 1), indices: rowIndices });
-        }
-      }
-      // Check columns
-      for (let col = 0; col < 5; col++) {
-        const colIndices = [];
-        let colComplete = true;
-        for (let row = 0; row < 5; row++) {
-          const index = row * 5 + col;
-          colIndices.push(index);
-          if (!card.marked[index]) {
-            colComplete = false;
-          }
-        }
-        if (colComplete) {
-          console.log('BINGO FOUND: Column', ['B', 'I', 'N', 'G', 'O'][col]);
-          bingoPatterns.push({ type: '🎉 BINGO - Column ' + ['B', 'I', 'N', 'G', 'O'][col], indices: colIndices });
-        }
-      }
-      // Check diagonals
-      const diagonal1 = [0, 6, 12, 18, 24];
-      if (diagonal1.every(i => card.marked[i])) {
-        console.log('BINGO FOUND: Diagonal \\');
-        bingoPatterns.push({ type: '🎉 BINGO - Diagonal \\', indices: diagonal1 });
-      }
-      const diagonal2 = [4, 8, 12, 16, 20];
-      if (diagonal2.every(i => card.marked[i])) {
-        console.log('BINGO FOUND: Diagonal /');
-        bingoPatterns.push({ type: '🎉 BINGO - Diagonal /', indices: diagonal2 });
-      }
-      // Check four corners
-      const fourCorners = [0, 4, 20, 24];
-      if (fourCorners.every(i => card.marked[i])) {
-        console.log('BINGO FOUND: Four Corners');
-        bingoPatterns.push({ type: '🎉 BINGO - Four Corners', indices: fourCorners });
-      }
-      // Check T pattern
-      const tPattern = [0, 1, 2, 3, 4, 7, 12, 17, 22];
-      if (tPattern.every(i => card.marked[i])) {
-        console.log('BINGO FOUND: T Pattern');
-        bingoPatterns.push({ type: '🎉 BINGO - T Pattern', indices: tPattern });
-      }
-      // Check X pattern
-      const xPattern = [0, 4, 6, 8, 12, 16, 18, 20, 24];
-      if (xPattern.every(i => card.marked[i])) {
-        console.log('BINGO FOUND: X Pattern');
-        bingoPatterns.push({ type: '🎉 BINGO - X Pattern', indices: xPattern });
-      }
-      // Check blackout
-      const allIndices = Array.from({length: 25}, (_, i) => i);
-      if (allIndices.every(i => card.marked[i])) {
-        console.log('BINGO FOUND: BLACKOUT!!!');
-        bingoPatterns.push({ type: '🎉🎉🎉 BLACKOUT!!!', indices: allIndices });
-      }
+      const allPatterns = getAllBingoPatterns();
+      const gamePatternsMap = {
+        'Any Line': allPatterns.filter(p => p.type.startsWith('Row') || p.type.startsWith('Column') || p.type.startsWith('Diagonal')),
+        'Four Corners': allPatterns.filter(p => p.type === 'Four Corners'),
+        'X': allPatterns.filter(p => p.type === 'X Pattern'),
+        'T': allPatterns.filter(p => p.type === 'T Pattern'),
+        'Blackout': allPatterns.filter(p => p.type === 'Blackout')
+      };
+      const patterns = gamePatternsMap[currentGameType] || allPatterns;
+      const bingoPatterns = patterns.filter(pattern => pattern.indices.every(i => card.marked[i]));
       if (bingoPatterns.length > 0) {
         console.log('Showing bingo modal');
         showBingoModal(cardIndex, bingoPatterns);
@@ -1619,6 +1586,21 @@
       alert('Player approved! Give this approval code to the user: ' + approvalCode + '\nThey will enter it to join.');
       manageRequests();
     }
+    window.setGameType = async function(type) {
+      if (!isAdmin) return;
+      await set(ref(database, 'config/currentGameType'), type);
+      alert('Game type set to ' + type);
+    }
+    window.goOffline = function() {
+      if (confirm('Switch to offline mode? No network, local only.')) {
+        localStorage.setItem('offlineMode', 'true');
+        window.location.reload();
+      }
+    }
+    window.goOnline = function() {
+      localStorage.removeItem('offlineMode');
+      window.location.reload();
+    }
     // Show/hide admin password field when admin name is entered
     document.getElementById('nameInput').addEventListener('input', function(e) {
       const name = e.target.value.trim();
@@ -1663,6 +1645,28 @@
     };
     // Initialize app
     window.onload = async function() {
+      offlineMode = localStorage.getItem('offlineMode') === 'true';
+      if (offlineMode) {
+        document.getElementById('activePlayers').style.display = 'none';
+        document.getElementById('controls').innerHTML += '<button class="btn-secondary" onclick="goOnline()">Go Online</button>';
+        gameState = localStorage.getItem('offlineGameState') ? JSON.parse(localStorage.getItem('offlineGameState')) : null;
+        if (!gameState) {
+          gameState = {
+            playerName: 'Offline Player',
+            isAdmin: false,
+            cards: [
+              { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
+              { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
+              { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) }
+            ]
+          };
+          gameState.cards.forEach(card => card.marked[12] = true);
+          localStorage.setItem('offlineGameState', JSON.stringify(gameState));
+        }
+        showPlayerInfo();
+        renderCards();
+        return;
+      }
       console.log('Page loading...');
       const saved = await loadGameState();
       if (saved && saved.playerName) {
@@ -1694,6 +1698,7 @@
         console.log('Cards loaded:', gameState.cards.length, 'cards');
         showPlayerInfo();
         renderCards();
+        document.getElementById('activePlayers').style.display = 'block';
         updatePlayerListPanel();
         // Update last active timestamp
         const playerRef = ref(database, 'players/' + playerId);
@@ -1740,6 +1745,12 @@
         if (gameState) {
           updatePlayerListPanel();
         }
+      });
+      // Listen to game type changes
+      const gameTypeRef = ref(database, 'config/currentGameType');
+      onValue(gameTypeRef, (snapshot) => {
+        currentGameType = snapshot.val() || 'Any Line';
+        updatePlayerListPanel();
       });
     };
   </script>
