@@ -1251,7 +1251,6 @@
         
         await Promise.all(removePromises);
         alert('✅ All players have been removed from the game. They will need to log in again.');
-        schedulePlayerListUpdate();
       } catch (error) {
         console.error('Error clearing players:', error);
         alert('Error clearing players. Please try again.');
@@ -1345,15 +1344,26 @@
       console.log('🎮 Initializing game for:', playerName);
       
       if (!isHiddenSpectator) {
-        saveGameState();
+        await saveGameState();
       }
       
       showPlayerInfo();
       renderCards();
       document.getElementById('activePlayers').style.display = 'block';
       
-      // FIXED: Force immediate update to show new player
-      schedulePlayerListUpdate();
+      // FIXED: Always initialize player list immediately
+      console.log('🎮 Initializing player list from initializeGame');
+      updatePlayerListPanel();
+      
+      // CRITICAL: Force an immediate render after save completes
+      setTimeout(() => {
+        console.log('🔄 Forcing player list refresh after new login');
+        get(ref(database, 'players')).then(playersSnapshot => {
+          get(ref(database, 'games')).then(gamesSnapshot => {
+            renderPlayerList(playersSnapshot, gamesSnapshot);
+          });
+        });
+      }, 500);
       
       if (isAdmin || isHiddenSpectator) {
         document.getElementById('gameTypeSelect').style.display = 'inline-block';
@@ -1507,8 +1517,6 @@
       closeModal();
       renderCards();
       checkForBingo(cardIdx);
-      
-      schedulePlayerListUpdate();
     }
     
     function closeModal() {
@@ -1592,7 +1600,6 @@
       
       await saveGameState();
       renderCards();
-      schedulePlayerListUpdate();
       alert('✅ All progress cleared! Your cards have been reset.');
     }
     
@@ -1862,7 +1869,8 @@
         renderCards();
         document.getElementById('activePlayers').style.display = 'block';
         
-        // FIXED: Initialize player list with real-time updates (only once)
+        // FIXED: Initialize player list (only once per session)
+        console.log('🎮 Initializing player list from session restore');
         updatePlayerListPanel();
         
         if (isAdmin || isHiddenSpectator) {
@@ -1882,63 +1890,64 @@
         document.getElementById('nameInput').focus();
       }
       
-      // CRITICAL FIX: Smart removal detection that distinguishes kicks from refreshes
+      // CRITICAL FIX: Only check for removal if game data is also gone
       const playersRef = ref(database, 'players');
-      onValue(playersRef, (snapshot) => {
+      onValue(playersRef, async (snapshot) => {
         if (!gameState || !playerId) return;
         
         const players = snapshot.val();
         const playerExists = players && players[playerId];
         
         if (!playerExists) {
-          // Clear any pending timeout
-          if (removalCheckTimeout) {
-            clearTimeout(removalCheckTimeout);
-          }
+          console.log('⚠️ Player data missing from snapshot, checking game data...');
           
-          // Check if this was an admin kick (game data also removed) or just a refresh
-          get(ref(database, 'games/' + playerId)).then((gameSnapshot) => {
-            if (!gameSnapshot.exists()) {
-              // Both player and game data removed = admin kicked this player
-              console.log('❌ Kicked by admin (game data also removed)');
-              gameState = null;
-              isAdmin = false;
-              localStorage.removeItem('uslBingoPlayerId');
-              alert('You have been removed from the game by the admin.');
-              window.location.reload();
-            } else {
-              // Game data exists but player data missing = likely a refresh race condition
-              // Set timeout to recheck in case it's a legitimate kick that happened slowly
-              removalCheckTimeout = setTimeout(async () => {
-                const recheckPlayer = await get(ref(database, 'players/' + playerId));
-                const recheckGame = await get(ref(database, 'games/' + playerId));
-                
-                if (!recheckPlayer.exists() && !recheckGame.exists()) {
-                  console.log('❌ Delayed kick detected');
-                  gameState = null;
-                  isAdmin = false;
-                  localStorage.removeItem('uslBingoPlayerId');
-                  alert('You have been removed from the game by the admin.');
-                  window.location.reload();
-                } else if (!recheckPlayer.exists() && recheckGame.exists()) {
-                  // Player data missing but game exists - restore player data
-                  console.log('⚠️ Restoring missing player data after refresh');
-                  const expirationDate = new Date();
-                  expirationDate.setDate(expirationDate.getDate() + 7);
-                  await set(ref(database, 'players/' + playerId), {
-                    id: playerId,
-                    name: gameState.playerName,
-                    expiresAt: expirationDate.toISOString(),
-                    lastActive: new Date().toISOString(),
-                    isSpectator: isSpectator || undefined,
-                    isHiddenSpectator: isHiddenSpectator || undefined
-                  });
-                }
-              }, 1500);
+          // Immediately check if game data exists
+          const gameSnapshot = await get(ref(database, 'games/' + playerId));
+          
+          if (!gameSnapshot.exists()) {
+            // Both missing = legitimate kick
+            console.log('❌ Kicked by admin (both player and game data removed)');
+            
+            // Clear timeout if any
+            if (removalCheckTimeout) {
+              clearTimeout(removalCheckTimeout);
+              removalCheckTimeout = null;
             }
-          });
+            
+            gameState = null;
+            isAdmin = false;
+            localStorage.removeItem('uslBingoPlayerId');
+            alert('You have been removed from the game by the admin.');
+            window.location.reload();
+          } else {
+            console.log('✅ Game data exists, this is a refresh race condition - ignoring');
+            // Game exists but player missing = refresh race condition, ignore it
+            // The player data will be restored on next save or we can restore it now
+            if (removalCheckTimeout) {
+              clearTimeout(removalCheckTimeout);
+            }
+            
+            removalCheckTimeout = setTimeout(async () => {
+              // Check one more time after delay
+              const recheckPlayer = await get(ref(database, 'players/' + playerId));
+              if (!recheckPlayer.exists()) {
+                console.log('🔧 Restoring player data after refresh');
+                const expirationDate = new Date();
+                expirationDate.setDate(expirationDate.getDate() + 7);
+                await set(ref(database, 'players/' + playerId), {
+                  id: playerId,
+                  name: gameState.playerName,
+                  expiresAt: expirationDate.toISOString(),
+                  lastActive: new Date().toISOString(),
+                  isSpectator: isSpectator || undefined,
+                  isHiddenSpectator: isHiddenSpectator || undefined
+                });
+              }
+              removalCheckTimeout = null;
+            }, 1000);
+          }
         } else {
-          // Player exists - clear any pending removal check
+          // Player exists - clear any pending checks
           if (removalCheckTimeout) {
             clearTimeout(removalCheckTimeout);
             removalCheckTimeout = null;
@@ -1952,7 +1961,7 @@
         const newGameType = snapshot.val() || 'Any Line';
         if (newGameType !== currentGameType) {
           currentGameType = newGameType;
-          schedulePlayerListUpdate();
+          // Player list will update automatically via its own listener
         }
       });
     };
