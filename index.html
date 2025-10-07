@@ -5,21 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>US LawShield BINGO</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Anton&family=Oswald:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
-  <script>
-    // EMERGENCY RESET - Runs before anything else
-    if (window.location.hash === '#reset') {
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = window.location.pathname;
-    }
-  </script>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
- 
+   
     body {
       font-family: 'Oswald', sans-serif;
       background: linear-gradient(135deg, #0e1d61 0%, #1a2a7a 100%);
@@ -27,7 +19,7 @@
       min-height: 100vh;
       position: relative;
     }
- 
+   
     .header {
       text-align: center;
       color: white;
@@ -37,7 +29,7 @@
       border-radius: 15px;
       backdrop-filter: blur(10px);
     }
- 
+   
     .logo-container {
       display: flex;
       justify-content: center;
@@ -46,7 +38,7 @@
       margin-bottom: 15px;
       flex-wrap: wrap;
     }
- 
+   
     .main-title {
       font-family: 'Anton', sans-serif;
       font-size: 3.8em;
@@ -57,7 +49,7 @@
       text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
       -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
     }
- 
+   
     .subtitle {
       font-family: 'Oswald', sans-serif;
       font-size: 1.4em;
@@ -71,7 +63,7 @@
       border-radius: 8px;
       display: inline-block;
     }
- 
+   
     .tagline {
       font-family: 'PT Sans', sans-serif;
       font-size: 1.1em;
@@ -81,7 +73,7 @@
       letter-spacing: 2px;
       margin-top: 10px;
     }
- 
+   
     .player-info {
       text-align: center;
       color: white;
@@ -92,7 +84,7 @@
       border-radius: 10px;
       font-weight: 600;
     }
- 
+   
     .active-players {
       position: fixed;
       bottom: 20px;
@@ -107,7 +99,7 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       z-index: 100;
     }
- 
+   
     .active-players h3 {
       font-family: 'Oswald', sans-serif;
       color: #0e1d61;
@@ -116,7 +108,7 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
- 
+   
     .game-status {
       background: linear-gradient(135deg, #e7d386 0%, #d4af37 100%);
       color: #0e1d61;
@@ -127,12 +119,12 @@
       font-weight: 700;
       text-align: center;
     }
- 
+   
     .player-list {
       font-size: 0.85em;
       color: #333;
     }
- 
+   
     .player-list-item {
       padding: 8px;
       margin-bottom: 6px;
@@ -141,29 +133,29 @@
       border-left: 4px solid #0e1d61;
       position: relative;
     }
- 
+   
     .player-list-item.admin {
       border-left-color: #d51e47;
       background: #fff5f5;
     }
- 
+   
     .player-list-item.one-away {
       border-left-color: #ffa500;
       background: #fff8e1;
       font-weight: 600;
     }
- 
+   
     .player-list-item.two-away {
       border-left-color: #4caf50;
       background: #f1f8f4;
     }
- 
+   
     .player-status {
       font-size: 0.75em;
       color: #666;
       margin-top: 3px;
     }
- 
+   
     .admin-badge {
       display: inline-block;
       background: #d51e47;
@@ -174,13 +166,13 @@
       margin-left: 5px;
       font-weight: 700;
     }
- 
+   
     .admin-controls {
       margin-top: 5px;
       display: flex;
       gap: 5px;
     }
- 
+   
     .admin-btn {
       font-size: 0.7em;
       padding: 3px 8px;
@@ -191,16 +183,16 @@
       cursor: pointer;
       font-family: 'Oswald', sans-serif;
     }
- 
+   
     .admin-btn:hover {
       background: #d51e47;
     }
- 
+   
     .controls {
       text-align: center;
       margin-bottom: 30px;
     }
- 
+   
     button {
       font-family: 'Oswald', sans-serif;
       font-size: 1em;
@@ -214,35 +206,35 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
- 
+   
     .btn-primary {
       background: linear-gradient(135deg, #d51e47 0%, #b01838 100%);
       color: white;
       box-shadow: 0 4px 15px rgba(213, 30, 71, 0.4);
     }
- 
+   
     .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(213, 30, 71, 0.6);
     }
- 
+   
     .btn-primary:disabled {
       background: #ccc;
       cursor: not-allowed;
       transform: none;
     }
- 
+   
     .btn-secondary {
       background: white;
       color: #0e1d61;
       border: 2px solid #0e1d61;
     }
- 
+   
     .btn-secondary:hover {
       background: #0e1d61;
       color: white;
     }
- 
+   
     .cards-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -251,7 +243,7 @@
       margin: 0 auto;
       padding-bottom: 100px;
     }
- 
+   
     .bingo-card {
       background: white;
       border-radius: 15px;
@@ -260,12 +252,12 @@
       page-break-after: always;
       border: 4px solid #0e1d61;
     }
- 
+   
     .card-header {
       text-align: center;
       margin-bottom: 20px;
     }
- 
+   
     .bingo-title {
       font-family: 'Anton', sans-serif;
       font-size: 4em;
@@ -276,7 +268,7 @@
                    6px 6px 0px rgba(213, 30, 71, 0.2);
       margin-bottom: 10px;
     }
- 
+   
     .card-number {
       font-family: 'Oswald', sans-serif;
       font-size: 1.3em;
@@ -289,7 +281,7 @@
       letter-spacing: 2px;
       margin-bottom: 5px;
     }
- 
+   
     .shield-badge {
       display: inline-block;
       background: linear-gradient(135deg, #e7d386 0%, #d4af37 100%);
@@ -300,7 +292,7 @@
       font-weight: 700;
       letter-spacing: 1px;
     }
- 
+   
     .bingo-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -310,7 +302,7 @@
       border-radius: 8px;
       overflow: hidden;
     }
- 
+   
     .bingo-header {
       background: #0e1d61;
       color: #d51e47;
@@ -321,7 +313,7 @@
       text-align: center;
       border: 2px solid #e7d386;
     }
- 
+   
     .bingo-cell {
       background: white;
       padding: 12px 8px;
@@ -338,12 +330,12 @@
       position: relative;
       border: 1px solid #e0e0e0;
     }
- 
+   
     .bingo-cell:hover:not(.free-space):not(.marked) {
       background: #f0f0f0;
       transform: scale(1.02);
     }
- 
+   
     .free-space {
       background: linear-gradient(135deg, #d51e47 0%, #e7d386 100%);
       color: white;
@@ -353,12 +345,12 @@
       position: relative;
       overflow: hidden;
     }
- 
+   
     .free-space-text {
       position: relative;
       z-index: 2;
     }
- 
+   
     .free-space svg {
       position: absolute;
       top: 50%;
@@ -369,12 +361,12 @@
       opacity: 0.7;
       z-index: 1;
     }
- 
+   
     .bingo-cell.marked {
       position: relative;
       background: linear-gradient(135deg, rgba(240, 248, 255, 0.95) 0%, rgba(230, 240, 255, 0.95) 100%) !important;
     }
- 
+   
     .bingo-cell.marked .cell-text {
       position: relative;
       z-index: 1;
@@ -382,7 +374,7 @@
       color: #0e1d61;
       opacity: 0.7;
     }
- 
+   
     .bingo-cell.marked::before {
       content: '';
       position: absolute;
@@ -399,7 +391,7 @@
       z-index: 2;
       pointer-events: none;
     }
- 
+   
     .bingo-cell.marked::after {
       content: attr(data-member-id);
       position: absolute;
@@ -417,7 +409,7 @@
       white-space: nowrap;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
- 
+   
     .modal {
       display: none;
       position: fixed;
@@ -429,7 +421,7 @@
       background-color: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(5px);
     }
- 
+   
     .modal-content {
       background-color: white;
       margin: 10% auto;
@@ -440,23 +432,23 @@
       max-width: 500px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
- 
+   
     .modal-header {
       text-align: center;
       margin-bottom: 20px;
     }
- 
+   
     .modal-title {
       font-family: 'Anton', sans-serif;
       font-size: 1.8em;
       color: #0e1d61;
       margin-bottom: 10px;
     }
- 
+   
     .modal-body {
       margin: 20px 0;
     }
- 
+   
     .modal-body label {
       display: block;
       font-weight: 700;
@@ -464,7 +456,7 @@
       margin-bottom: 8px;
       font-size: 1.1em;
     }
- 
+   
     .modal-body input {
       width: 100%;
       padding: 12px;
@@ -473,18 +465,18 @@
       border-radius: 8px;
       font-family: 'Oswald', sans-serif;
     }
- 
+   
     .modal-body input[type="text"]#memberIdInput {
       text-transform: uppercase;
       font-family: monospace;
     }
- 
+   
     .modal-body input:focus {
       outline: none;
       border-color: #d51e47;
       box-shadow: 0 0 10px rgba(213, 30, 71, 0.3);
     }
- 
+   
     .error-message {
       color: #d51e47;
       font-size: 0.9em;
@@ -492,23 +484,23 @@
       display: none;
       font-weight: 600;
     }
- 
+   
     .modal-footer {
       display: flex;
       gap: 10px;
       justify-content: center;
       margin-top: 20px;
     }
- 
+   
     .close-btn {
       background: #6c757d;
       color: white;
     }
- 
+   
     .close-btn:hover {
       background: #5a6268;
     }
- 
+   
     .bingo-modal {
       display: none;
       position: fixed;
@@ -520,7 +512,7 @@
       background-color: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(8px);
     }
- 
+   
     .bingo-modal-content {
       background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       margin: 5% auto;
@@ -532,12 +524,12 @@
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
       position: relative;
     }
- 
+   
     .bingo-celebration {
       text-align: center;
       margin-bottom: 30px;
     }
- 
+   
     .bingo-celebration h2 {
       font-family: 'Anton', sans-serif;
       font-size: 4em;
@@ -546,12 +538,12 @@
       margin-bottom: 10px;
       animation: pulse 1s ease-in-out infinite;
     }
- 
+   
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
     }
- 
+   
     .bingo-type {
       font-family: 'Oswald', sans-serif;
       font-size: 1.8em;
@@ -563,7 +555,7 @@
       border-radius: 10px;
       text-align: center;
     }
- 
+   
     .verification-details {
       background: white;
       padding: 25px;
@@ -571,21 +563,21 @@
       border: 3px solid #0e1d61;
       margin-bottom: 20px;
     }
- 
+   
     .verification-details h3 {
       font-family: 'Oswald', sans-serif;
       color: #0e1d61;
       margin-bottom: 15px;
       font-size: 1.3em;
     }
- 
+   
     .member-list {
       display: grid;
       gap: 10px;
       max-height: 300px;
       overflow-y: auto;
     }
- 
+   
     .member-item {
       display: flex;
       justify-content: space-between;
@@ -595,18 +587,18 @@
       border-radius: 5px;
       font-family: 'Oswald', sans-serif;
     }
- 
+   
     .member-position {
       font-weight: 700;
       color: #0e1d61;
     }
- 
+   
     .member-id {
       font-weight: 600;
       color: #d51e47;
       font-family: monospace;
     }
- 
+   
     .screenshot-note {
       background: #fff3cd;
       border: 2px solid #ffc107;
@@ -617,7 +609,7 @@
       color: #856404;
       text-align: center;
     }
- 
+   
     @media print {
       body {
         background: white;
@@ -630,7 +622,7 @@
         page-break-after: always;
       }
     }
- 
+   
     @media (max-width: 768px) {
       .cards-container {
         grid-template-columns: 1fr;
@@ -673,7 +665,6 @@
   </div>
   <div class="player-info" id="playerInfo" style="display: none;"></div>
   <div class="controls">
-    <button class="btn-secondary" style="background: #dc3545; color: white; border-color: #dc3545;" onclick="if(confirm('RESET EVERYTHING? This will clear your session and force you to log in again.')){localStorage.clear();location.href=location.href.split('?')[0];}">🔄 RESET SESSION</button>
     <button class="btn-secondary" onclick="goOffline()">Offline Game</button>
     <button class="btn-secondary" onclick="confirmClearProgress()" style="background: #dc3545; color: white; border-color: #dc3545;">Clear All Progress</button>
     <button id="adminClearAllBtn" class="btn-secondary" onclick="adminClearAllPlayers()" style="background: #8b0000; color: white; border-color: #8b0000; display: none;">🚫 Remove All Players</button>
@@ -832,16 +823,31 @@
           get(gameRef)
         ]);
         
+        console.log('Player exists:', playerSnapshot.exists());
+        console.log('Game exists:', gameSnapshot.exists());
+        
         if (playerSnapshot.exists() && gameSnapshot.exists()) {
           const playerData = playerSnapshot.val();
           const gameData = gameSnapshot.val();
+          
+          console.log('Player data:', playerData);
+          console.log('Game data:', gameData);
+          
           const expirationDate = new Date(playerData.expiresAt);
           const now = new Date();
+          
+          console.log('Expiration date:', expirationDate);
+          console.log('Current date:', now);
+          console.log('Session expired?', expirationDate <= now);
           
           if (expirationDate > now) {
             console.log('✅ Session is valid!');
             return { valid: true, playerData, gameData };
+          } else {
+            console.log('❌ Session expired');
           }
+        } else {
+          console.log('❌ Player or game data missing in Firebase');
         }
       } catch (error) {
         console.error('Error validating session:', error);
@@ -850,117 +856,88 @@
       return { valid: false };
     }
     
-    // FIXED: Debounced player list update
-    function schedulePlayerListUpdate() {
-      // Player list updates are now handled by real-time listeners
-      // This function is kept for backward compatibility but does nothing
-    }
-    
-    // FIXED: Single persistent real-time listener for player list
-    let playerListInitialized = false;
-    
     function updatePlayerListPanel() {
-      // Only initialize listeners once
-      if (playerListInitialized) return;
-      playerListInitialized = true;
-      
-      console.log('🎯 Initializing player list listeners');
-      
       const playersRef = ref(database, 'players');
       const gamesRef = ref(database, 'games');
       
-      // Set up persistent listener for players
-      onValue(playersRef, async (playersSnapshot) => {
-        console.log('📡 Players data changed');
-        // Get games data and render
-        const gamesSnapshot = await get(gamesRef);
-        renderPlayerList(playersSnapshot, gamesSnapshot);
-      });
-      
-      // Also listen to games for bingo distance updates
-      onValue(gamesRef, async () => {
-        console.log('📡 Games data changed');
-        const playersSnapshot = await get(playersRef);
-        const gamesSnapshot = await get(gamesRef);
-        renderPlayerList(playersSnapshot, gamesSnapshot);
-      });
-    }
-    
-    function renderPlayerList(playersSnapshot, gamesSnapshot) {
-      const panel = document.getElementById('playerListPanel');
-      const players = playersSnapshot.val();
-      const games = gamesSnapshot.val();
-      
-      console.log('🔄 Rendering player list - Players:', players ? Object.keys(players).length : 0);
-      
-      if (!players || Object.keys(players).length === 0) {
-        panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
-        return;
-      }
-      
-      const now = new Date();
-      const playerArray = Object.values(players).filter(p => {
-        if (!p.expiresAt) return false;
-        const expirationDate = new Date(p.expiresAt);
-        return expirationDate > now;
-      }).sort((a, b) => {
-        return new Date(b.lastActive) - new Date(a.lastActive);
-      });
-      
-      if (playerArray.length === 0) {
-        panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
-        return;
-      }
-      
-      let html = `<div class="game-status">🎮 Playing: ${currentGameType}</div>`;
-      
-      playerArray.forEach((p, idx) => {
-        if (p.isHiddenSpectator) return;
-        if (p.isSpectator && !(isAdmin || isHiddenSpectator)) return;
+      return Promise.all([
+        get(playersRef),
+        get(gamesRef)
+      ]).then(([playersSnapshot, gamesSnapshot]) => {
+        const panel = document.getElementById('playerListPanel');
+        const players = playersSnapshot.val();
+        const games = gamesSnapshot.val();
         
-        const playerGame = games && games[p.id];
-        const distanceToBingo = playerGame ? calculateMinDistanceToBingo(playerGame) : null;
+        console.log('Players data from Firebase:', players);
+        console.log('Games data from Firebase:', games);
         
-        let itemClass = 'player-list-item';
-        let statusText = '';
-        const playerIsAdmin = p.name === ADMIN_NAME;
+        if (!players || Object.keys(players).length === 0) {
+          panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
+          return;
+        }
         
-        if (playerIsAdmin) {
-          itemClass += ' admin';
-        } else if (distanceToBingo !== null) {
-          if (distanceToBingo === 1) {
-            itemClass += ' one-away';
-            statusText = '<div class="player-status">🔥 1 away from BINGO!</div>';
-          } else if (distanceToBingo === 2) {
-            itemClass += ' two-away';
-            statusText = '<div class="player-status">⚡ 2 away from BINGO</div>';
+        const now = new Date();
+        const playerArray = Object.values(players).filter(p => {
+          if (!p.expiresAt) return false;
+          const expirationDate = new Date(p.expiresAt);
+          return expirationDate > now;
+        }).sort((a, b) => {
+          return new Date(b.lastActive) - new Date(a.lastActive);
+        });
+        
+        console.log('Active players:', playerArray);
+        
+        if (playerArray.length === 0) {
+          panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
+          return;
+        }
+        
+        let html = `<div class="game-status">🎮 Playing: ${currentGameType}</div>`;
+        
+        playerArray.forEach((p, idx) => {
+          const playerGame = games && games[p.id];
+          const distanceToBingo = playerGame ? calculateMinDistanceToBingo(playerGame) : null;
+          
+          let itemClass = 'player-list-item';
+          let statusText = '';
+          const playerIsAdmin = p.name === ADMIN_NAME;
+          
+          if (playerIsAdmin) {
+            itemClass += ' admin';
+          } else if (distanceToBingo !== null) {
+            if (distanceToBingo === 1) {
+              itemClass += ' one-away';
+              statusText = '<div class="player-status">🔥 1 away from BINGO!</div>';
+            } else if (distanceToBingo === 2) {
+              itemClass += ' two-away';
+              statusText = '<div class="player-status">⚡ 2 away from BINGO</div>';
+            }
           }
-        }
-        
-        html += `<div class="${itemClass}">`;
-        html += `${idx + 1}. ${p.name}`;
-        
-        if (playerIsAdmin) {
-          html += `<span class="admin-badge">ADMIN</span>`;
-        }
-        if (p.isSpectator) {
-          html += `<span class="admin-badge" style="background: #6c757d;">SPECTATOR</span>`;
-        }
-        
-        html += statusText;
-        
-        if ((isAdmin || isHiddenSpectator) && p.id !== playerId && !p.isSpectator && !p.isHiddenSpectator) {
-          html += `<div class="admin-controls">`;
-          html += `<button class="admin-btn" onclick="window.adminClearPlayer('${p.id}')">Clear</button>`;
-          html += `<button class="admin-btn" onclick="window.adminEditPlayer('${p.id}')">Edit</button>`;
-          html += `<button class="admin-btn" onclick="window.adminKickPlayer('${p.id}')">Kick</button>`;
+          
+          html += `<div class="${itemClass}">`;
+          html += `${idx + 1}. ${p.name}`;
+          
+          if (playerIsAdmin) {
+            html += `<span class="admin-badge">ADMIN</span>`;
+          }
+          
+          html += statusText;
+          
+          if (isAdmin && p.id !== playerId) {
+            html += `<div class="admin-controls">`;
+            html += `<button class="admin-btn" onclick="window.adminClearPlayer('${p.id}')">Clear</button>`;
+            html += `<button class="admin-btn" onclick="window.adminEditPlayer('${p.id}')">Edit</button>`;
+            html += `<button class="admin-btn" onclick="window.adminKickPlayer('${p.id}')">Kick</button>`;
+            html += `</div>`;
+          }
+          
           html += `</div>`;
-        }
+        });
         
-        html += `</div>`;
+        panel.innerHTML = html;
+      }).catch(error => {
+        console.error('Error updating player list:', error);
       });
-      
-      panel.innerHTML = html;
     }
     
     function calculateMinDistanceToBingo(playerGame) {
@@ -1024,7 +1001,7 @@
     }
     
     window.adminClearPlayer = async function(targetPlayerId) {
-      if (!isAdmin && !isHiddenSpectator) {
+      if (!isAdmin) {
         alert('Admin access only');
         return;
       }
@@ -1048,7 +1025,7 @@
     }
     
     window.adminKickPlayer = async function(targetPlayerId) {
-      if (!isAdmin && !isHiddenSpectator) {
+      if (!isAdmin) {
         alert('Admin access only');
         return;
       }
@@ -1060,11 +1037,12 @@
     }
     
     window.adminEditPlayer = async function(targetPlayerId) {
-      if (!isAdmin && !isHiddenSpectator) {
+      if (!isAdmin) {
         alert('Admin access only');
         return;
       }
       
+      console.log('Fetching fresh data for player:', targetPlayerId);
       const gameRef = ref(database, 'games/' + targetPlayerId);
       const playerRef = ref(database, 'players/' + targetPlayerId);
       
@@ -1080,6 +1058,9 @@
         
         let targetGame = gameSnapshot.val();
         const targetPlayer = playerSnapshot.val();
+        
+        console.log('Loaded game data:', targetGame);
+        console.log('Loaded player data:', targetPlayer);
         
         if (targetGame.cards && !Array.isArray(targetGame.cards)) {
           targetGame.cards = Object.values(targetGame.cards);
@@ -1098,13 +1079,17 @@
         showAdminEditModal(targetPlayerId, targetPlayer.name, targetGame);
       } catch (error) {
         console.error('Error loading player data:', error);
-        alert('Error loading player data: ' + error.message);
+        alert('Error loading player data: ' + error.message + '. Please try again or check if the player exists.');
       }
     }
     
     function showAdminEditModal(targetPlayerId, playerName, targetGame) {
       const modal = document.getElementById('adminEditModal');
       const content = document.getElementById('adminEditContent');
+      
+      console.log('Showing edit modal for:', playerName);
+      console.log('Target game data:', targetGame);
+      console.log('Number of cards:', targetGame.cards ? targetGame.cards.length : 'NO CARDS');
       
       if (!targetGame.cards || targetGame.cards.length !== 3) {
         alert('Error: Player card data is missing or corrupted');
@@ -1124,6 +1109,7 @@
       html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">`;
       
       targetGame.cards.forEach((cardData, cardIndex) => {
+        console.log(`Rendering card ${cardIndex + 1}:`, cardData);
         html += `<div style="background: white; border: 3px solid #0e1d61; border-radius: 10px; padding: 15px;">`;
         html += `<h4 style="text-align: center; color: #d51e47; margin-bottom: 10px; font-family: 'Anton', sans-serif; font-size: 1.5em;">CARD ${cardIndex + 1}</h4>`;
         html += `<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #0e1d61; border: 2px solid #0e1d61; border-radius: 5px;">`;
@@ -1212,12 +1198,12 @@
       document.getElementById('adminEditModal').style.display = 'none';
       if (gameState) {
         renderCards();
-        schedulePlayerListUpdate();
+        updatePlayerListPanel();
       }
     }
     
     window.adminClearAllPlayers = async function() {
-      if (!isAdmin && !isHiddenSpectator) {
+      if (!isAdmin) {
         alert('Admin access only');
         return;
       }
@@ -1257,6 +1243,7 @@
         
         await Promise.all(removePromises);
         alert('✅ All players have been removed from the game. They will need to log in again.');
+        updatePlayerListPanel();
       } catch (error) {
         console.error('Error clearing players:', error);
         alert('Error clearing players. Please try again.');
@@ -1275,10 +1262,8 @@
       expirationDate.setDate(expirationDate.getDate() + 7);
       gameState.expiresAt = expirationDate.toISOString();
       
-      // Save player game data
       await set(ref(database, 'games/' + playerId), gameState);
       
-      // Update player in players list
       await set(ref(database, 'players/' + playerId), {
         id: playerId,
         name: gameState.playerName,
@@ -1290,7 +1275,10 @@
     async function loadGameState() {
       const storedPlayerId = localStorage.getItem('uslBingoPlayerId');
       
+      console.log('Stored player ID in localStorage:', storedPlayerId);
+      
       if (!storedPlayerId) {
+        console.log('No stored player ID found - new session');
         return null;
       }
       
@@ -1298,8 +1286,10 @@
       const validation = await validatePlayerSession(playerId);
       
       if (validation.valid) {
+        console.log('✅ Valid session found, restoring game state');
         return validation.gameData;
       } else {
+        console.log('❌ Invalid session, clearing localStorage');
         localStorage.removeItem('uslBingoPlayerId');
         playerId = null;
         return null;
@@ -1316,15 +1306,14 @@
     function initializeGame(playerName) {
       if (!playerId) {
         playerId = getOrCreatePlayerId();
+        console.log('Generated new player ID:', playerId);
       }
       
       isAdmin = (playerName === ADMIN_NAME);
-      isSpectator = (playerName.toLowerCase() === 'spectator');
-      isHiddenSpectator = (playerName === '[nucca]');
       
       gameState = {
         playerId: playerId,
-        playerName: isSpectator ? 'Spectator (Victoria)' : playerName,
+        playerName: playerName,
         isAdmin: isAdmin,
         cards: [
           { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
@@ -1338,36 +1327,16 @@
         card.marked[12] = true;
       });
       
-      console.log('🎮 Initializing game for:', playerName);
-      
-      // Save game state FIRST and wait for it
-      if (!isHiddenSpectator) {
-        await saveGameState();
-        console.log('✅ Initial game state saved to Firebase');
-      }
-      
+      console.log('Saving new game state for player:', playerName);
+      saveGameState();
       showPlayerInfo();
       renderCards();
-      document.getElementById('activePlayers').style.display = 'block';
-      
-      // Initialize player list listeners
-      console.log('🎮 Initializing player list from initializeGame');
       updatePlayerListPanel();
       
-      // Wait a moment for Firebase to propagate, then force render
-      setTimeout(async () => {
-        console.log('🔄 Forcing player list refresh after new login');
-        const playersSnapshot = await get(ref(database, 'players'));
-        const gamesSnapshot = await get(ref(database, 'games'));
-        console.log('📊 Players in Firebase:', playersSnapshot.val());
-        renderPlayerList(playersSnapshot, gamesSnapshot);
-      }, 1000);
-      
-      if (isAdmin || isHiddenSpectator) {
+      if (isAdmin) {
         document.getElementById('gameTypeSelect').style.display = 'inline-block';
         document.getElementById('adminClearAllBtn').style.display = 'inline-block';
         document.getElementById('adminManageRequestsBtn').style.display = 'inline-block';
-        document.getElementById('adminLogoutBtn').style.display = 'inline-block';
       }
     }
     
@@ -1376,7 +1345,9 @@
       let infoText = `Welcome, ${gameState.playerName}! 🎯`;
       
       if (isAdmin) {
-        infoText += ' <span style="background: #d51e47; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">👑 ADMIN</span>';
+        infoText += ' <span style="background: #d51e47; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">👑 ADMIN</span>`;
+        document.getElementById('adminClearAllBtn').style.display = 'inline-block';
+        document.getElementById('adminManageRequestsBtn').style.display = 'inline-block';
       }
       
       playerInfo.innerHTML = infoText;
@@ -1506,10 +1477,12 @@
       gameState.cards[cardIdx].marked[cellIdx] = true;
       gameState.cards[cardIdx].memberIds[cellIdx] = memberId;
       
+      console.log('Marked cell', cellIdx, 'on card', cardIdx, 'with member ID', memberId);
       saveGameState();
       closeModal();
       renderCards();
       checkForBingo(cardIdx);
+      updatePlayerListPanel();
     }
     
     function closeModal() {
@@ -1534,6 +1507,7 @@
       const bingoPatterns = patterns.filter(pattern => pattern.indices.every(i => card.marked[i]));
       
       if (bingoPatterns.length > 0) {
+        console.log('Showing bingo modal');
         showBingoModal(cardIndex, bingoPatterns);
       }
     }
@@ -1593,6 +1567,7 @@
       
       await saveGameState();
       renderCards();
+      updatePlayerListPanel();
       alert('✅ All progress cleared! Your cards have been reset.');
     }
     
@@ -1621,8 +1596,7 @@
         }
       }
       
-      // Check for duplicate names
-      if (!isAttemptingAdmin && name.toLowerCase() !== 'spectator' && name !== '[nucca]') {
+      if (!isAttemptingAdmin) {
         const playersRef = ref(database, 'players');
         const playersSnapshot = await get(playersRef);
         
@@ -1640,6 +1614,24 @@
             document.getElementById('nameError').textContent = 'This name is already in use. Please choose a different name.';
             input.focus();
             return;
+          }
+        }
+      }
+      
+      if (isAttemptingAdmin) {
+        const playersRef = ref(database, 'players');
+        const playersSnapshot = await get(playersRef);
+        if (playersSnapshot.exists()) {
+          const players = playersSnapshot.val();
+          const removePromises = [];
+          Object.entries(players).forEach(([id, p]) => {
+            if (p.name === ADMIN_NAME && id !== playerId) {
+              removePromises.push(remove(ref(database, 'players/' + id)));
+              removePromises.push(remove(ref(database, 'games/' + id)));
+            }
+          });
+          if (removePromises.length > 0) {
+            await Promise.all(removePromises);
           }
         }
       }
@@ -1732,7 +1724,7 @@
     }
     
     window.setGameType = async function(type) {
-      if (!isAdmin && !isHiddenSpectator) return;
+      if (!isAdmin) return;
       
       await set(ref(database, 'config/currentGameType'), type);
       alert('Game type set to ' + type);
@@ -1751,14 +1743,7 @@
     }
     
     document.addEventListener('DOMContentLoaded', function() {
-      const btn = document.getElementById('adminLogoutBtn');
-      if (btn) {
-        btn.onclick = function() {
-          localStorage.clear();
-          sessionStorage.clear();
-          window.location.href = window.location.href.split('?')[0];
-        };
-      }
+      // Any initialization needed after DOM loads
     });
     
     document.getElementById('nameInput').addEventListener('input', function(e) {
@@ -1836,12 +1821,13 @@
         return;
       }
       
-      console.log('🚀 Loading application...');
+      console.log('Page loading...');
       
       const saved = await loadGameState();
       
       if (saved && saved.playerName) {
-        console.log('✅ Restoring session for:', saved.playerName);
+        console.log('Restoring session for:', saved.playerName);
+        console.log('Loaded game state:', saved);
         
         gameState = saved;
         
@@ -1856,8 +1842,6 @@
         });
         
         isAdmin = (gameState.playerName === ADMIN_NAME);
-        isSpectator = !!gameState.isSpectator;
-        isHiddenSpectator = (gameState.playerName === '[nucca]');
         
         if (!gameState.cards || gameState.cards.length !== 3) {
           console.error('❌ Cards data is missing or invalid!');
@@ -1869,32 +1853,27 @@
           return;
         }
         
+        console.log('Cards loaded:', gameState.cards.length, 'cards');
         showPlayerInfo();
         renderCards();
         document.getElementById('activePlayers').style.display = 'block';
-        
-        // FIXED: Initialize player list (only once per session)
-        console.log('🎮 Initializing player list from session restore');
         updatePlayerListPanel();
         
-        if (isAdmin || isHiddenSpectator) {
-          document.getElementById('gameTypeSelect').style.display = 'inline-block';
-          document.getElementById('adminClearAllBtn').style.display = 'inline-block';
-          document.getElementById('adminManageRequestsBtn').style.display = 'inline-block';
+        const playerRef = ref(database, 'players/' + playerId);
+        const playerSnapshot = await get(playerRef);
+        if (playerSnapshot.exists()) {
+          const playerData = playerSnapshot.val();
+          playerData.lastActive = new Date().toISOString();
+          await set(playerRef, playerData);
         }
-        
-        // CRITICAL FIX: Don't update timestamp on restore to avoid triggering removal checks
-        // The session is already valid, no need to write to Firebase again
-        console.log('✅ Session restored, skipping save to prevent race condition');
       } else {
-        console.log('❌ No valid session, showing login');
+        console.log('No valid session, showing login screen');
         gameState = null;
         isAdmin = false;
         document.getElementById('nameModal').style.display = 'block';
         document.getElementById('nameInput').focus();
       }
       
-      // Set up real-time listener for player list updates
       const playersRef = ref(database, 'players');
       onValue(playersRef, (snapshot) => {
         console.log('Player list changed, updating...');
@@ -1914,7 +1893,6 @@
         }
       });
       
-      // Listen to games for bingo distance updates
       const gamesRef = ref(database, 'games');
       onValue(gamesRef, () => {
         console.log('Games data changed, updating player list...');
@@ -1923,7 +1901,6 @@
         }
       });
       
-      // Listen to game type changes
       const gameTypeRef = ref(database, 'config/currentGameType');
       onValue(gameTypeRef, (snapshot) => {
         currentGameType = snapshot.val() || 'Any Line';
