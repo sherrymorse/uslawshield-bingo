@@ -1,3 +1,4 @@
+<!-- build: force-2025-10-07-fallback-on -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -111,7 +112,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js?v=force2" crossorigin="anonymous"></script>
 
 <script type="module">
 /* ---------- error banner ---------- */
@@ -140,7 +141,7 @@ const all=[];for(let r=0;r<5;r++)for(let c=0;c<5;c++)all.push([r,c]);if(all.ever
 
 /* state */
 let STATE={playerId:null,playerName:null,cards:[],activeCell:null,lastPng:null};
-let USE_LOCAL=false; // auto-enabled if Firebase fails
+let USE_LOCAL=false; // fallback flag
 
 /* builders */
 function buildBlankCard(seed){const rng=seedRand(seed);const pool=shuffleDet(ALL_ITEMS,rng);const labels=pool.slice(0,24);labels[Math.floor(rng()*24)]=ACW_ITEM;
@@ -177,7 +178,7 @@ const idModal=q('#idModal'), memberInput=q('#memberInput');
 q('#idCancel').onclick=()=>idModal.style.display='none';
 function openIdModal(){ memberInput.value=''; idModal.style.display='flex'; memberInput.focus(); }
 
-/* unified persistence */
+/* unified persistence (Firebase OR Local) */
 function saveLocalCards(){ localStorage.setItem('usl:local:cards', JSON.stringify(STATE.cards)); }
 function loadLocalCards(){ const s=localStorage.getItem('usl:local:cards'); return s?JSON.parse(s):null; }
 async function saveCell(cardIndex,r,c,cell){
@@ -209,7 +210,6 @@ async function logBingo(type,entries){
   if(USE_LOCAL){ const log=JSON.parse(localStorage.getItem('usl:local:bingos')||'[]'); log.push({type,at:Date.now(),entries}); localStorage.setItem('usl:local:bingos',JSON.stringify(log)); return; }
   await importFirebase().then(({db,ref,push,set,serverTimestamp})=>set(push(ref(db,`bingos/${STATE.playerId}`)),{type,at:serverTimestamp(),entries}));
 }
-
 async function checkForBingoAndNotify(cardIndex){
   const card=STATE.cards[cardIndex]; const found=findBingos(card); if(found.length===0) return;
   const order=["BLACKOUT","X Pattern","T Pattern","Four Corners","Regular Bingo"]; found.sort((a,b)=>order.indexOf(a.type)-order.indexOf(b.type));
@@ -241,20 +241,21 @@ function wirePresenceFirebase(pid){
     onValue(ref(db,`cards/${pid}`),snap=>{ if(snap.exists()){ const v=snap.val(); STATE.cards=[v[0],v[1],v[2]]; render(); }});
     onValue(ref(db,'players'),snap=>{
       const ul=q('#playersList'); const list=[]; if(snap.exists()){ for(const [id,info] of Object.entries(snap.val())) list.push({id,name:info.name||`Player ${id}`}); }
-      list.sort((a,b)=>Number(a.id)-Number(b.id)); ul.innerHTML=list.map(p=>`<li><span class="dot"></span><strong style="min-width:62px;display:inline-block;">#${p.id}</strong> ${esc(p.name)}</li>`).join('');
+      list.sort((a,b)=>Number(a.id)-Number(b.id));
+      ul.innerHTML=list.map(p=>`<li><span class="dot"></span><strong style="min-width:62px;display:inline-block;">#${p.id}</strong> ${esc(p.name)}</li>`).join('');
     });
   });
 }
 
 /* ---------- Firebase boot with graceful fallback ---------- */
 async function importFirebase(){
-  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js");
   const { getDatabase, ref, child, get, set, update, push, onValue, runTransaction, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js");
   return {db,ref,child,get,set,update,push,onValue,runTransaction,serverTimestamp};
 }
 import { initializeApp as _ia } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getDatabase as _gd, ref as _ref, child as _child, get as _get, set as _set, update as _update, push as _push, onValue as _onValue, runTransaction as _rt, serverTimestamp as _st } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
 const firebaseConfig={apiKey:"AIzaSyDzNTPcHXIgb7T73yX0ngLyuJkSiyUd3dA",authDomain:"uslawshield-bingo.firebaseapp.com",databaseURL:"https://uslawshield-bingo-default-rtdb.firebaseio.com",projectId:"uslawshield-bingo",storageBucket:"uslawshield-bingo.firebasestorage.app",messagingSenderId:"227127069053",appId:"1:227127069053:web:be6acba57a6561ad9ce414",measurementId:"G-Z2FXPKS7EY"};
 const app=_ia(firebaseConfig); const db=_gd(app); const auth=getAuth(app);
 
@@ -276,7 +277,6 @@ async function ensureCardsFirebase(pid){
 /* Local mode boot */
 function bootLocal(){
   USE_LOCAL=true;
-  // allocate local slot + name
   let pid=localStorage.getItem('usl:local:pid'); if(!pid){ pid='1'; localStorage.setItem('usl:local:pid',pid); }
   STATE.playerId=Number(pid);
   let name=localStorage.getItem('usl:name:'+pid); if(!name){ name=(prompt("Enter your display name (First & Last):","")||"").trim(); if(!name) name=`Player ${pid}`; localStorage.setItem('usl:name:'+pid,name); }
