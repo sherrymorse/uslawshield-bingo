@@ -665,9 +665,9 @@
   </div>
   <div class="player-info" id="playerInfo" style="display: none;"></div>
   <div class="controls">
+    <button class="btn-secondary" style="background: #dc3545; color: white; border-color: #dc3545;" onclick="if(confirm('RESET EVERYTHING? This will clear your session and force you to log in again.')){localStorage.clear();location.href=location.href.split('?')[0];}">🔄 RESET SESSION</button>
     <button class="btn-secondary" onclick="goOffline()">Offline Game</button>
     <button class="btn-secondary" onclick="confirmClearProgress()" style="background: #dc3545; color: white; border-color: #dc3545;">Clear All Progress</button>
-    <button id="adminLogoutBtn" class="btn-secondary" style="background: #6c757d; color: white; border-color: #6c757d; display: none;">🚪 Admin Logout</button>
     <button id="adminClearAllBtn" class="btn-secondary" onclick="adminClearAllPlayers()" style="background: #8b0000; color: white; border-color: #8b0000; display: none;">🚫 Remove All Players</button>
     <button id="adminManageRequestsBtn" class="btn-secondary" onclick="manageRequests()" style="display: none;">Manage Requests</button>
     <select id="gameTypeSelect" style="display: none; padding: 10px; margin: 0 10px; border-radius: 8px;" onchange="setGameType(this.value)">
