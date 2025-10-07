@@ -689,6 +689,10 @@
       <div class="modal-body">
         <label for="nameInput">Your Name:</label>
         <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off">
+        <div id="adminPasswordSection" style="display: none; margin-top: 15px;">
+          <label for="adminPassword">Admin Password:</label>
+          <input type="password" id="adminPassword" placeholder="Enter admin password" autocomplete="off">
+        </div>
         <div class="error-message" id="nameError">Please enter your name</div>
       </div>
       <div class="modal-footer">
@@ -788,6 +792,7 @@
 
     const MAX_PLAYERS = 10;
     const ADMIN_NAME = "Sherry Morse"; // Admin user
+    const ADMIN_PASSWORD = "Airport-1"; // Admin password
     let currentCell = null;
     let currentCardIndex = null;
     let gameState = null;
@@ -877,8 +882,8 @@
           // Show admin controls if current user is admin and this is not the admin's own card
           if (isAdmin && p.id !== playerId) {
             html += `<div class="admin-controls">`;
-            html += `<button class="admin-btn" onclick="adminClearPlayer('${p.id}')">Clear</button>`;
-            html += `<button class="admin-btn" onclick="adminEditPlayer('${p.id}')">Edit</button>`;
+            html += `<button class="admin-btn" onclick="window.adminClearPlayer('${p.id}')">Clear</button>`;
+            html += `<button class="admin-btn" onclick="window.adminEditPlayer('${p.id}')">Edit</button>`;
             html += `</div>`;
           }
           
@@ -1477,13 +1482,60 @@
       
       if (!name) {
         document.getElementById('nameError').style.display = 'block';
+        document.getElementById('nameError').textContent = 'Please enter your name';
         input.focus();
         return;
+      }
+      
+      // Check if trying to be admin
+      if (name === ADMIN_NAME) {
+        const passwordInput = document.getElementById('adminPassword');
+        const password = passwordInput.value;
+        
+        if (password !== ADMIN_PASSWORD) {
+          document.getElementById('nameError').style.display = 'block';
+          document.getElementById('nameError').textContent = 'Incorrect admin password';
+          passwordInput.focus();
+          return;
+        }
+      }
+      
+      // Check for duplicate names
+      const playersRef = ref(database, 'players');
+      const playersSnapshot = await get(playersRef);
+      
+      if (playersSnapshot.exists()) {
+        const players = playersSnapshot.val();
+        const existingPlayer = Object.values(players).find(p => {
+          const expirationDate = new Date(p.expiresAt);
+          return p.name.toLowerCase() === name.toLowerCase() && 
+                 expirationDate > new Date() &&
+                 p.id !== playerId;
+        });
+        
+        if (existingPlayer) {
+          document.getElementById('nameError').style.display = 'block';
+          document.getElementById('nameError').textContent = 'This name is already in use. Please choose a different name.';
+          input.focus();
+          return;
+        }
       }
       
       document.getElementById('nameModal').style.display = 'none';
       initializeGame(name);
     }
+    
+    // Show/hide admin password field when admin name is entered
+    document.getElementById('nameInput').addEventListener('input', function(e) {
+      const name = e.target.value.trim();
+      const passwordSection = document.getElementById('adminPasswordSection');
+      
+      if (name === ADMIN_NAME) {
+        passwordSection.style.display = 'block';
+      } else {
+        passwordSection.style.display = 'none';
+      }
+    });
 
     document.getElementById('memberIdInput').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
@@ -1492,6 +1544,23 @@
     });
 
     document.getElementById('nameInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        // If admin name and password field is visible, check if password is entered
+        const name = document.getElementById('nameInput').value.trim();
+        if (name === ADMIN_NAME) {
+          const passwordInput = document.getElementById('adminPassword');
+          if (passwordInput.value) {
+            window.submitName();
+          } else {
+            passwordInput.focus();
+          }
+        } else {
+          window.submitName();
+        }
+      }
+    });
+    
+    document.getElementById('adminPassword').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         window.submitName();
       }
