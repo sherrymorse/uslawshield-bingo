@@ -1,4 +1,3 @@
-```
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +11,7 @@
       padding: 0;
       box-sizing: border-box;
     }
-   
+    
     body {
       font-family: 'Oswald', sans-serif;
       background: linear-gradient(135deg, #0e1d61 0%, #1a2a7a 100%);
@@ -20,7 +19,7 @@
       min-height: 100vh;
       position: relative;
     }
-   
+    
     .header {
       text-align: center;
       color: white;
@@ -30,7 +29,7 @@
       border-radius: 15px;
       backdrop-filter: blur(10px);
     }
-   
+    
     .logo-container {
       display: flex;
       justify-content: center;
@@ -39,7 +38,7 @@
       margin-bottom: 15px;
       flex-wrap: wrap;
     }
-   
+    
     .main-title {
       font-family: 'Anton', sans-serif;
       font-size: 3.8em;
@@ -50,7 +49,7 @@
       text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
       -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
     }
-   
+    
     .subtitle {
       font-family: 'Oswald', sans-serif;
       font-size: 1.4em;
@@ -64,7 +63,7 @@
       border-radius: 8px;
       display: inline-block;
     }
-   
+    
     .tagline {
       font-family: 'PT Sans', sans-serif;
       font-size: 1.1em;
@@ -74,7 +73,7 @@
       letter-spacing: 2px;
       margin-top: 10px;
     }
-   
+    
     .player-info {
       text-align: center;
       color: white;
@@ -85,7 +84,7 @@
       border-radius: 10px;
       font-weight: 600;
     }
-   
+    
     .active-players {
       position: fixed;
       bottom: 20px;
@@ -98,7 +97,7 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       z-index: 100;
     }
-   
+    
     .active-players h3 {
       font-family: 'Oswald', sans-serif;
       color: #0e1d61;
@@ -107,28 +106,28 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-   
+    
     .player-list {
       font-size: 0.85em;
       color: #333;
       max-height: 200px;
       overflow-y: auto;
     }
-   
+    
     .player-list-item {
       padding: 5px 0;
       border-bottom: 1px solid #e0e0e0;
     }
-   
+    
     .player-list-item:last-child {
       border-bottom: none;
     }
-   
+    
     .controls {
       text-align: center;
       margin-bottom: 30px;
     }
-   
+    
     button {
       font-family: 'Oswald', sans-serif;
       font-size: 1em;
@@ -142,35 +141,35 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-   
+    
     .btn-primary {
       background: linear-gradient(135deg, #d51e47 0%, #b01838 100%);
       color: white;
       box-shadow: 0 4px 15px rgba(213, 30, 71, 0.4);
     }
-   
+    
     .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(213, 30, 71, 0.6);
     }
-   
+    
     .btn-primary:disabled {
       background: #ccc;
       cursor: not-allowed;
       transform: none;
     }
-   
+    
     .btn-secondary {
       background: white;
       color: #0e1d61;
       border: 2px solid #0e1d61;
     }
-   
+    
     .btn-secondary:hover {
       background: #0e1d61;
       color: white;
     }
-   
+    
     .cards-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -179,7 +178,7 @@
       margin: 0 auto;
       padding-bottom: 100px;
     }
-   
+    
     .bingo-card {
       background: white;
       border-radius: 15px;
@@ -188,12 +187,12 @@
       page-break-after: always;
       border: 4px solid #0e1d61;
     }
-   
+    
     .card-header {
       text-align: center;
       margin-bottom: 20px;
     }
-   
+    
     .bingo-title {
       font-family: 'Anton', sans-serif;
       font-size: 4em;
@@ -204,7 +203,7 @@
                    6px 6px 0px rgba(213, 30, 71, 0.2);
       margin-bottom: 10px;
     }
-   
+    
     .card-number {
       font-family: 'Oswald', sans-serif;
       font-size: 1.3em;
@@ -217,7 +216,7 @@
       letter-spacing: 2px;
       margin-bottom: 5px;
     }
-   
+    
     .shield-badge {
       display: inline-block;
       background: linear-gradient(135deg, #e7d386 0%, #d4af37 100%);
@@ -228,7 +227,7 @@
       font-weight: 700;
       letter-spacing: 1px;
     }
-   
+    
     .bingo-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -238,7 +237,7 @@
       border-radius: 8px;
       overflow: hidden;
     }
-   
+    
     .bingo-header {
       background: #0e1d61;
       color: #d51e47;
@@ -249,7 +248,7 @@
       text-align: center;
       border: 2px solid #e7d386;
     }
-   
+    
     .bingo-cell {
       background: white;
       padding: 12px 8px;
@@ -266,12 +265,12 @@
       position: relative;
       border: 1px solid #e0e0e0;
     }
-   
+    
     .bingo-cell:hover:not(.free-space):not(.marked) {
       background: #f0f0f0;
       transform: scale(1.02);
     }
-   
+    
     .free-space {
       background: linear-gradient(135deg, #d51e47 0%, #e7d386 100%);
       color: white;
@@ -281,12 +280,12 @@
       position: relative;
       overflow: hidden;
     }
-   
+    
     .free-space-text {
       position: relative;
       z-index: 2;
     }
-   
+    
     .free-space svg {
       position: absolute;
       top: 50%;
@@ -297,12 +296,12 @@
       opacity: 0.7;
       z-index: 1;
     }
-   
+    
     .bingo-cell.marked {
       position: relative;
       background: #f0f8ff !important;
     }
-   
+    
     .bingo-cell.marked::before {
       content: '';
       position: absolute;
@@ -318,7 +317,7 @@
       opacity: 0.3;
       z-index: 1;
     }
-   
+    
     .bingo-cell.marked::after {
       content: attr(data-member-id);
       position: absolute;
@@ -339,21 +338,7 @@
       word-wrap: break-word;
       line-height: 1.2;
     }
-   
-    @keyframes markAnimation {
-      0% {
-        transform: translate(-50%, -50%) scale(0) rotate(-10deg);
-        opacity: 0;
-      }
-      50% {
-        transform: translate(-50%, -50%) scale(1.3) rotate(5deg);
-      }
-      100% {
-        transform: translate(-50%, -50%) scale(1) rotate(0deg);
-        opacity: 0.9;
-      }
-    }
-   
+    
     .modal {
       display: none;
       position: fixed;
@@ -365,7 +350,7 @@
       background-color: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(5px);
     }
-   
+    
     .modal-content {
       background-color: white;
       margin: 10% auto;
@@ -376,23 +361,23 @@
       max-width: 500px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
-   
+    
     .modal-header {
       text-align: center;
       margin-bottom: 20px;
     }
-   
+    
     .modal-title {
       font-family: 'Anton', sans-serif;
       font-size: 1.8em;
       color: #0e1d61;
       margin-bottom: 10px;
     }
-   
+    
     .modal-body {
       margin: 20px 0;
     }
-   
+    
     .modal-body label {
       display: block;
       font-weight: 700;
@@ -400,7 +385,7 @@
       margin-bottom: 8px;
       font-size: 1.1em;
     }
-   
+    
     .modal-body input {
       width: 100%;
       padding: 12px;
@@ -409,18 +394,18 @@
       border-radius: 8px;
       font-family: 'Oswald', sans-serif;
     }
-   
+    
     .modal-body input[type="text"]#memberIdInput {
       text-transform: uppercase;
       font-family: monospace;
     }
-   
+    
     .modal-body input:focus {
       outline: none;
       border-color: #d51e47;
       box-shadow: 0 0 10px rgba(213, 30, 71, 0.3);
     }
-   
+    
     .error-message {
       color: #d51e47;
       font-size: 0.9em;
@@ -428,23 +413,23 @@
       display: none;
       font-weight: 600;
     }
-   
+    
     .modal-footer {
       display: flex;
       gap: 10px;
       justify-content: center;
       margin-top: 20px;
     }
-   
+    
     .close-btn {
       background: #6c757d;
       color: white;
     }
-   
+    
     .close-btn:hover {
       background: #5a6268;
     }
-   
+    
     .bingo-modal {
       display: none;
       position: fixed;
@@ -456,7 +441,7 @@
       background-color: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(8px);
     }
-   
+    
     .bingo-modal-content {
       background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       margin: 5% auto;
@@ -468,12 +453,12 @@
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
       position: relative;
     }
-   
+    
     .bingo-celebration {
       text-align: center;
       margin-bottom: 30px;
     }
-   
+    
     .bingo-celebration h2 {
       font-family: 'Anton', sans-serif;
       font-size: 4em;
@@ -482,12 +467,12 @@
       margin-bottom: 10px;
       animation: pulse 1s ease-in-out infinite;
     }
-   
+    
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
     }
-   
+    
     .bingo-type {
       font-family: 'Oswald', sans-serif;
       font-size: 1.8em;
@@ -499,7 +484,7 @@
       border-radius: 10px;
       text-align: center;
     }
-   
+    
     .verification-details {
       background: white;
       padding: 25px;
@@ -507,21 +492,21 @@
       border: 3px solid #0e1d61;
       margin-bottom: 20px;
     }
-   
+    
     .verification-details h3 {
       font-family: 'Oswald', sans-serif;
       color: #0e1d61;
       margin-bottom: 15px;
       font-size: 1.3em;
     }
-   
+    
     .member-list {
       display: grid;
       gap: 10px;
       max-height: 300px;
       overflow-y: auto;
     }
-   
+    
     .member-item {
       display: flex;
       justify-content: space-between;
@@ -531,18 +516,18 @@
       border-radius: 5px;
       font-family: 'Oswald', sans-serif;
     }
-   
+    
     .member-position {
       font-weight: 700;
       color: #0e1d61;
     }
-   
+    
     .member-id {
       font-weight: 600;
       color: #d51e47;
       font-family: monospace;
     }
-   
+    
     .screenshot-note {
       background: #fff3cd;
       border: 2px solid #ffc107;
@@ -553,7 +538,7 @@
       color: #856404;
       text-align: center;
     }
-   
+    
     @media print {
       body {
         background: white;
@@ -566,7 +551,7 @@
         page-break-after: always;
       }
     }
-   
+    
     @media (max-width: 768px) {
       .cards-container {
         grid-template-columns: 1fr;
@@ -607,19 +592,22 @@
     <div class="subtitle">EMPLOYEE ENGAGEMENT BINGO</div>
     <p class="tagline">LEGAL DEFENSE FOR SELF DEFENSE®</p>
   </div>
+
   <div class="player-info" id="playerInfo" style="display: none;"></div>
+
   <div class="controls">
     <button class="btn-secondary" onclick="window.print()">Print Cards (PDF)</button>
-    <button class="btn-secondary" id="btnRename" style="background: #0e1d61; color: white; border-color: #0e1d61;">Change Name</button>
     <button class="btn-secondary" onclick="confirmClearProgress()" style="background: #dc3545; color: white; border-color: #dc3545;">Clear All Progress</button>
-    <a id="btnExport" class="btn-secondary" download="bingo-verification.png" href="#" style="background: #ffc107; color: #0e1d61; border-color: #ffc107; text-decoration: none; display: none;">Download Last Bingo</a>
   </div>
+
   <div class="cards-container" id="cardsContainer"></div>
+
   <!-- Active Players Panel -->
   <div class="active-players" id="activePlayers">
     <h3>🎮 Active Players</h3>
     <div class="player-list" id="playerListPanel"></div>
   </div>
+
   <!-- Name Entry Modal -->
   <div id="nameModal" class="modal" style="display: none;">
     <div class="modal-content">
@@ -633,10 +621,11 @@
         <div class="error-message" id="nameError">Please enter your name</div>
       </div>
       <div class="modal-footer">
-        <button class="btn-primary" id="submitNameBtn">Start Playing</button>
+        <button class="btn-primary" onclick="submitName()">Start Playing</button>
       </div>
     </div>
   </div>
+
   <!-- Member ID Modal -->
   <div id="memberModal" class="modal">
     <div class="modal-content">
@@ -650,259 +639,511 @@
         <div class="error-message" id="errorMessage">Invalid Member ID. Must be 2-3 letters followed by numbers (5-10 characters total)</div>
       </div>
       <div class="modal-footer">
-        <button class="btn-primary" id="submitMemberIdBtn">Submit</button>
+        <button class="btn-primary" onclick="submitMemberId()">Submit</button>
         <button class="btn-secondary close-btn" onclick="closeModal()">Cancel</button>
       </div>
     </div>
   </div>
+
   <!-- Bingo Celebration Modal -->
   <div id="bingoModal" class="bingo-modal">
-    <div class="bingo-modal-content" id="verifyCard">
+    <div class="bingo-modal-content">
       <div class="bingo-celebration">
         <h2>🎉 BINGO! 🎉</h2>
       </div>
       <div class="bingo-type" id="bingoType"></div>
-      <div class="screenshot-note"> 📸 Screenshot this verification for admin approval </div>
+      <div class="screenshot-note">
+        📸 Screenshot this verification for admin approval
+      </div>
       <div class="verification-details">
         <h3>Verified Member IDs:</h3>
         <div class="member-list" id="memberList"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn-primary" id="verifySnap">Create Screenshot</button>
-        <button class="btn-primary" id="verifyClose">Close</button>
+        <button class="btn-primary" onclick="closeBingoModal()">Continue Playing</button>
       </div>
     </div>
   </div>
-  <div id="errorbar" class="errorbar"></div>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
+
+  <!-- Firebase SDKs -->
   <script type="module">
-/* ========= visible error banner ========= */
-function showErrorBar(msg){
-  const el=document.getElementById('errorbar');
-  el.textContent = 'Error: ' + msg;
-  el.style.display = 'block';
-}
-window.addEventListener('error', e=>showErrorBar(e.message||'Script error'));
-window.addEventListener('unhandledrejection', e=>showErrorBar((e.reason&&e.reason.message)||'Unhandled promise rejection'));
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getDatabase, ref, set, get, onValue, remove } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
 
-/* ========= constants & helpers ========= */
-const ALL_ITEMS = [
-  "Single PR","Dual PR","Dual Monthly LOC","Single Monthly LOC","Single Annual LOC","Dual Annual LOC",
-  "Add Secondary Legacy (Monthly)","Add Secondary Legacy (Annual)","Conversion to Explore","Conversion to Navigate",
-  "Save","Winback (monthly)","Winback (annual)"
-];
-const ACW_ITEM = "< 3 ACW Expires";
-const FREE_POS = {r:2,c:2};
-const ID_RE = /^[A-Za-z]{2,3}\d{2,8}$/;
-const MAX_PLAYERS = 10;
-
-function seedRand(seed){ let h=0; for(let i=0;i<seed.length;i++) h=(h*31+seed.charCodeAt(i))>>>0; return ()=> (h=(1103515245*h+12345)&0x7fffffff)/0x80000000; }
-function shuffleDet(a,rng){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
-
-/* ========= bingo lines ========= */
-const LINES=(()=>{const L=[];for(let r=0;r<5;r++)L.push([...Array(5)].map((_,c)=>[r,c])); for(let c=0;c<5;c++)L.push([...Array(5)].map((_,r)=>[r,c])); L.push([[0,0],[1,1],[2,2],[3,3],[4,4]]); L.push([[0,4],[1,3],[2,2],[3,1],[4,0]]); return L;})();
-const FOUR_CORNERS=[[0,0],[0,4],[4,0],[4,4]];
-const T_PATTERN=([0,1,2,3,4].map(c=>[0,c])).concat([[1,2],[2,2],[3,2],[4,2]]);
-const X_PATTERN=[[0,0],[1,1],[2,2],[3,3],[4,4],[0,4],[1,3],[3,1],[4,0]];
-const BLACKOUT = []; for(let r=0;r<5;r++) for(let c=0;c<5;c++) BLACKOUT.push([r,c]);
-function isMarked(card,r,c){ return (r===FREE_POS.r&&c===FREE_POS.c)||!!card.marked[r][c];}
-function findBingos(card){
-  const out=[]; for(const ln of LINES){ if(ln.every(([r,c])=>isMarked(card,r,c))) out.push({type:"Regular Bingo",cells:ln}); }
-  if(FOUR_CORNERS.every(([r,c])=>isMarked(card,r,c))) out.push({type:"Four Corners",cells:FOUR_CORNERS});
-  if(T_PATTERN.every(([r,c])=>isMarked(card,r,c))) out.push({type:"T Pattern",cells:T_PATTERN});
-  if(X_PATTERN.every(([r,c])=>isMarked(card,r,c))) out.push({type:"X Pattern",cells:X_PATTERN});
-  if(BLACKOUT.every(([r,c])=>isMarked(card,r,c))) out.push({type:"BLACKOUT",cells:BLACKOUT});
-  return out;
-}
-
-/* state */
-let STATE={playerId:null,playerName:null,cards:[],activeCell:null,lastPng:null, USE_LOCAL:false};
-
-/* build card */
-function buildBlankCard(seedStr){
-  const rng=seedRand(seedStr);
-  const pool=shuffleDet(ALL_ITEMS,rng);
-  const labels=pool.slice(0,24);
-  labels[Math.floor(rng()*24)]=ACW_ITEM;
-  const grid=[]; let k=0;
-  for(let r=0;r<5;r++){
-    const row = [];
-    for(let c=0;c<5;c++){
-      if(r===FREE_POS.r && c===FREE_POS.c){ row.push("FREE"); continue; }
-      row.push(labels[k++]);
-    }
-    grid.push(row);
-  }
-  const marked = [...Array(5)].map(() => new Array(5).fill(false)); marked[FREE_POS.r][FREE_POS.c] = true;
-  const memberIds = [...Array(5)].map(() => new Array(5).fill(null));
-  return { grid, marked, memberIds };
-}
-
-/* render */
-function render(){
-  const host=document.getElementById('cardsContainer'); host.innerHTML='';
-  document.getElementById('playerInfo').textContent=`Welcome, ${STATE.playerName}! 🎯${STATE.USE_LOCAL?' (Local Mode)':''}`;
-  document.getElementById('playerInfo').style.display = 'block';
-  STATE.cards.forEach((card,idx)=>{
-    const c=document.createElement('div'); c.className='bingo-card';
-    c.innerHTML=`
-      <div class="card-header">
-        <div class="bingo-title">BINGO</div>
-        <div class="card-number">Card ${idx+1} of 3</div>
-        <div class="shield-badge">★ Shield Nation Member ★</div>
-      </div>
-    `;
-    const grid=document.createElement('div'); grid.className='bingo-grid';
-    ['B','I','N','G','O'].forEach(l=>{ const h=document.createElement('div'); h.className='bingo-header'; h.textContent=l; grid.appendChild(h); });
-    for(let r=0;r<5;r++) for(let cc=0;cc<5;cc++){
-      const item=card.grid[r][cc];
-      const cell=document.createElement('div'); cell.className='bingo-cell';
-      if (r===FREE_POS.r&&cc===FREE_POS.c) { cell.classList.add('free-space'); cell.innerHTML=`<svg width="100" height="115" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg"><path d="M50 5L10 20V50C10 70 20 95 50 110C80 95 90 70 90 50V20L50 5Z" fill="#1e1e1e" stroke="#1e1e1e" stroke-width="2"/><path d="M50 8L13 22V50C13 69 19 92 50 106C81 92 87 69 87 50V22L50 8Z" fill="#d51e47"/><path d="M50 55L13 50V50C13 69 19 92 50 106C81 92 87 69 87 50V50L50 55Z" fill="#f4e5c2"/><rect x="20" y="35" width="60" height="12" fill="#0e1d61" rx="2"/><text x="50" y="44" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle">U.S. LawShield</text><g transform="translate(50, 70) scale(0.3)"><line x1="0" y1="0" x2="0" y2="40" stroke="#0e1d61" stroke-width="3"/><line x1="-30" y1="0" x2="30" y2="0" stroke="#0e1d61" stroke-width="3"/><circle cx="-30" cy="-5" r="8" fill="none" stroke="#0e1d61" stroke-width="2"/><circle cx="30" cy="-5" r="8" fill="none" stroke="#0e1d61" stroke-width="2"/></g></svg><span class="free-space-text">FREE<br>SPACE</span>`; }
-      else { cell.textContent=item; cell.onclick=()=>{ STATE.activeCell={cardIndex:idx,r,c:cc}; document.getElementById('memberModal').style.display='flex'; document.getElementById('memberIdInput').focus(); }; }
-      if (card.marked[r][cc]) { cell.classList.add('marked'); const memberId=card.memberIds[r][cc]; if (memberId) cell.setAttribute('data-member-id', memberId); }
-      grid.appendChild(cell);
-    }
-    c.appendChild(grid);
-    host.appendChild(c);
-  });
-}
-
-/* modal */
-document.getElementById('submitMemberIdBtn').onclick=async()=>{
-  const raw=document.getElementById('memberIdInput').value.trim().toUpperCase();
-  if(!ID_RE.test(raw)||raw.length<5||raw.length>10){ document.getElementById('errorMessage').style.display='block'; return; }
-  const t=STATE.activeCell; if(!t){ closeModal(); return; }
-  STATE.cards[t.cardIndex].marked[t.r][t.c]=true; STATE.cards[t.cardIndex].memberIds[t.r][t.c]=raw;
-  if(STATE.USE_LOCAL){ saveLocalCards(); }else{ await update(ref(db,`cards/${STATE.playerId}/${t.cardIndex}`),STATE.cards[t.cardIndex]); }
-  closeModal(); render(); const found=findBingos(STATE.cards[t.cardIndex]); if(found.length===0) return;
-  const order=["BLACKOUT","X Pattern","T Pattern","Four Corners","Regular Bingo"]; found.sort((a,b)=>order.indexOf(a.type)-order.indexOf(b.type));
-  const hit=found[0];
-  const entries=hit.cells.map(([r,c])=>{ const cell=STATE.cards[t.cardIndex].memberIds[r][c]; const item=STATE.cards[t.cardIndex].grid[r][c]; return {card:t.cardIndex+1,r,c,item,memberId:(r===FREE_POS.r&&c===FREE_POS.c)?"FREE":(cell||"")}; });
-  if(STATE.USE_LOCAL){ logLocalBingo(hit.type,entries); }else{ await set(push(ref(db,`bingos/${STATE.playerId}`)),{type:hit.type,at:serverTimestamp(),entries}); }
-  document.getElementById('bingoType').textContent = hit.type + ' - Card ' + (t.cardIndex + 1);
-  document.getElementById('memberList').innerHTML = entries.map(e => {
-    const row = e.r + 1; const col = ['B', 'I', 'N', 'G', 'O'][e.c]; const position = col + row;
-    return `
-      <div class="member-item">
-        <span class="member-position">${position}: ${e.item}</span>
-        <span class="member-id">${e.memberId}</span>
-      </div>
-    `;
-  }).join('');
-  document.getElementById('bingoModal').style.display = 'block';
-};
-
-function closeModal(){ document.getElementById('memberModal').style.display = 'none'; }
-
-document.getElementById('verifyClose').onclick=()=>document.getElementById('bingoModal').style.display = 'none';
-document.getElementById('verifySnap').onclick=async()=>{ const canvas=await html2canvas(document.getElementById('verifyCard'),{backgroundColor:"#ffffff",scale:2}); const data=canvas.toDataURL("image/png"); STATE.lastPng=data; document.getElementById('btnExport').href=data; document.getElementById('btnExport').style.display = 'inline-block'; };
-
-/* clear / print / rename */
-document.getElementById('btnClear').onclick=async()=>{
-  if(!confirm("Clear all three cards and Member IDs for your player?")) return;
-  const three=[0,1,2].map(i=>buildBlankCard(`p${STATE.playerId}-${i}`));
-  if(STATE.USE_LOCAL){ STATE.cards=three; saveLocalCards(); }else{ await set(ref(db,`cards/${STATE.playerId}`),three); STATE.cards=three; }
-  render();
-};
-document.getElementById('btnPrint').onclick=()=>window.print();
-document.getElementById('btnRename').onclick=async()=>{
-  const cur=STATE.playerName||`Player ${STATE.playerId}`; const next=(prompt("Enter new display name:",cur)||"").trim(); if(!next) return;
-  localStorage.setItem(`usl:name:${STATE.playerId}`,next); STATE.playerName=next; document.getElementById('playerInfo').textContent=`Welcome, ${next}! ${STATE.USE_LOCAL?' (Local Mode)':''}`;
-  if(!STATE.USE_LOCAL){ await update(ref(db,`players/${STATE.playerId}`),{name:next,lastActive:serverTimestamp()}); }
-};
-
-/* players + presence */
-function renderPlayersLocal(){ document.getElementById('playerListPanel').innerHTML=`<div class="player-list-item">#${STATE.playerId} ${STATE.playerName}</div>`; }
-function wirePresenceFirebase(pid){
-  setInterval(()=>update(ref(db,`players/${pid}`),{lastActive:serverTimestamp()}),10000);
-  onValue(ref(db,`cards/${pid}`),snap=>{ if(snap.exists()){ const v=snap.val(); STATE.cards=[v[0],v[1],v[2]]; render(); }});
-  onValue(ref(db,'players'),snap=>{
-    const list=[]; if(snap.exists()){ for(const [id,info] of Object.entries(snap.val())) list.push({id,name:info.name||`Player ${id}`}); }
-    list.sort((a,b)=>Number(a.id)-Number(b.id)); document.getElementById('playerListPanel').innerHTML = list.map(p => `<div class="player-list-item">#${p.id} ${p.name}</div>`).join('');
-  });
-}
-
-/* local persistence */
-function saveLocalCards(){ localStorage.setItem('usl:local:cards', JSON.stringify(STATE.cards)); }
-function loadLocalCards(){ const s=localStorage.getItem('usl:local:cards'); return s?JSON.parse(s):null; }
-function logLocalBingo(type,entries){ const log=JSON.parse(localStorage.getItem('usl:local:bingos')||'[]'); log.push({type,at:Date.now(),entries}); localStorage.setItem('usl:local:bingos',JSON.stringify(log)); }
-
-/* Firebase boot with fallback */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getDatabase, ref, child, get, set, update, push, onValue, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-
-const firebaseConfig = { /* your config */ };
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-
-async function ensurePlayerAssigned(uid){
-  const asn=await get(child(ref(db),`assignments/${uid}`));
-  if(asn.exists()) return asn.val().playerId;
-  let assigned=null;
-  await runTransaction(ref(db,'counters/nextPlayer'),curr=>{
-    const v=(typeof curr==='number'?curr:0); if(v>=MAX_PLAYERS) return; assigned=v+1; return assigned;
-  });
-  if(!assigned) throw new Error("players_full");
-  await set(ref(db,`assignments/${uid}`),{playerId:assigned});
-  return assigned;
-}
-async function ensurePlayerName(pid){
-  const key=`usl:name:${pid}`; let name=localStorage.getItem(key);
-  if(!name){ name=await new Promise(resolve=>{
-    document.getElementById('nameModal').style.display='block'; document.getElementById('nameInput').focus();
-    document.getElementById('submitNameBtn').onclick=()=>{
-      const input=document.getElementById('nameInput'); const newName=input.value.trim();
-      if(!newName){ document.getElementById('nameError').style.display='block'; return; }
-      document.getElementById('nameModal').style.display='none';
-      localStorage.setItem(key,newName); resolve(newName);
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzNTPcHXIgb7T73yX0ngLyuJkSiyUd3dA",
+      authDomain: "uslawshield-bingo.firebaseapp.com",
+      databaseURL: "https://uslawshield-bingo-default-rtdb.firebaseio.com",
+      projectId: "uslawshield-bingo",
+      storageBucket: "uslawshield-bingo.firebasestorage.app",
+      messagingSenderId: "227127069053",
+      appId: "1:227127069053:web:be6acba57a6561ad9ce414",
+      measurementId: "G-Z2FXPKS7EY"
     };
-  }); }
-  await update(ref(db,`players/${pid}`),{name,createdAt:serverTimestamp(),lastActive:serverTimestamp()});
-  return name;
-}
-async function ensureCards(pid){
-  const s=await get(ref(db,`cards/${pid}`));
-  if(s.exists()){ const v=s.val(); return [v[0],v[1],v[2]]; }
-  const three=[0,1,2].map(i=>buildBlankCard(`p${pid}-${i}`)); await set(ref(db,`cards/${pid}`),three); return three;
-}
 
-/* local boot */
-function bootLocal(){
-  STATE.USE_LOCAL=true;
-  let pid=localStorage.getItem('usl:local:pid'); if(!pid){ pid='1'; localStorage.setItem('usl:local:pid',pid); }
-  STATE.playerId=pid;
-  const key=`usl:name:${pid}`; let name=localStorage.getItem(key);
-  if(!name){ name=(prompt("Enter your display name (First & Last):","")||"").trim(); if(!name) name=`Player ${pid}`; localStorage.setItem(key,name); }
-  STATE.playerName=name;
-  const saved=loadLocalCards();
-  STATE.cards = saved || [0,1,2].map(i=>buildBlankCard(`local-${pid}-${i}`));
-  if(!saved) saveLocalCards();
-  render();
-  renderPlayersLocal();
-}
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
-/* firebase boot */
-function bootFirebase(user){
-  (async () => {
-    STATE.playerId = await ensurePlayerAssigned(user.uid);
-    STATE.playerName = await ensurePlayerName(STATE.playerId);
-    STATE.cards = await ensureCards(STATE.playerId);
-    render();
-    wirePresenceFirebase(STATE.playerId);
-  })().catch(e=>{ showErrorBar('Firebase: '+(e.message||e)); bootLocal(); });
-}
+    const items = [
+      'Single PR', 'Single PR', 'Single PR',
+      'Dual PR', 'Dual PR', 'Dual PR',
+      'Dual Monthly LOC', 'Dual Monthly LOC',
+      'Single Monthly LOC', 'Single Monthly LOC',
+      'Single Annual LOC', 'Single Annual LOC',
+      'Dual Annual LOC',
+      'Add Secondary Legacy (Monthly)',
+      'Add Secondary Legacy (Annual)',
+      'Conversion to Explore',
+      'Conversion to Navigate',
+      'Conversion to Discover',
+      'Add E-Shield', 'Add E-Shield',
+      'LSLP (monthly)', 'LSLP (monthly)',
+      'LSLP (Annual)',
+      'Save', 'Save',
+      'Winback (monthly)', 'Winback (monthly)',
+      'Winback (annual)'
+    ];
 
-/* auth */
-onAuthStateChanged(auth, u=>{
-  if(!u){
-    signInAnonymously(auth).catch(e=>{ showErrorBar('Firebase: '+(e.message||e)); bootLocal(); });
-    return;
-  }
-  bootFirebase(u);
-});
+    const MAX_PLAYERS = 10;
+    let currentCell = null;
+    let currentCardIndex = null;
+    let gameState = null;
+    let playerId = null;
+
+    // Get or create player ID from localStorage
+    function getOrCreatePlayerId() {
+      let id = localStorage.getItem('uslBingoPlayerId');
+      if (!id) {
+        id = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('uslBingoPlayerId', id);
+      }
+      return id;
+    }
+
+    // Load player list from Firebase
+    function updatePlayerListPanel() {
+      const playersRef = ref(database, 'players');
+      onValue(playersRef, (snapshot) => {
+        const panel = document.getElementById('playerListPanel');
+        const players = snapshot.val();
+        
+        if (!players || Object.keys(players).length === 0) {
+          panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
+        } else {
+          const playerArray = Object.values(players).filter(p => {
+            const expirationDate = new Date(p.expiresAt);
+            return expirationDate > new Date();
+          });
+          
+          panel.innerHTML = playerArray.map((p, idx) => 
+            `<div class="player-list-item">${idx + 1}. ${p.name}</div>`
+          ).join('');
+        }
+      });
+    }
+
+    // Save game state to Firebase
+    async function saveGameState() {
+      if (!gameState || !playerId) return;
+      
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 7);
+      gameState.expiresAt = expirationDate.toISOString();
+      
+      // Save player game data
+      await set(ref(database, 'games/' + playerId), gameState);
+      
+      // Update player in players list
+      await set(ref(database, 'players/' + playerId), {
+        id: playerId,
+        name: gameState.playerName,
+        expiresAt: expirationDate.toISOString(),
+        lastActive: new Date().toISOString()
+      });
+    }
+
+    // Load game state from Firebase
+    async function loadGameState() {
+      playerId = getOrCreatePlayerId();
+      const gameRef = ref(database, 'games/' + playerId);
+      const snapshot = await get(gameRef);
+      
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const expirationDate = new Date(data.expiresAt);
+        
+        if (expirationDate > new Date()) {
+          return data;
+        } else {
+          await remove(gameRef);
+          await remove(ref(database, 'players/' + playerId));
+        }
+      }
+      return null;
+    }
+
+    function generateCard() {
+      const shuffled = [...items].sort(() => Math.random() - 0.5);
+      const card = shuffled.slice(0, 24);
+      card.splice(12, 0, 'FREE');
+      
+      const hasAcwExpires = card.includes('< 3 ACW Expires');
+      if (!hasAcwExpires) {
+        const randomIndex = Math.floor(Math.random() * 24);
+        const targetIndex = randomIndex >= 12 ? randomIndex + 1 : randomIndex;
+        card[targetIndex] = '< 3 ACW Expires';
+      }
+      
+      return card;
+    }
+
+    function initializeGame(playerName) {
+      gameState = {
+        playerId: playerId,
+        playerName: playerName,
+        cards: [
+          { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
+          { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
+          { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) }
+        ],
+        createdAt: new Date().toISOString()
+      };
+      
+      gameState.cards.forEach(card => {
+        card.marked[12] = true;
+      });
+      
+      saveGameState();
+      showPlayerInfo();
+      renderCards();
+    }
+
+    function showPlayerInfo() {
+      const playerInfo = document.getElementById('playerInfo');
+      playerInfo.textContent = `Welcome, ${gameState.playerName}! 🎯`;
+      playerInfo.style.display = 'block';
+    }
+
+    function renderCards() {
+      const container = document.getElementById('cardsContainer');
+      container.innerHTML = '';
+      
+      gameState.cards.forEach((cardData, cardIndex) => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'bingo-card';
+        
+        const header = `
+          <div class="card-header">
+            <div class="bingo-title">BINGO</div>
+            <div class="card-number">Card ${cardIndex + 1} of 3</div>
+            <div class="shield-badge">★ Shield Nation Member ★</div>
+          </div>
+        `;
+        
+        const grid = document.createElement('div');
+        grid.className = 'bingo-grid';
+        
+        ['B', 'I', 'N', 'G', 'O'].forEach(letter => {
+          const headerCell = document.createElement('div');
+          headerCell.className = 'bingo-header';
+          headerCell.textContent = letter;
+          grid.appendChild(headerCell);
+        });
+        
+        cardData.items.forEach((item, index) => {
+          const cell = document.createElement('div');
+          cell.className = 'bingo-cell';
+          
+          if (item === 'FREE') {
+            cell.className += ' free-space';
+            cell.innerHTML = `
+              <svg width="100" height="115" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 5L10 20V50C10 70 20 95 50 110C80 95 90 70 90 50V20L50 5Z" fill="#1e1e1e" stroke="#1e1e1e" stroke-width="2"/>
+                <path d="M50 8L13 22V50C13 69 19 92 50 106C81 92 87 69 87 50V22L50 8Z" fill="#d51e47"/>
+                <path d="M50 55L13 50V50C13 69 19 92 50 106C81 92 87 69 87 50V50L50 55Z" fill="#f4e5c2"/>
+                <rect x="20" y="35" width="60" height="12" fill="#0e1d61" rx="2"/>
+                <text x="50" y="44" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle">U.S. LawShield</text>
+                <g transform="translate(50, 70) scale(0.3)">
+                  <line x1="0" y1="0" x2="0" y2="40" stroke="#0e1d61" stroke-width="3"/>
+                  <line x1="-30" y1="0" x2="30" y2="0" stroke="#0e1d61" stroke-width="3"/>
+                  <circle cx="-30" cy="-5" r="8" fill="none" stroke="#0e1d61" stroke-width="2"/>
+                  <circle cx="30" cy="-5" r="8" fill="none" stroke="#0e1d61" stroke-width="2"/>
+                </g>
+              </svg>
+              <span class="free-space-text">FREE<br>SPACE</span>
+            `;
+          } else {
+            cell.textContent = item;
+            cell.onclick = () => handleCellClick(cardIndex, index);
+          }
+          
+          if (cardData.marked[index]) {
+            cell.classList.add('marked');
+            const memberId = cardData.memberIds[index];
+            if (memberId) {
+              cell.setAttribute('data-member-id', memberId);
+            }
+          }
+          
+          grid.appendChild(cell);
+        });
+        
+        cardDiv.innerHTML = header;
+        cardDiv.appendChild(grid);
+        container.appendChild(cardDiv);
+      });
+    }
+
+    function handleCellClick(cardIndex, cellIndex) {
+      if (gameState.cards[cardIndex].marked[cellIndex]) {
+        return;
+      }
+      
+      currentCardIndex = cardIndex;
+      currentCell = cellIndex;
+      
+      document.getElementById('memberModal').style.display = 'block';
+      document.getElementById('memberIdInput').value = '';
+      document.getElementById('errorMessage').style.display = 'none';
+      document.getElementById('memberIdInput').focus();
+    }
+
+    function validateMemberId(memberId) {
+      const trimmed = memberId.trim().toUpperCase();
+      const regex = /^[A-Z]{2,3}\d+$/;
+      
+      if (trimmed.length < 5 || trimmed.length > 10) {
+        return false;
+      }
+      
+      return regex.test(trimmed);
+    }
+
+    window.submitMemberId = function() {
+      const input = document.getElementById('memberIdInput');
+      const memberId = input.value.trim().toUpperCase();
+      
+      if (!validateMemberId(memberId)) {
+        document.getElementById('errorMessage').style.display = 'block';
+        input.focus();
+        return;
+      }
+      
+      const cardIdx = currentCardIndex;
+      const cellIdx = currentCell;
+      
+      gameState.cards[cardIdx].marked[cellIdx] = true;
+      gameState.cards[cardIdx].memberIds[cellIdx] = memberId;
+      
+      console.log('Marked cell', cellIdx, 'on card', cardIdx, 'with member ID', memberId);
+      
+      saveGameState();
+      closeModal();
+      renderCards();
+      
+      checkForBingo(cardIdx);
+    }
+
+    function closeModal() {
+      document.getElementById('memberModal').style.display = 'none';
+      currentCell = null;
+      currentCardIndex = null;
+    }
+
+    function checkForBingo(cardIndex) {
+      const card = gameState.cards[cardIndex];
+      const bingoPatterns = [];
+      
+      console.log('Checking bingo for card', cardIndex);
+      
+      // Check rows
+      for (let row = 0; row < 5; row++) {
+        const rowIndices = [];
+        let rowComplete = true;
+        for (let col = 0; col < 5; col++) {
+          const index = row * 5 + col;
+          rowIndices.push(index);
+          if (!card.marked[index]) {
+            rowComplete = false;
+          }
+        }
+        if (rowComplete) {
+          console.log('BINGO FOUND: Row', row + 1);
+          bingoPatterns.push({ type: '🎉 BINGO - Row ' + (row + 1), indices: rowIndices });
+        }
+      }
+      
+      // Check columns
+      for (let col = 0; col < 5; col++) {
+        const colIndices = [];
+        let colComplete = true;
+        for (let row = 0; row < 5; row++) {
+          const index = row * 5 + col;
+          colIndices.push(index);
+          if (!card.marked[index]) {
+            colComplete = false;
+          }
+        }
+        if (colComplete) {
+          console.log('BINGO FOUND: Column', ['B', 'I', 'N', 'G', 'O'][col]);
+          bingoPatterns.push({ type: '🎉 BINGO - Column ' + ['B', 'I', 'N', 'G', 'O'][col], indices: colIndices });
+        }
+      }
+      
+      // Check diagonals
+      const diagonal1 = [0, 6, 12, 18, 24];
+      if (diagonal1.every(i => card.marked[i])) {
+        console.log('BINGO FOUND: Diagonal \\');
+        bingoPatterns.push({ type: '🎉 BINGO - Diagonal \\', indices: diagonal1 });
+      }
+      
+      const diagonal2 = [4, 8, 12, 16, 20];
+      if (diagonal2.every(i => card.marked[i])) {
+        console.log('BINGO FOUND: Diagonal /');
+        bingoPatterns.push({ type: '🎉 BINGO - Diagonal /', indices: diagonal2 });
+      }
+      
+      // Check four corners
+      const fourCorners = [0, 4, 20, 24];
+      if (fourCorners.every(i => card.marked[i])) {
+        console.log('BINGO FOUND: Four Corners');
+        bingoPatterns.push({ type: '🎉 BINGO - Four Corners', indices: fourCorners });
+      }
+      
+      // Check T pattern
+      const tPattern = [0, 1, 2, 3, 4, 7, 12, 17, 22];
+      if (tPattern.every(i => card.marked[i])) {
+        console.log('BINGO FOUND: T Pattern');
+        bingoPatterns.push({ type: '🎉 BINGO - T Pattern', indices: tPattern });
+      }
+      
+      // Check X pattern
+      const xPattern = [0, 4, 6, 8, 12, 16, 18, 20, 24];
+      if (xPattern.every(i => card.marked[i])) {
+        console.log('BINGO FOUND: X Pattern');
+        bingoPatterns.push({ type: '🎉 BINGO - X Pattern', indices: xPattern });
+      }
+      
+      // Check blackout
+      const allIndices = Array.from({length: 25}, (_, i) => i);
+      if (allIndices.every(i => card.marked[i])) {
+        console.log('BINGO FOUND: BLACKOUT!!!');
+        bingoPatterns.push({ type: '🎉🎉🎉 BLACKOUT!!!', indices: allIndices });
+      }
+      
+      if (bingoPatterns.length > 0) {
+        console.log('Showing bingo modal');
+        showBingoModal(cardIndex, bingoPatterns);
+      }
+    }
+
+    function showBingoModal(cardIndex, patterns) {
+      const modal = document.getElementById('bingoModal');
+      const typeDiv = document.getElementById('bingoType');
+      const memberList = document.getElementById('memberList');
+      
+      const pattern = patterns[patterns.length - 1];
+      
+      typeDiv.textContent = pattern.type + ' - Card ' + (cardIndex + 1);
+      
+      memberList.innerHTML = '';
+      pattern.indices.forEach(index => {
+        const memberId = gameState.cards[cardIndex].memberIds[index];
+        const item = gameState.cards[cardIndex].items[index];
+        
+        if (memberId || item === 'FREE') {
+          const memberItem = document.createElement('div');
+          memberItem.className = 'member-item';
+          
+          const row = Math.floor(index / 5) + 1;
+          const col = ['B', 'I', 'N', 'G', 'O'][index % 5];
+          const position = col + row;
+          
+          memberItem.innerHTML = `
+            <span class="member-position">${position}: ${item}</span>
+            <span class="member-id">${memberId || 'FREE SPACE'}</span>
+          `;
+          memberList.appendChild(memberItem);
+        }
+      });
+      
+      modal.style.display = 'block';
+    }
+
+    window.closeBingoModal = function() {
+      document.getElementById('bingoModal').style.display = 'none';
+    }
+
+    window.confirmClearProgress = function() {
+      if (confirm('⚠️ Are you sure you want to clear ALL progress and start over?\n\nThis will:\n- Delete all marked squares\n- Remove all Member IDs\n- Reset all three cards\n- Keep your player name\n\nThis action cannot be undone!')) {
+        clearAllProgress();
+      }
+    }
+
+    async function clearAllProgress() {
+      if (!gameState) return;
+      
+      gameState.cards.forEach(card => {
+        card.marked = new Array(25).fill(false);
+        card.memberIds = new Array(25).fill(null);
+        card.marked[12] = true;
+      });
+      
+      await saveGameState();
+      renderCards();
+      
+      alert('✅ All progress cleared! Refreshing page to ensure sync...');
+      window.location.reload(true);
+    }
+
+    window.submitName = async function() {
+      const input = document.getElementById('nameInput');
+      const name = input.value.trim();
+      
+      if (!name) {
+        document.getElementById('nameError').style.display = 'block';
+        input.focus();
+        return;
+      }
+      
+      document.getElementById('nameModal').style.display = 'none';
+      initializeGame(name);
+    }
+
+    document.getElementById('memberIdInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        window.submitMemberId();
+      }
+    });
+
+    document.getElementById('nameInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        window.submitName();
+      }
+    });
+
+    window.onclick = function(event) {
+      const memberModal = document.getElementById('memberModal');
+      if (event.target === memberModal) {
+        closeModal();
+      }
+    };
+
+    // Initialize app
+    window.onload = async function() {
+      playerId = getOrCreatePlayerId();
+      updatePlayerListPanel();
+      
+      const saved = await loadGameState();
+      if (saved) {
+        gameState = saved;
+        showPlayerInfo();
+        renderCards();
+      } else {
+        document.getElementById('nameModal').style.display = 'block';
+        document.getElementById('nameInput').focus();
+      }
+    };
   </script>
 </body>
 </html>
-```
