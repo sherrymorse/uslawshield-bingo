@@ -804,7 +804,7 @@
     let isHiddenSpectator = false;
     let currentGameType = "Any Line";
     let offlineMode = false;
-    let playerListUpdateTimeout = null;
+    let removalCheckTimeout = null;
     
     function getOrCreatePlayerId() {
       let id = localStorage.getItem('uslBingoPlayerId');
@@ -844,14 +844,10 @@
       return { valid: false };
     }
     
-    // FIXED: Debounced player list update with real-time data
+    // FIXED: Debounced player list update
     function schedulePlayerListUpdate() {
-      if (playerListUpdateTimeout) {
-        clearTimeout(playerListUpdateTimeout);
-      }
-      playerListUpdateTimeout = setTimeout(() => {
-        updatePlayerListPanel();
-      }, 300);
+      // Player list updates are now handled by real-time listeners
+      // This function is kept for backward compatibility but does nothing
     }
     
     // FIXED: Single persistent real-time listener for player list
@@ -1261,7 +1257,7 @@
       }
     }
     
-    // FIXED: Silent timestamp update that won't trigger logout issues
+    // FIXED: Atomic write to prevent race conditions during refresh
     async function saveGameState(silent = false) {
       if (offlineMode) {
         localStorage.setItem('offlineGameState', JSON.stringify(gameState));
@@ -1274,9 +1270,6 @@
       expirationDate.setDate(expirationDate.getDate() + 7);
       gameState.expiresAt = expirationDate.toISOString();
       
-      await set(ref(database, 'games/' + playerId), gameState);
-      
-      // FIXED: Use update instead of set to avoid triggering unnecessary listeners
       const playerData = {
         id: playerId,
         name: gameState.playerName,
@@ -1286,7 +1279,11 @@
         isHiddenSpectator: isHiddenSpectator || undefined
       };
       
-      await set(ref(database, 'players/' + playerId), playerData);
+      // CRITICAL FIX: Write both simultaneously to prevent race condition
+      await Promise.all([
+        set(ref(database, 'games/' + playerId), gameState),
+        set(ref(database, 'players/' + playerId), playerData)
+      ]);
       
       if (!silent) {
         console.log('💾 Game state saved for:', gameState.playerName);
@@ -1864,7 +1861,7 @@
         renderCards();
         document.getElementById('activePlayers').style.display = 'block';
         
-        // FIXED: Initialize player list with real-time updates
+        // FIXED: Initialize player list with real-time updates (only once)
         updatePlayerListPanel();
         
         if (isAdmin || isHiddenSpectator) {
@@ -1873,8 +1870,9 @@
           document.getElementById('adminManageRequestsBtn').style.display = 'inline-block';
         }
         
-        // FIXED: Silent timestamp update on restore
-        await saveGameState(true);
+        // CRITICAL FIX: Don't update timestamp on restore to avoid triggering removal checks
+        // The session is already valid, no need to write to Firebase again
+        console.log('✅ Session restored, skipping save to prevent race condition');
       } else {
         console.log('❌ No valid session, showing login');
         gameState = null;
@@ -1883,19 +1881,66 @@
         document.getElementById('nameInput').focus();
       }
       
-      // FIXED: Single listener for player removals
+      // CRITICAL FIX: Smart removal detection that distinguishes kicks from refreshes
       const playersRef = ref(database, 'players');
       onValue(playersRef, (snapshot) => {
-        if (gameState && playerId) {
-          const players = snapshot.val();
+        if (!gameState || !playerId) return;
+        
+        const players = snapshot.val();
+        const playerExists = players && players[playerId];
+        
+        if (!playerExists) {
+          // Clear any pending timeout
+          if (removalCheckTimeout) {
+            clearTimeout(removalCheckTimeout);
+          }
           
-          if (!players || !players[playerId]) {
-            console.log('❌ Player removed by admin');
-            gameState = null;
-            isAdmin = false;
-            localStorage.removeItem('uslBingoPlayerId');
-            alert('You have been removed from the game. Please log in again.');
-            window.location.reload();
+          // Check if this was an admin kick (game data also removed) or just a refresh
+          get(ref(database, 'games/' + playerId)).then((gameSnapshot) => {
+            if (!gameSnapshot.exists()) {
+              // Both player and game data removed = admin kicked this player
+              console.log('❌ Kicked by admin (game data also removed)');
+              gameState = null;
+              isAdmin = false;
+              localStorage.removeItem('uslBingoPlayerId');
+              alert('You have been removed from the game by the admin.');
+              window.location.reload();
+            } else {
+              // Game data exists but player data missing = likely a refresh race condition
+              // Set timeout to recheck in case it's a legitimate kick that happened slowly
+              removalCheckTimeout = setTimeout(async () => {
+                const recheckPlayer = await get(ref(database, 'players/' + playerId));
+                const recheckGame = await get(ref(database, 'games/' + playerId));
+                
+                if (!recheckPlayer.exists() && !recheckGame.exists()) {
+                  console.log('❌ Delayed kick detected');
+                  gameState = null;
+                  isAdmin = false;
+                  localStorage.removeItem('uslBingoPlayerId');
+                  alert('You have been removed from the game by the admin.');
+                  window.location.reload();
+                } else if (!recheckPlayer.exists() && recheckGame.exists()) {
+                  // Player data missing but game exists - restore player data
+                  console.log('⚠️ Restoring missing player data after refresh');
+                  const expirationDate = new Date();
+                  expirationDate.setDate(expirationDate.getDate() + 7);
+                  await set(ref(database, 'players/' + playerId), {
+                    id: playerId,
+                    name: gameState.playerName,
+                    expiresAt: expirationDate.toISOString(),
+                    lastActive: new Date().toISOString(),
+                    isSpectator: isSpectator || undefined,
+                    isHiddenSpectator: isHiddenSpectator || undefined
+                  });
+                }
+              }, 1500);
+            }
+          });
+        } else {
+          // Player exists - clear any pending removal check
+          if (removalCheckTimeout) {
+            clearTimeout(removalCheckTimeout);
+            removalCheckTimeout = null;
           }
         }
       });
