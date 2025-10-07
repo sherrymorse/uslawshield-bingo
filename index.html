@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>US LawShield BINGO</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Anton&family=Oswald:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <script>
+    // EMERGENCY RESET - Runs before anything else
+    if (window.location.hash === '#reset') {
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = window.location.pathname;
+    }
+  </script>
   <style>
     * {
       margin: 0;
