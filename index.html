@@ -590,6 +590,7 @@
   <div class="player-info" id="playerInfo" style="display: none;"></div>
 
   <div class="controls">
+    <button class="btn-primary" onclick="checkAllCardsForBingo()">Check All Cards for Bingo</button>
     <button class="btn-secondary" onclick="window.print()">Print Cards (PDF)</button>
   </div>
 
@@ -912,17 +913,21 @@
         return;
       }
       
-      gameState.cards[currentCardIndex].marked[currentCell] = true;
-      gameState.cards[currentCardIndex].memberIds[currentCell] = memberId;
+      const cardIdx = currentCardIndex;
+      const cellIdx = currentCell;
+      
+      gameState.cards[cardIdx].marked[cellIdx] = true;
+      gameState.cards[cardIdx].memberIds[cellIdx] = memberId;
+      
+      console.log('Marked cell', cellIdx, 'on card', cardIdx, 'with member ID', memberId);
+      console.log('Current marked state:', gameState.cards[cardIdx].marked);
       
       saveGameState();
       closeModal();
       renderCards();
       
-      setTimeout(() => {
-        console.log('Checking for bingo on card', currentCardIndex);
-        checkForBingo(currentCardIndex);
-      }, 300);
+      // Check for bingo immediately after rendering
+      checkForBingo(cardIdx);
     }
 
     function closeModal() {
