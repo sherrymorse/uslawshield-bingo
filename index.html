@@ -1280,13 +1280,17 @@
       };
       
       // CRITICAL FIX: Write both simultaneously to prevent race condition
-      await Promise.all([
-        set(ref(database, 'games/' + playerId), gameState),
-        set(ref(database, 'players/' + playerId), playerData)
-      ]);
-      
-      if (!silent) {
-        console.log('💾 Game state saved for:', gameState.playerName);
+      try {
+        await Promise.all([
+          set(ref(database, 'games/' + playerId), gameState),
+          set(ref(database, 'players/' + playerId), playerData)
+        ]);
+        
+        if (!silent) {
+          console.log('💾 Game state saved for:', gameState.playerName);
+        }
+      } catch (error) {
+        console.error('❌ Error saving game state:', error);
       }
     }
     
@@ -1343,27 +1347,28 @@
       
       console.log('🎮 Initializing game for:', playerName);
       
+      // Save game state FIRST and wait for it
       if (!isHiddenSpectator) {
         await saveGameState();
+        console.log('✅ Initial game state saved to Firebase');
       }
       
       showPlayerInfo();
       renderCards();
       document.getElementById('activePlayers').style.display = 'block';
       
-      // FIXED: Always initialize player list immediately
+      // Initialize player list listeners
       console.log('🎮 Initializing player list from initializeGame');
       updatePlayerListPanel();
       
-      // CRITICAL: Force an immediate render after save completes
-      setTimeout(() => {
+      // Wait a moment for Firebase to propagate, then force render
+      setTimeout(async () => {
         console.log('🔄 Forcing player list refresh after new login');
-        get(ref(database, 'players')).then(playersSnapshot => {
-          get(ref(database, 'games')).then(gamesSnapshot => {
-            renderPlayerList(playersSnapshot, gamesSnapshot);
-          });
-        });
-      }, 500);
+        const playersSnapshot = await get(ref(database, 'players'));
+        const gamesSnapshot = await get(ref(database, 'games'));
+        console.log('📊 Players in Firebase:', playersSnapshot.val());
+        renderPlayerList(playersSnapshot, gamesSnapshot);
+      }, 1000);
       
       if (isAdmin || isHiddenSpectator) {
         document.getElementById('gameTypeSelect').style.display = 'inline-block';
@@ -1891,9 +1896,24 @@
       }
       
       // CRITICAL FIX: Only check for removal if game data is also gone
+      // AND give time for session restore to complete
       const playersRef = ref(database, 'players');
+      let sessionRestoreGracePeriod = true;
+      
+      // Grace period for initial page load - don't check removals for first 3 seconds
+      setTimeout(() => {
+        sessionRestoreGracePeriod = false;
+        console.log('✅ Grace period ended, now monitoring for kicks');
+      }, 3000);
+      
       onValue(playersRef, async (snapshot) => {
         if (!gameState || !playerId) return;
+        
+        // Skip removal checks during grace period
+        if (sessionRestoreGracePeriod) {
+          console.log('⏳ Still in grace period, skipping removal check');
+          return;
+        }
         
         const players = snapshot.val();
         const playerExists = players && players[playerId];
@@ -1920,31 +1940,23 @@
             alert('You have been removed from the game by the admin.');
             window.location.reload();
           } else {
-            console.log('✅ Game data exists, this is a refresh race condition - ignoring');
-            // Game exists but player missing = refresh race condition, ignore it
-            // The player data will be restored on next save or we can restore it now
+            console.log('✅ Game data exists, player data missing - restoring');
+            // Game exists but player missing = restore immediately
             if (removalCheckTimeout) {
               clearTimeout(removalCheckTimeout);
             }
             
-            removalCheckTimeout = setTimeout(async () => {
-              // Check one more time after delay
-              const recheckPlayer = await get(ref(database, 'players/' + playerId));
-              if (!recheckPlayer.exists()) {
-                console.log('🔧 Restoring player data after refresh');
-                const expirationDate = new Date();
-                expirationDate.setDate(expirationDate.getDate() + 7);
-                await set(ref(database, 'players/' + playerId), {
-                  id: playerId,
-                  name: gameState.playerName,
-                  expiresAt: expirationDate.toISOString(),
-                  lastActive: new Date().toISOString(),
-                  isSpectator: isSpectator || undefined,
-                  isHiddenSpectator: isHiddenSpectator || undefined
-                });
-              }
-              removalCheckTimeout = null;
-            }, 1000);
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 7);
+            await set(ref(database, 'players/' + playerId), {
+              id: playerId,
+              name: gameState.playerName,
+              expiresAt: expirationDate.toISOString(),
+              lastActive: new Date().toISOString(),
+              isSpectator: isSpectator || undefined,
+              isHiddenSpectator: isHiddenSpectator || undefined
+            });
+            console.log('✅ Player data restored');
           }
         } else {
           // Player exists - clear any pending checks
