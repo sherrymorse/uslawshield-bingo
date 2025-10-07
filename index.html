@@ -1675,19 +1675,19 @@
       // Set up real-time listener for player list updates
       const playersRef = ref(database, 'players');
       onValue(playersRef, (snapshot) => {
-        if (gameState) {
+        // Only check for removal if we have an active game session
+        if (gameState && playerId) {
           updatePlayerListPanel();
-        } else {
-          // If we were logged in but our player data was removed, force re-login
-          if (playerId) {
-            const players = snapshot.val();
-            if (!players || !players[playerId]) {
-              alert('You have been removed from the game. Please log in again.');
-              gameState = null;
-              isAdmin = false;
-              localStorage.removeItem('uslBingoPlayerId');
-              window.location.reload();
-            }
+          
+          // Check if current player was removed by admin
+          const players = snapshot.val();
+          if (!players || !players[playerId]) {
+            // Player was removed - force re-login
+            alert('You have been removed from the game. Please log in again.');
+            gameState = null;
+            isAdmin = false;
+            localStorage.removeItem('uslBingoPlayerId');
+            window.location.reload();
           }
         }
       });
