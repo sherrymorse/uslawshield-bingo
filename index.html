@@ -929,7 +929,7 @@
       let minDistance = Infinity;
       playerGame.cards.forEach(card => {
         if (!card.marked) return;
-        const patterns = getAllBingoPatterns();
+        const patterns = getBingoPatternsForMode(currentGameType);
         patterns.forEach(pattern => {
           const unmarkedCount = pattern.indices.filter(i => !card.marked[i]).length;
           if (unmarkedCount < minDistance) {
@@ -938,6 +938,17 @@
         });
       });
       return minDistance === Infinity ? null : minDistance;
+    }
+    function getBingoPatternsForMode(mode) {
+      const allPatterns = getAllBingoPatterns();
+      const gamePatternsMap = {
+        'Any Line': allPatterns.filter(p => p.type.startsWith('Row') || p.type.startsWith('Column') || p.type.startsWith('Diagonal')),
+        'Four Corners': allPatterns.filter(p => p.type === 'Four Corners'),
+        'X': allPatterns.filter(p => p.type === 'X Pattern'),
+        'T': allPatterns.filter(p => p.type === 'T Pattern'),
+        'Blackout': allPatterns.filter(p => p.type === 'Blackout')
+      };
+      return gamePatternsMap[mode] || allPatterns;
     }
     // Get all possible bingo patterns
     function getAllBingoPatterns() {
@@ -1256,7 +1267,7 @@
       isHiddenSpectator = (playerName === '[nucca]');
       gameState = {
         playerId: playerId,
-        playerName: playerName,
+        playerName: isSpectator ? 'Spectator (Victoria)' : playerName,
         isAdmin: isAdmin,
         cards: [
           { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
@@ -1498,7 +1509,7 @@
         }
       }
       // Check for duplicate names (but allow admin to log back in)
-      if (!isAttemptingAdmin) {
+      if (!isAttemptingAdmin && name.toLowerCase() !== 'spectator' && name !== '[nucca]') {
         const playersRef = ref(database, 'players');
         const playersSnapshot = await get(playersRef);
         if (playersSnapshot.exists()) {
@@ -1722,6 +1733,9 @@
         renderCards();
         document.getElementById('activePlayers').style.display = 'block';
         updatePlayerListPanel();
+        if (isAdmin || isHiddenSpectator) {
+          document.getElementById('gameTypeSelect').style.display = 'inline-block';
+        }
         // Update last active timestamp
         const playerRef = ref(database, 'players/' + playerId);
         const playerSnapshot = await get(playerRef);
