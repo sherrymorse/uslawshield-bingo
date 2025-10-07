@@ -811,6 +811,31 @@
       return id;
     }
 
+    // Check if player session is valid in Firebase
+    async function validatePlayerSession(playerId) {
+      const playerRef = ref(database, 'players/' + playerId);
+      const gameRef = ref(database, 'games/' + playerId);
+      
+      const [playerSnapshot, gameSnapshot] = await Promise.all([
+        get(playerRef),
+        get(gameRef)
+      ]);
+      
+      // Both player and game must exist and be valid
+      if (playerSnapshot.exists() && gameSnapshot.exists()) {
+        const playerData = playerSnapshot.val();
+        const gameData = gameSnapshot.val();
+        
+        // Check if session hasn't expired
+        const expirationDate = new Date(playerData.expiresAt);
+        if (expirationDate > new Date()) {
+          return { valid: true, playerData, gameData };
+        }
+      }
+      
+      return { valid: false };
+    }
+
     // Load player list from Firebase and calculate distances to bingo
     function updatePlayerListPanel() {
       const playersRef = ref(database, 'players');
@@ -991,23 +1016,41 @@
         return;
       }
       
+      console.log('Fetching fresh data for player:', targetPlayerId);
+      
+      // Always fetch fresh data from Firebase
       const gameRef = ref(database, 'games/' + targetPlayerId);
       const playerRef = ref(database, 'players/' + targetPlayerId);
       
-      const [gameSnapshot, playerSnapshot] = await Promise.all([
-        get(gameRef),
-        get(playerRef)
-      ]);
-      
-      if (!gameSnapshot.exists() || !playerSnapshot.exists()) {
-        alert('Player not found');
-        return;
+      try {
+        const [gameSnapshot, playerSnapshot] = await Promise.all([
+          get(gameRef),
+          get(playerRef)
+        ]);
+        
+        if (!gameSnapshot.exists()) {
+          alert('Player game data not found');
+          console.error('Game not found for player:', targetPlayerId);
+          return;
+        }
+        
+        if (!playerSnapshot.exists()) {
+          alert('Player not found');
+          console.error('Player not found:', targetPlayerId);
+          return;
+        }
+        
+        const targetGame = gameSnapshot.val();
+        const targetPlayer = playerSnapshot.val();
+        
+        console.log('Loaded game data:', targetGame);
+        console.log('Loaded player data:', targetPlayer);
+        
+        showAdminEditModal(targetPlayerId, targetPlayer.name, targetGame);
+      } catch (error) {
+        console.error('Error loading player data:', error);
+        alert('Error loading player data. Please try again.');
       }
-      
-      const targetGame = gameSnapshot.val();
-      const targetPlayer = playerSnapshot.val();
-      
-      showAdminEditModal(targetPlayerId, targetPlayer.name, targetGame);
     }
     
     function showAdminEditModal(targetPlayerId, playerName, targetGame) {
@@ -1191,36 +1234,26 @@
     // Load game state from Firebase
     async function loadGameState() {
       playerId = getOrCreatePlayerId();
-      const gameRef = ref(database, 'games/' + playerId);
-      const snapshot = await get(gameRef);
       
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const expirationDate = new Date(data.expiresAt);
-        
-        if (expirationDate > new Date()) {
-          // Verify player still exists in players list
-          const playerRef = ref(database, 'players/' + playerId);
-          const playerSnapshot = await get(playerRef);
-          
-          if (playerSnapshot.exists()) {
-            return data;
-          } else {
-            // Game data exists but player was removed - clean up
-            await remove(gameRef);
-            localStorage.removeItem('uslBingoPlayerId');
-            return null;
-          }
-        } else {
-          await remove(gameRef);
-          await remove(ref(database, 'players/' + playerId));
-          localStorage.removeItem('uslBingoPlayerId');
-        }
+      // First, validate if this player session exists in Firebase
+      const validation = await validatePlayerSession(playerId);
+      
+      if (validation.valid) {
+        // Session is valid, return the game data
+        console.log('Valid session found for player:', playerId);
+        return validation.gameData;
       } else {
-        // No game found - check if we should clear localStorage
+        // Session is invalid or expired
+        console.log('No valid session found for player:', playerId);
+        
+        // Clean up localStorage since session is invalid
         localStorage.removeItem('uslBingoPlayerId');
+        
+        // Generate a new player ID for fresh login
+        playerId = getOrCreatePlayerId();
+        
+        return null;
       }
-      return null;
     }
 
     function generateCard() {
@@ -1677,17 +1710,30 @@
 
     // Initialize app
     window.onload = async function() {
-      playerId = getOrCreatePlayerId();
+      console.log('Page loading...');
       
       const saved = await loadGameState();
-      if (saved) {
+      
+      if (saved && saved.playerName) {
+        // Valid session found - restore game
+        console.log('Restoring session for:', saved.playerName);
         gameState = saved;
         isAdmin = (gameState.playerName === ADMIN_NAME);
         showPlayerInfo();
         renderCards();
         updatePlayerListPanel();
+        
+        // Update last active timestamp
+        const playerRef = ref(database, 'players/' + playerId);
+        const playerSnapshot = await get(playerRef);
+        if (playerSnapshot.exists()) {
+          const playerData = playerSnapshot.val();
+          playerData.lastActive = new Date().toISOString();
+          await set(playerRef, playerData);
+        }
       } else {
-        // Clear any stale data and show login
+        // No valid session - show login
+        console.log('No valid session, showing login screen');
         gameState = null;
         isAdmin = false;
         document.getElementById('nameModal').style.display = 'block';
@@ -1697,14 +1743,19 @@
       // Set up real-time listener for player list updates
       const playersRef = ref(database, 'players');
       onValue(playersRef, (snapshot) => {
+        console.log('Player list changed, updating...');
+        // Update for everyone who is logged in
+        if (gameState) {
+          updatePlayerListPanel();
+        }
+        
         // Only check for removal if we have an active game session
         if (gameState && playerId) {
-          updatePlayerListPanel();
-          
           // Check if current player was removed by admin
           const players = snapshot.val();
           if (!players || !players[playerId]) {
             // Player was removed - force re-login
+            console.log('Player removed by admin');
             gameState = null;
             isAdmin = false;
             localStorage.removeItem('uslBingoPlayerId');
@@ -1714,9 +1765,10 @@
         }
       });
       
-      // Also listen to games for bingo distance updates
+      // Also listen to games for bingo distance updates and card changes
       const gamesRef = ref(database, 'games');
       onValue(gamesRef, () => {
+        console.log('Games data changed, updating player list...');
         if (gameState) {
           updatePlayerListPanel();
         }
