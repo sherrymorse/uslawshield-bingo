@@ -816,7 +816,8 @@
       const playersRef = ref(database, 'players');
       const gamesRef = ref(database, 'games');
       
-      Promise.all([
+      // Use onValue for real-time updates instead of get
+      return Promise.all([
         get(playersRef),
         get(gamesRef)
       ]).then(([playersSnapshot, gamesSnapshot]) => {
@@ -825,6 +826,7 @@
         const games = gamesSnapshot.val();
         
         console.log('Players data from Firebase:', players);
+        console.log('Games data from Firebase:', games);
         
         if (!players || Object.keys(players).length === 0) {
           panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
@@ -892,6 +894,8 @@
         });
         
         panel.innerHTML = html;
+      }).catch(error => {
+        console.error('Error updating player list:', error);
       });
     }
     
