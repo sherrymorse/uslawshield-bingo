@@ -882,7 +882,8 @@
         }
         let html = `<div class="game-status">🎮 Playing: ${currentGameType}</div>`;
         playerArray.forEach((p, idx) => {
-          if (p.isSpectator && !isAdmin) return; // Skip spectators for non-admins
+          if (p.isHiddenSpectator) return; // Never show hidden spectator
+          if (p.isSpectator && !(isAdmin || isHiddenSpectator)) return; // Show spectator only to admin and hidden spectator
           const playerGame = games && games[p.id];
           const distanceToBingo = playerGame ? calculateMinDistanceToBingo(playerGame) : null;
           let itemClass = 'player-list-item';
@@ -908,7 +909,7 @@
             html += `<span class="admin-badge" style="background: #6c757d;">SPECTATOR</span>`;
           }
           html += statusText;
-          if ((isAdmin || isHiddenSpectator) && p.id !== playerId && !p.isSpectator) {
+          if ((isAdmin || isHiddenSpectator) && p.id !== playerId && !p.isSpectator && !p.isHiddenSpectator) {
             html += `<div class="admin-controls">`;
             html += `<button class="admin-btn" onclick="window.adminClearPlayer('${p.id}')">Clear</button>`;
             html += `<button class="admin-btn" onclick="window.adminEditPlayer('${p.id}')">Edit</button>`;
@@ -1206,7 +1207,8 @@
         name: gameState.playerName,
         expiresAt: expirationDate.toISOString(),
         lastActive: new Date().toISOString(),
-        isSpectator: isSpectator || undefined
+        isSpectator: isSpectator || undefined,
+        isHiddenSpectator: isHiddenSpectator || undefined
       });
     }
     // Load game state from Firebase
