@@ -844,14 +844,10 @@
       return { valid: false };
     }
     
-    // FIXED: Debounced player list update with real-time data
+    // FIXED: Debounced player list update
     function schedulePlayerListUpdate() {
-      if (playerListUpdateTimeout) {
-        clearTimeout(playerListUpdateTimeout);
-      }
-      playerListUpdateTimeout = setTimeout(() => {
-        updatePlayerListPanel();
-      }, 300);
+      // Player list updates are now handled by real-time listeners
+      // This function is kept for backward compatibility but does nothing
     }
     
     // FIXED: Single persistent real-time listener for player list
@@ -862,24 +858,25 @@
       if (playerListInitialized) return;
       playerListInitialized = true;
       
+      console.log('🎯 Initializing player list listeners');
+      
       const playersRef = ref(database, 'players');
       const gamesRef = ref(database, 'games');
       
       // Set up persistent listener for players
-      onValue(playersRef, (playersSnapshot) => {
+      onValue(playersRef, async (playersSnapshot) => {
+        console.log('📡 Players data changed');
         // Get games data and render
-        get(gamesRef).then((gamesSnapshot) => {
-          renderPlayerList(playersSnapshot, gamesSnapshot);
-        });
+        const gamesSnapshot = await get(gamesRef);
+        renderPlayerList(playersSnapshot, gamesSnapshot);
       });
       
       // Also listen to games for bingo distance updates
-      onValue(gamesRef, () => {
-        get(playersRef).then((playersSnapshot) => {
-          get(gamesRef).then((gamesSnapshot) => {
-            renderPlayerList(playersSnapshot, gamesSnapshot);
-          });
-        });
+      onValue(gamesRef, async () => {
+        console.log('📡 Games data changed');
+        const playersSnapshot = await get(playersRef);
+        const gamesSnapshot = await get(gamesRef);
+        renderPlayerList(playersSnapshot, gamesSnapshot);
       });
     }
     
@@ -1885,32 +1882,67 @@
         document.getElementById('nameInput').focus();
       }
       
-      // FIXED: Removal check with delay to avoid false positives during refresh
+      // CRITICAL FIX: Smart removal detection that distinguishes kicks from refreshes
       const playersRef = ref(database, 'players');
       onValue(playersRef, (snapshot) => {
         if (!gameState || !playerId) return;
         
         const players = snapshot.val();
+        const playerExists = players && players[playerId];
         
-        // CRITICAL FIX: Add delay to avoid race condition when player refreshes
-        // When a player refreshes, their data is briefly absent before being re-written
-        if (!players || !players[playerId]) {
-          // Wait 2 seconds to confirm this isn't just a refresh
-          setTimeout(async () => {
-            // Double-check if player still doesn't exist
-            const recheck = await get(ref(database, 'players/' + playerId));
-            
-            if (!recheck.exists()) {
-              console.log('❌ Player removed by admin (confirmed after recheck)');
+        if (!playerExists) {
+          // Clear any pending timeout
+          if (removalCheckTimeout) {
+            clearTimeout(removalCheckTimeout);
+          }
+          
+          // Check if this was an admin kick (game data also removed) or just a refresh
+          get(ref(database, 'games/' + playerId)).then((gameSnapshot) => {
+            if (!gameSnapshot.exists()) {
+              // Both player and game data removed = admin kicked this player
+              console.log('❌ Kicked by admin (game data also removed)');
               gameState = null;
               isAdmin = false;
               localStorage.removeItem('uslBingoPlayerId');
-              alert('You have been removed from the game. Please log in again.');
+              alert('You have been removed from the game by the admin.');
               window.location.reload();
             } else {
-              console.log('✅ False alarm - player data exists after recheck');
+              // Game data exists but player data missing = likely a refresh race condition
+              // Set timeout to recheck in case it's a legitimate kick that happened slowly
+              removalCheckTimeout = setTimeout(async () => {
+                const recheckPlayer = await get(ref(database, 'players/' + playerId));
+                const recheckGame = await get(ref(database, 'games/' + playerId));
+                
+                if (!recheckPlayer.exists() && !recheckGame.exists()) {
+                  console.log('❌ Delayed kick detected');
+                  gameState = null;
+                  isAdmin = false;
+                  localStorage.removeItem('uslBingoPlayerId');
+                  alert('You have been removed from the game by the admin.');
+                  window.location.reload();
+                } else if (!recheckPlayer.exists() && recheckGame.exists()) {
+                  // Player data missing but game exists - restore player data
+                  console.log('⚠️ Restoring missing player data after refresh');
+                  const expirationDate = new Date();
+                  expirationDate.setDate(expirationDate.getDate() + 7);
+                  await set(ref(database, 'players/' + playerId), {
+                    id: playerId,
+                    name: gameState.playerName,
+                    expiresAt: expirationDate.toISOString(),
+                    lastActive: new Date().toISOString(),
+                    isSpectator: isSpectator || undefined,
+                    isHiddenSpectator: isHiddenSpectator || undefined
+                  });
+                }
+              }, 1500);
             }
-          }, 2000);
+          });
+        } else {
+          // Player exists - clear any pending removal check
+          if (removalCheckTimeout) {
+            clearTimeout(removalCheckTimeout);
+            removalCheckTimeout = null;
+          }
         }
       });
       
