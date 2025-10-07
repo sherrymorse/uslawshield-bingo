@@ -840,63 +840,72 @@
       return { valid: false };
     }
     // Load player list from Firebase and calculate distances to bingo
-    function updatePlayerListPanel(playersSnapshot, gamesSnapshot) {
-      const panel = document.getElementById('playerListPanel');
-      const players = playersSnapshot ? playersSnapshot.val() : {};
-      const games = gamesSnapshot ? gamesSnapshot.val() : {};
-      console.log('Players data from Firebase:', players);
-      console.log('Games data from Firebase:', games);
-      if (!players || Object.keys(players).length === 0) {
-        panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
-        return;
-      }
-      const now = new Date();
-      const playerArray = Object.values(players).filter(p => {
-        if (!p.expiresAt) return false;
-        const expirationDate = new Date(p.expiresAt);
-        return expirationDate > now;
-      }).sort((a, b) => {
-        return new Date(b.lastActive) - new Date(a.lastActive);
-      });
-      console.log('Active players:', playerArray);
-      if (playerArray.length === 0) {
-        panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
-        return;
-      }
-      let html = `<div class="game-status">🎮 Playing: ${currentGameType}</div>`;
-      playerArray.forEach((p, idx) => {
-        const playerGame = games && games[p.id];
-        const distanceToBingo = playerGame ? calculateMinDistanceToBingo(playerGame) : null;
-        let itemClass = 'player-list-item';
-        let statusText = '';
-        const playerIsAdmin = p.name === ADMIN_NAME;
-        if (playerIsAdmin) {
-          itemClass += ' admin';
-        } else if (distanceToBingo !== null) {
-          if (distanceToBingo === 1) {
-            itemClass += ' one-away';
-            statusText = '<div class="player-status">🔥 1 away from BINGO!</div>';
-          } else if (distanceToBingo === 2) {
-            itemClass += ' two-away';
-            statusText = '<div class="player-status">⚡ 2 away from BINGO</div>';
+    function updatePlayerListPanel() {
+      const playersRef = ref(database, 'players');
+      const gamesRef = ref(database, 'games');
+      return Promise.all([
+        get(playersRef),
+        get(gamesRef)
+      ]).then(([playersSnapshot, gamesSnapshot]) => {
+        const panel = document.getElementById('playerListPanel');
+        const players = playersSnapshot.val();
+        const games = gamesSnapshot.val();
+        console.log('Players data from Firebase:', players);
+        console.log('Games data from Firebase:', games);
+        if (!players || Object.keys(players).length === 0) {
+          panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
+          return;
+        }
+        const now = new Date();
+        const playerArray = Object.values(players).filter(p => {
+          if (!p.expiresAt) return false;
+          const expirationDate = new Date(p.expiresAt);
+          return expirationDate > now;
+        }).sort((a, b) => {
+          return new Date(b.lastActive) - new Date(a.lastActive);
+        });
+        console.log('Active players:', playerArray);
+        if (playerArray.length === 0) {
+          panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
+          return;
+        }
+        let html = `<div class="game-status">🎮 Playing: ${currentGameType}</div>`;
+        playerArray.forEach((p, idx) => {
+          const playerGame = games && games[p.id];
+          const distanceToBingo = playerGame ? calculateMinDistanceToBingo(playerGame) : null;
+          let itemClass = 'player-list-item';
+          let statusText = '';
+          const playerIsAdmin = p.name === ADMIN_NAME;
+          if (playerIsAdmin) {
+            itemClass += ' admin';
+          } else if (distanceToBingo !== null) {
+            if (distanceToBingo === 1) {
+              itemClass += ' one-away';
+              statusText = '<div class="player-status">🔥 1 away from BINGO!</div>';
+            } else if (distanceToBingo === 2) {
+              itemClass += ' two-away';
+              statusText = '<div class="player-status">⚡ 2 away from BINGO</div>';
+            }
           }
-        }
-        html += `<div class="${itemClass}">`;
-        html += `${idx + 1}. ${p.name}`;
-        if (playerIsAdmin) {
-          html += `<span class="admin-badge">ADMIN</span>`;
-        }
-        html += statusText;
-        if (isAdmin && p.id !== playerId) {
-          html += `<div class="admin-controls">`;
-          html += `<button class="admin-btn" onclick="window.adminClearPlayer('${p.id}')">Clear</button>`;
-          html += `<button class="admin-btn" onclick="window.adminEditPlayer('${p.id}')">Edit</button>`;
-          html += `<button class="admin-btn" onclick="window.adminKickPlayer('${p.id}')">Kick</button>`;
+          html += `<div class="${itemClass}">`;
+          html += `${idx + 1}. ${p.name}`;
+          if (playerIsAdmin) {
+            html += `<span class="admin-badge">ADMIN</span>`;
+          }
+          html += statusText;
+          if (isAdmin && p.id !== playerId) {
+            html += `<div class="admin-controls">`;
+            html += `<button class="admin-btn" onclick="window.adminClearPlayer('${p.id}')">Clear</button>`;
+            html += `<button class="admin-btn" onclick="window.adminEditPlayer('${p.id}')">Edit</button>`;
+            html += `<button class="admin-btn" onclick="window.adminKickPlayer('${p.id}')">Kick</button>`;
+            html += `</div>`;
+          }
           html += `</div>`;
-        }
-        html += `</div>`;
+        });
+        panel.innerHTML = html;
+      }).catch(error => {
+        console.error('Error updating player list:', error);
       });
-      panel.innerHTML = html;
     }
     // Calculate minimum distance to any bingo pattern
     function calculateMinDistanceToBingo(playerGame) {
@@ -994,10 +1003,19 @@
         if (!gameSnapshot.exists() || !playerSnapshot.exists()) {
           throw new Error('Data not found');
         }
-        const targetGame = gameSnapshot.val();
+        let targetGame = gameSnapshot.val();
         const targetPlayer = playerSnapshot.val();
         console.log('Loaded game data:', targetGame);
         console.log('Loaded player data:', targetPlayer);
+        // Convert to arrays if necessary
+        if (targetGame.cards && !Array.isArray(targetGame.cards)) {
+          targetGame.cards = Object.values(targetGame.cards);
+        }
+        targetGame.cards.forEach(card => {
+          if (!Array.isArray(card.items)) card.items = Object.values(card.items || {});
+          if (!Array.isArray(card.marked)) card.marked = Object.values(card.marked || {});
+          if (!Array.isArray(card.memberIds)) card.memberIds = Object.values(card.memberIds || {});
+        });
         if (!targetGame || !targetGame.cards || targetGame.cards.length !== 3) {
           throw new Error('Invalid card data');
         }
@@ -1652,6 +1670,15 @@
         console.log('Restoring session for:', saved.playerName);
         console.log('Loaded game state:', saved);
         gameState = saved;
+        // Convert to arrays if necessary
+        if (gameState.cards && !Array.isArray(gameState.cards)) {
+          gameState.cards = Object.values(gameState.cards);
+        }
+        gameState.cards.forEach(card => {
+          if (!Array.isArray(card.items)) card.items = Object.values(card.items || {});
+          if (!Array.isArray(card.marked)) card.marked = Object.values(card.marked || {});
+          if (!Array.isArray(card.memberIds)) card.memberIds = Object.values(card.memberIds || {});
+        });
         isAdmin = (gameState.playerName === ADMIN_NAME);
         // Verify cards exist
         if (!gameState.cards || gameState.cards.length !== 3) {
@@ -1690,9 +1717,7 @@
         console.log('Player list changed, updating...');
         // Update for everyone who is logged in
         if (gameState) {
-          get(ref(database, 'games')).then(gamesSnapshot => {
-            updatePlayerListPanel(snapshot, gamesSnapshot);
-          });
+          updatePlayerListPanel();
         }
         // Only check for removal if we have an active game session
         if (gameState && playerId) {
@@ -1710,12 +1735,10 @@
       });
       // Also listen to games for bingo distance updates and card changes
       const gamesRef = ref(database, 'games');
-      onValue(gamesRef, (snapshot) => {
+      onValue(gamesRef, () => {
         console.log('Games data changed, updating player list...');
         if (gameState) {
-          get(ref(database, 'players')).then(playersSnapshot => {
-            updatePlayerListPanel(playersSnapshot, snapshot);
-          });
+          updatePlayerListPanel();
         }
       });
     };
