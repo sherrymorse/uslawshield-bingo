@@ -1488,7 +1488,9 @@
       }
       
       // Check if trying to be admin
-      if (name === ADMIN_NAME) {
+      const isAttemptingAdmin = (name === ADMIN_NAME);
+      
+      if (isAttemptingAdmin) {
         const passwordInput = document.getElementById('adminPassword');
         const password = passwordInput.value;
         
@@ -1500,24 +1502,49 @@
         }
       }
       
-      // Check for duplicate names
-      const playersRef = ref(database, 'players');
-      const playersSnapshot = await get(playersRef);
-      
-      if (playersSnapshot.exists()) {
-        const players = playersSnapshot.val();
-        const existingPlayer = Object.values(players).find(p => {
-          const expirationDate = new Date(p.expiresAt);
-          return p.name.toLowerCase() === name.toLowerCase() && 
-                 expirationDate > new Date() &&
-                 p.id !== playerId;
-        });
+      // Check for duplicate names (but allow admin to log back in)
+      if (!isAttemptingAdmin) {
+        const playersRef = ref(database, 'players');
+        const playersSnapshot = await get(playersRef);
         
-        if (existingPlayer) {
-          document.getElementById('nameError').style.display = 'block';
-          document.getElementById('nameError').textContent = 'This name is already in use. Please choose a different name.';
-          input.focus();
-          return;
+        if (playersSnapshot.exists()) {
+          const players = playersSnapshot.val();
+          const existingPlayer = Object.values(players).find(p => {
+            const expirationDate = new Date(p.expiresAt);
+            return p.name.toLowerCase() === name.toLowerCase() && 
+                   expirationDate > new Date() &&
+                   p.id !== playerId;
+          });
+          
+          if (existingPlayer) {
+            document.getElementById('nameError').style.display = 'block';
+            document.getElementById('nameError').textContent = 'This name is already in use. Please choose a different name.';
+            input.focus();
+            return;
+          }
+        }
+      }
+      
+      // If admin is attempting to log in, check if they already have an active session
+      if (isAttemptingAdmin) {
+        const playersRef = ref(database, 'players');
+        const playersSnapshot = await get(playersRef);
+        
+        if (playersSnapshot.exists()) {
+          const players = playersSnapshot.val();
+          const existingAdmin = Object.values(players).find(p => {
+            const expirationDate = new Date(p.expiresAt);
+            return p.name === ADMIN_NAME && 
+                   expirationDate > new Date() &&
+                   p.id !== playerId;
+          });
+          
+          if (existingAdmin) {
+            // Admin is already logged in from another session
+            // Allow them to take over by clearing the old session
+            await remove(ref(database, 'players/' + existingAdmin.id));
+            await remove(ref(database, 'games/' + existingAdmin.id));
+          }
         }
       }
       
