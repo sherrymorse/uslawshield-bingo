@@ -5,110 +5,46 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>US LawShield BINGO</title>
 
-<!-- ======= THEME (restored to original look/feel) ======= -->
+<!-- ======= THEME (matches your original look) ======= -->
 <style>
   :root{
-    --nav:#0f2350;           /* deep navy */
-    --nav2:#112a67;          /* lighter navy panel */
-    --ink:#ffffff;
-    --ink-2:#e7ecf8;
-    --muted:#b7c2de;
-    --card:#ffffff;
-    --grid:#0b2a6b;          /* grid border */
-    --shield:#c01c28;
-    --shield-bg:rgba(192,28,40,.08);
-    --badge-bg:#fff;
-    --badge-ink:#b31724;
-    --accent:#0f2350;
+    --nav:#0f2350; --nav2:#112a67; --ink:#ffffff; --ink-2:#e7ecf8; --muted:#b7c2de;
+    --card:#ffffff; --grid:#0b2a6b; --shield:#c01c28; --shield-bg:rgba(192,28,40,.08);
+    --badge-bg:#fff; --badge-ink:#b31724;
   }
-
   html,body{margin:0;padding:0;background:#0e1d44;color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
   a{color:#cfe2ff}
-
-  /* header band */
-  .hero{
-    background:linear-gradient(180deg,var(--nav) 0%, var(--nav2) 100%);
-    color:var(--ink);
-    padding:38px 16px 24px;
-    text-align:center;
-    position:relative;
-  }
-  .brand{font-size:56px;font-weight:900;letter-spacing:.06em;text-shadow:0 4px 26px rgba(0,0,0,.35); margin:0}
-  .subtitle{
-    display:inline-block;
-    margin:14px auto 10px;
-    padding:10px 18px;
-    border-radius:10px;
-    background:#1d3270;
-    border:1px solid #2d4392;
-    font-weight:800;
-    letter-spacing:.08em;
-  }
+  .hero{background:linear-gradient(180deg,var(--nav) 0%, var(--nav2) 100%);color:var(--ink);padding:38px 16px 24px;text-align:center}
+  .brand{font-size:56px;font-weight:900;letter-spacing:.06em;text-shadow:0 4px 26px rgba(0,0,0,.35);margin:0}
+  .subtitle{display:inline-block;margin:14px auto 10px;padding:10px 18px;border-radius:10px;background:#1d3270;border:1px solid #2d4392;font-weight:800;letter-spacing:.08em}
   .tagline{opacity:.86;font-size:13px;letter-spacing:.06em;margin:8px 0 26px}
-
-  .hero-controls{
-    display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:6px;
-  }
-  .btn{
-    background:#e7ecf8;color:#0b1d48;
-    border:2px solid #c9d6ff;border-radius:12px;padding:10px 16px;font-weight:700;cursor:pointer;
-  }
-  .btn:focus,.btn:hover{filter:brightness(1.03)}
+  .hero-controls{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+  .btn{background:#e7ecf8;color:#0b1d48;border:2px solid #c9d6ff;border-radius:12px;padding:10px 16px;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.03)}
   .btn-danger{background:#ffdde1;border-color:#ffb7bf;color:#7f0c19}
   .btn-ghost{background:#e7ecf81a;color:#e7ecf8;border-color:#2d4392}
-
-  /* welcome bar */
-  .welcome{
-    max-width:1150px;margin:14px auto 0;background:#1a2e74;border:1px solid #2d4392;
-    color:#e7ecf8;border-radius:10px;padding:10px 12px;text-align:center;font-weight:700
-  }
-
-  /* layout */
+  .welcome{max-width:1150px;margin:14px auto 0;background:#1a2e74;border:1px solid #2d4392;color:#e7ecf8;border-radius:10px;padding:10px 12px;text-align:center;font-weight:700}
   .wrap{max-width:1250px;margin:22px auto 120px;padding:0 16px}
   .grid{display:grid;grid-template-columns:repeat(3,minmax(320px,1fr));gap:26px}
-
-  /* card */
-  .card{
-    background:var(--card); color:#0a1a3f;
-    border-radius:18px; box-shadow:0 8px 30px rgba(0,0,0,.25);
-    padding:0 0 18px; overflow:hidden;
-  }
-  .card-head{
-    padding:18px 18px 0; text-align:center;
-  }
-  .bingo-title{
-    font-weight:900; font-size:52px; color:#ea2e52; letter-spacing:.18em; margin:0 0 8px;
-  }
-  .card-sub{margin:0 0 12px; font-weight:800; letter-spacing:.08em}
+  .card{background:var(--card);color:#0a1a3f;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.25);padding:0 0 18px;overflow:hidden}
+  .card-head{padding:18px 18px 0;text-align:center}
+  .bingo-title{font-weight:900;font-size:52px;color:#ea2e52;letter-spacing:.18em;margin:0 0 8px}
+  .card-sub{margin:0 0 12px;font-weight:800;letter-spacing:.08em}
   .badge{display:inline-block;background:#e9d39c;color:#1a1a1a;border-radius:999px;padding:6px 12px;font-weight:800;border:2px solid #9a7f2a}
-
-  /* board */
   .board-wrap{padding:14px}
-  .board{
-    width:100%;border-collapse:collapse;table-layout:fixed;border:4px solid var(--grid);background:#fdfdfd
-  }
+  .board{width:100%;border-collapse:collapse;table-layout:fixed;border:4px solid var(--grid);background:#fdfdfd}
   .board th,.board td{border:2px solid var(--grid);height:74px;text-align:center;vertical-align:middle;position:relative}
-  .board th{
-    background:#102a6c;color:#e9efff;font-weight:900;font-size:24px;letter-spacing:.22em
-  }
+  .board th{background:#102a6c;color:#e9efff;font-weight:900;font-size:24px;letter-spacing:.22em}
   .cell-text{font-size:12.5px;line-height:1.25;padding:8px 6px;color:#102a6c}
   .free{background:#eef3ff;border:2px dashed #8aa6ff !important;color:#18347e;font-weight:900}
-
-  /* shield mark */
   .mark-shield{position:absolute;inset:6px;background:var(--shield-bg);border:2px solid var(--shield);border-radius:10px;pointer-events:none}
-  .mark-id{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--badge-bg);color:var(--badge-ink);
-           border:2px solid var(--shield);border-radius:8px;padding:3px 6px;font-weight:800;font-size:12px;pointer-events:none;max-width:95%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-  /* players panel */
-  .players{position:fixed;right:16px;bottom:16px;background:#0e1d44;border:1px solid #2d4392;border-radius:14px;padding:10px 12px;
-           color:#e7ecf8;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+  .mark-id{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--badge-bg);color:var(--badge-ink);border:2px solid var(--shield);border-radius:8px;padding:3px 6px;font-weight:800;font-size:12px;pointer-events:none;max-width:95%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .players{position:fixed;right:16px;bottom:16px;background:#0e1d44;border:1px solid #2d4392;border-radius:14px;padding:10px 12px;color:#e7ecf8;box-shadow:0 4px 16px rgba(0,0,0,.4)}
   .players h4{margin:0 0 6px;color:#cfe2ff;font-weight:800;letter-spacing:.06em}
   .players ul{list-style:none;padding:0;margin:0;max-height:220px;overflow:auto}
   .players li{display:flex;gap:8px;padding:6px 4px;border-bottom:1px dashed #2b3e8a}
   .players li:last-child{border-bottom:none}
   .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;margin-top:6px}
-
-  /* modals */
   .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:2000}
   .modal{width:min(680px,92vw);background:#0f1621;border:1px solid #243046;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.6);padding:18px;color:#e7ecf8}
   .modal h3{margin:0 0 8px}
@@ -117,10 +53,7 @@
   .row input{flex:1;background:#0b121c;border:1px solid #223049;border-radius:10px;padding:12px 12px;color:#e7ecf8}
   .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
   .btn-dark{background:#1a284b;color:#e7ecf8;border:1px solid #2a3b57;border-radius:10px;padding:10px 14px;cursor:pointer}
-
-  /* error banner */
   .errorbar{position:fixed;left:0;right:0;top:0;background:#3a0d0f;color:#ffdfe3;border-bottom:1px solid #5a1b22;padding:10px 14px;font-size:13px;z-index:4000;display:none}
-
   @media (max-width:1100px){ .grid{grid-template-columns:1fr} .brand{font-size:44px} }
 </style>
 </head>
@@ -129,7 +62,7 @@
 <!-- error banner -->
 <div id="errorbar" class="errorbar"></div>
 
-<!-- ======= HEADER (matches original) ======= -->
+<!-- header -->
 <section class="hero">
   <h1 class="brand">U.S. LAWSHIELD</h1>
   <div class="subtitle">EMPLOYEE ENGAGEMENT BINGO</div>
@@ -144,12 +77,8 @@
 
 <div class="welcome" id="welcomeBar">Welcome!</div>
 
-<!-- ======= CARDS ======= -->
-<div class="wrap">
-  <div class="grid" id="cards"></div>
-</div>
+<div class="wrap"><div class="grid" id="cards"></div></div>
 
-<!-- Active players -->
 <aside class="players">
   <h4>Active Players</h4>
   <ul id="playersList"></ul>
@@ -182,216 +111,201 @@
   </div>
 </div>
 
-<!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
 
-<!-- ======= APP (Firebase + original layout preserved) ======= -->
 <script type="module">
-/* visible error banner */
+/* ---------- error banner ---------- */
 function errBar(msg){ const e=document.getElementById('errorbar'); e.textContent='Error: '+msg; e.style.display='block'; }
 window.addEventListener('error', e=>errBar(e.message||'Script error'));
 window.addEventListener('unhandledrejection', e=>errBar((e.reason&&e.reason.message)||'Unhandled promise rejection'));
 
-/* Firebase */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getDatabase, ref, child, get, set, update, push, onValue, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+/* ---------- constants & helpers ---------- */
+const ALL_ITEMS=["Single PR","Dual PR","Dual Monthly LOC","Single Monthly LOC","Single Annual LOC","Dual Annual LOC","Add Secondary Legacy (Monthly)","Add Secondary Legacy (Annual)","Conversion to Explore","Conversion to Navigate","Save","Winback (monthly)","Winback (annual)"];
+const ACW_ITEM="< 3 ACW Expires"; const FREE_POS={r:2,c:2}; const ID_RE=/^[A-Za-z]{2,3}\d{2,8}$/;
+const q=(s,el=document)=>el.querySelector(s); function esc(s){return (s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function seedRand(seed){let h=0;for(let i=0;i<seed.length;i++)h=(h*31+seed.charCodeAt(i))>>>0;return()=> (h=(1103515245*h+12345)&0x7fffffff)/0x80000000;}
+function shuffleDet(a,r){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+function toast(msg,ms=1700){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';t.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f1621;border:1px solid #2a3b57;border-radius:10px;padding:10px 14px;color:#cfe2ff;z-index:5;display:none';document.body.appendChild(t);}t.textContent=msg;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',ms);}
 
-/* NOTE: if you see auth/configuration-not-found, enable "Anonymous" sign-in in Firebase Console → Build → Authentication → Sign-in method → Anonymous → Enable. */
-const firebaseConfig = {
-  apiKey: "AIzaSyDzNTPcHXIgb7T73yX0ngLyuJkSiyUd3dA",
-  authDomain: "uslawshield-bingo.firebaseapp.com",
-  databaseURL: "https://uslawshield-bingo-default-rtdb.firebaseio.com",
-  projectId: "uslawshield-bingo",
-  storageBucket: "uslawshield-bingo.firebasestorage.app",
-  messagingSenderId: "227127069053",
-  appId: "1:227127069053:web:be6acba57a6561ad9ce414",
-  measurementId: "G-Z2FXPKS7EY"
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
-const auth = getAuth(app);
-
-/* helpers + config */
-const ALL_ITEMS = [
-  "Single PR","Dual PR","Dual Monthly LOC","Single Monthly LOC","Single Annual LOC","Dual Annual LOC",
-  "Add Secondary Legacy (Monthly)","Add Secondary Legacy (Annual)","Conversion to Explore","Conversion to Navigate",
-  "Save","Winback (monthly)","Winback (annual)"
-];
-const ACW_ITEM = "< 3 ACW Expires";
-const FREE_POS = {r:2,c:2};
-const ID_RE = /^[A-Za-z]{2,3}\d{2,8}$/;
-
-const q=(s,el=document)=>el.querySelector(s);
-function esc(s){return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));}
-function seedRand(seed){ let h=0; for(let i=0;i<seed.length;i++) h=(h*31+seed.charCodeAt(i))>>>0; return ()=> (h=(1103515245*h+12345)&0x7fffffff)/0x80000000; }
-function shuffleDet(a,rng){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
-function toast(msg,ms=1700){ let t=document.querySelector('.toast'); if(!t){ t=document.createElement('div'); t.className='toast'; t.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f1621;border:1px solid #2a3b57;border-radius:10px;padding:10px 14px;color:#cfe2ff;z-index:5;display:none'; document.body.appendChild(t);} t.textContent=msg; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',ms); }
-
-/* lines */
-const LINES=(()=>{const L=[];for(let r=0;r<5;r++)L.push([...Array(5)].map((_,c)=>[r,c])); for(let c=0;c<5;c++)L.push([...Array(5)].map((_,r)=>[r,c])); L.push([[0,0],[1,1],[2,2],[3,3],[4,4]]); L.push([[0,4],[1,3],[2,2],[3,1],[4,0]]); return L;})();
-const FOUR_CORNERS=[[0,0],[0,4],[4,0],[4,4]];
-const T_PATTERN=([0,1,2,3,4].map(c=>[0,c])).concat([[1,2],[2,2],[3,2],[4,2]]);
+/* bingo lines */
+const LINES=(()=>{const L=[];for(let r=0;r<5;r++)L.push([...Array(5)].map((_,c)=>[r,c]));for(let c=0;c<5;c++)L.push([...Array(5)].map((_,r)=>[r,c]));L.push([[0,0],[1,1],[2,2],[3,3],[4,4]]);L.push([[0,4],[1,3],[2,2],[3,1],[4,0]]);return L;})();
+const FOUR_CORNERS=[[0,0],[0,4],[4,0],[4,4]]; const T_PATTERN=([0,1,2,3,4].map(c=>[0,c])).concat([[1,2],[2,2],[3,2],[4,2]]);
 const X_PATTERN=[[0,0],[1,1],[2,2],[3,3],[4,4],[0,4],[1,3],[3,1],[4,0]];
-function isMarked(card,r,c){ return (r===FREE_POS.r&&c===FREE_POS.c)||!!card.grid[r][c].marked;}
-function findBingos(card){
-  const out=[]; for(const ln of LINES){ if(ln.every(([r,c])=>isMarked(card,r,c))) out.push({type:"Regular Bingo",cells:ln}); }
-  if(FOUR_CORNERS.every(([r,c])=>isMarked(card,r,c))) out.push({type:"Four Corners",cells:FOUR_CORNERS});
-  if(T_PATTERN.every(([r,c])=>isMarked(card,r,c))) out.push({type:"T Pattern",cells:T_PATTERN});
-  if(X_PATTERN.every(([r,c])=>isMarked(card,r,c))) out.push({type:"X Pattern",cells:X_PATTERN});
-  const all=[]; for(let r=0;r<5;r++) for(let c=0;c<5;c++) all.push([r,c]); if(all.every(([r,c])=>isMarked(card,r,c))) out.push({type:"BLACKOUT",cells:all});
-  return out;
-}
+function isMarked(card,r,c){return (r===FREE_POS.r&&c===FREE_POS.c)||!!card.grid[r][c].marked;}
+function findBingos(card){const out=[];for(const ln of LINES){if(ln.every(([r,c])=>isMarked(card,r,c)))out.push({type:"Regular Bingo",cells:ln});}
+if(FOUR_CORNERS.every(([r,c])=>isMarked(card,r,c)))out.push({type:"Four Corners",cells:FOUR_CORNERS});
+if(T_PATTERN.every(([r,c])=>isMarked(card,r,c)))out.push({type:"T Pattern",cells:T_PATTERN});
+if(X_PATTERN.every(([r,c])=>isMarked(card,r,c)))out.push({type:"X Pattern",cells:X_PATTERN});
+const all=[];for(let r=0;r<5;r++)for(let c=0;c<5;c++)all.push([r,c]);if(all.every(([r,c])=>isMarked(card,r,c)))out.push({type:"BLACKOUT",cells:all});return out;}
 
 /* state */
 let STATE={playerId:null,playerName:null,cards:[],activeCell:null,lastPng:null};
+let USE_LOCAL=false; // auto-enabled if Firebase fails
 
-/* build card data */
-function buildBlankCard(seedStr){
-  const rng=seedRand(seedStr);
-  const pool=shuffleDet(ALL_ITEMS,rng);
-  const labels=pool.slice(0,24);
-  labels[Math.floor(rng()*24)]=ACW_ITEM; // exactly one
-  const grid=[...Array(5)].map((_,r)=>[...Array(5)].map((_,c)=>({r,c,item:null,marked:false,memberId:""})));
-  let k=0;
-  for(let r=0;r<5;r++)for(let c=0;c<5;c++){ if(r===FREE_POS.r&&c===FREE_POS.c){grid[r][c].item="FREE";continue;} grid[r][c].item=labels[k++]; }
+/* builders */
+function buildBlankCard(seed){const rng=seedRand(seed);const pool=shuffleDet(ALL_ITEMS,rng);const labels=pool.slice(0,24);labels[Math.floor(rng()*24)]=ACW_ITEM;
+  const grid=[...Array(5)].map((_,r)=>[...Array(5)].map((_,c)=>({r,c,item:null,marked:false,memberId:""})));let k=0;
+  for(let r=0;r<5;r++)for(let c=0;c<5;c++){if(r===FREE_POS.r&&c===FREE_POS.c){grid[r][c].item="FREE";continue;}grid[r][c].item=labels[k++];}
   return {grid};
 }
 
-/* render one board as table (to match original) */
+/* render */
 function render(){
   const host=q('#cards'); host.innerHTML='';
-  const welcome=q('#welcomeBar'); welcome.textContent=`Welcome, ${STATE.playerName || ('Player '+STATE.playerId)}!`;
+  q('#welcomeBar').textContent=`Welcome, ${STATE.playerName||('Player '+STATE.playerId)}!${USE_LOCAL?' (Local Mode)':''}`;
   STATE.cards.forEach((card,idx)=>{
     const c=document.createElement('div'); c.className='card';
-    c.innerHTML=`
-      <div class="card-head">
-        <div class="bingo-title">BINGO</div>
-        <div class="card-sub">CARD ${idx+1} OF 3</div>
-        <span class="badge">★ Shield Nation Member ★</span>
-      </div>
-      <div class="board-wrap">
-        <table class="board" aria-label="Bingo board">
-          <thead>
-            <tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>`;
+    c.innerHTML=`<div class="card-head"><div class="bingo-title">BINGO</div><div class="card-sub">CARD ${idx+1} OF 3</div><span class="badge">★ Shield Nation Member ★</span></div>
+      <div class="board-wrap"><table class="board" aria-label="Bingo board"><thead><tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr></thead><tbody></tbody></table></div>`;
     const tb=c.querySelector('tbody');
     for(let r=0;r<5;r++){
       const tr=document.createElement('tr');
-      for(let cIdx=0;cIdx<5;cIdx++){
-        const cell=card.grid[r][cIdx];
-        const td=document.createElement('td');
-        if(r===FREE_POS.r&&cIdx===FREE_POS.c){ td.classList.add('free'); td.innerHTML='<div class="cell-text">FREE SPACE</div>'; }
-        else{
-          td.innerHTML=`<div class="cell-text">${esc(cell.item)}</div>`;
-          td.addEventListener('click',()=>{ STATE.activeCell={cardIndex:idx,r,c:cIdx}; openIdModal(); });
-        }
-        if(cell.marked || (r===FREE_POS.r&&cIdx===FREE_POS.c)){
-          const s=document.createElement('div'); s.className='mark-shield'; td.appendChild(s);
-        }
-        if(cell.memberId){
-          const b=document.createElement('div'); b.className='mark-id'; b.textContent=cell.memberId; td.appendChild(b);
-        }
+      for(let cc=0;cc<5;cc++){
+        const cell=card.grid[r][cc]; const td=document.createElement('td');
+        if(r===FREE_POS.r&&cc===FREE_POS.c){td.classList.add('free');td.innerHTML='<div class="cell-text">FREE SPACE</div>';}
+        else{td.innerHTML=`<div class="cell-text">${esc(cell.item)}</div>`; td.addEventListener('click',()=>{STATE.activeCell={cardIndex:idx,r,c:cc}; openIdModal();});}
+        if(cell.marked || (r===FREE_POS.r&&cc===FREE_POS.c)){const sh=document.createElement('div');sh.className='mark-shield';td.appendChild(sh);}
+        if(cell.memberId){const b=document.createElement('div');b.className='mark-id';b.textContent=cell.memberId;td.appendChild(b);}
         tr.appendChild(td);
-      }
-      tb.appendChild(tr);
-    }
-    host.appendChild(c);
+      } tb.appendChild(tr);
+    } host.appendChild(c);
   });
 }
 
-/* modal */
+/* modal + actions */
 const idModal=q('#idModal'), memberInput=q('#memberInput');
 q('#idCancel').onclick=()=>idModal.style.display='none';
 function openIdModal(){ memberInput.value=''; idModal.style.display='flex'; memberInput.focus(); }
+
+/* unified persistence */
+function saveLocalCards(){ localStorage.setItem('usl:local:cards', JSON.stringify(STATE.cards)); }
+function loadLocalCards(){ const s=localStorage.getItem('usl:local:cards'); return s?JSON.parse(s):null; }
+async function saveCell(cardIndex,r,c,cell){
+  if(USE_LOCAL){ STATE.cards[cardIndex].grid[r][c]=cell; saveLocalCards(); return; }
+  await importFirebase().then(({db,ref,update})=>update(ref(db,`cards/${STATE.playerId}/${cardIndex}/grid/${r}/${c}`),{marked:cell.marked,memberId:cell.memberId}));
+}
+async function saveCards(cards){
+  if(USE_LOCAL){ STATE.cards=cards; saveLocalCards(); return; }
+  await importFirebase().then(({db,ref,set})=>set(ref(db,`cards/${STATE.playerId}`),cards));
+}
+
+/* member id save */
 q('#idSave').onclick=async()=>{
   const raw=(memberInput.value||'').trim();
   if(!ID_RE.test(raw)||raw.length<5||raw.length>10){ toast('Invalid Member ID. 2–3 letters + numbers, 5–10 chars.'); return; }
   const t=STATE.activeCell; if(!t){ idModal.style.display='none'; return; }
   const cell=STATE.cards[t.cardIndex].grid[t.r][t.c]; cell.marked=true; cell.memberId=raw.toUpperCase();
-  await update(ref(db,`cards/${STATE.playerId}/${t.cardIndex}/grid/${t.r}/${t.c}`),{marked:true,memberId:cell.memberId});
+  await saveCell(t.cardIndex,t.r,t.c,cell);
   idModal.style.display='none'; render(); await checkForBingoAndNotify(t.cardIndex);
 };
 
-/* verify modal */
-const vbg=q('#verifyModal'); const vtype=q('#verifyType'); const vlist=q('#verifyList');
+/* verification */
+const vbg=q('#verifyModal'), vtype=q('#verifyType'), vlist=q('#verifyList');
 q('#verifyClose').onclick=()=>vbg.style.display='none';
 q('#verifyCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(`US LawShield BINGO — ${vtype.textContent}\n${vlist.textContent}`); toast('Copied'); }catch{} };
-q('#verifySnap').onclick=async()=>{
-  const canvas = await html2canvas(q('#verifyCard'), {backgroundColor:"#0f1621",scale:2});
-  const data = canvas.toDataURL("image/png"); STATE.lastPng=data; q('#btnExport').href=data; toast("Verification image ready");
-};
+q('#verifySnap').onclick=async()=>{ const canvas=await html2canvas(q('#verifyCard'),{backgroundColor:"#0f1621",scale:2}); const data=canvas.toDataURL("image/png"); STATE.lastPng=data; q('#btnExport').href=data; toast("Verification image ready"); };
+
+async function logBingo(type,entries){
+  if(USE_LOCAL){ const log=JSON.parse(localStorage.getItem('usl:local:bingos')||'[]'); log.push({type,at:Date.now(),entries}); localStorage.setItem('usl:local:bingos',JSON.stringify(log)); return; }
+  await importFirebase().then(({db,ref,push,set,serverTimestamp})=>set(push(ref(db,`bingos/${STATE.playerId}`)),{type,at:serverTimestamp(),entries}));
+}
 
 async function checkForBingoAndNotify(cardIndex){
-  const card=STATE.cards[cardIndex];
-  const found=findBingos(card); if(found.length===0) return;
+  const card=STATE.cards[cardIndex]; const found=findBingos(card); if(found.length===0) return;
   const order=["BLACKOUT","X Pattern","T Pattern","Four Corners","Regular Bingo"]; found.sort((a,b)=>order.indexOf(a.type)-order.indexOf(b.type));
   const hit=found[0];
   const entries=hit.cells.map(([r,c])=>{ const cell=card.grid[r][c]; return {card:cardIndex+1,r,c,item:cell.item,memberId:(r===FREE_POS.r&&c===FREE_POS.c)?"FREE":(cell.memberId||"")}; });
-  await set(push(ref(db,`bingos/${STATE.playerId}`)),{type:hit.type,at:serverTimestamp(),entries});
-  vtype.textContent=`Type: ${hit.type}`;
-  vlist.textContent=entries.map(e=>`Card ${e.card} [${e.r+1},${e.c+1}]  •  ${e.item}  •  ${e.memberId}`).join("\n");
-  vbg.style.display='flex';
+  await logBingo(hit.type,entries);
+  vtype.textContent=`Type: ${hit.type}`; vlist.textContent=entries.map(e=>`Card ${e.card} [${e.r+1},${e.c+1}]  •  ${e.item}  •  ${e.memberId}`).join("\n"); vbg.style.display='flex';
 }
 
 /* clear / print / rename */
 q('#btnClear').onclick=async()=>{
   if(!confirm("Clear all three cards and Member IDs for your player?")) return;
   const three=[0,1,2].map(i=>buildBlankCard(`p${STATE.playerId}-${i}`));
-  await set(ref(db,`cards/${STATE.playerId}`),three); STATE.cards=three; render(); toast("All progress cleared");
+  await saveCards(three); STATE.cards=three; render(); toast("All progress cleared");
 };
 q('#btnPrint').onclick=()=>window.print();
 q('#btnRename').onclick=async()=>{
   const cur=STATE.playerName||`Player ${STATE.playerId}`; const next=(prompt("Enter your display name:",cur)||"").trim(); if(!next) return;
-  localStorage.setItem(`usl:name:${STATE.playerId}`,next); STATE.playerName=next; await update(ref(db,`players/${STATE.playerId}`),{name:next,lastActive:serverTimestamp()}); q('#welcomeBar').textContent=`Welcome, ${next}!`; toast("Name updated");
+  localStorage.setItem(`usl:name:${STATE.playerId}`,next); STATE.playerName=next; q('#welcomeBar').textContent=`Welcome, ${next}!${USE_LOCAL?' (Local Mode)':''}`;
+  if(!USE_LOCAL){ await importFirebase().then(({db,ref,update,serverTimestamp})=>update(ref(db,`players/${STATE.playerId}`),{name:next,lastActive:serverTimestamp()})); }
+  toast("Name updated");
 };
 
-/* players list + presence */
-function wirePresence(pid){
-  setInterval(()=>update(ref(db,`players/${pid}`),{lastActive:serverTimestamp()}),10000);
-  onValue(ref(db,`cards/${pid}`),snap=>{ if(snap.exists()){ const v=snap.val(); STATE.cards=[v[0],v[1],v[2]]; render(); }});
-  onValue(ref(db,'players'),snap=>{
-    const ul=q('#playersList'); const list=[];
-    if(snap.exists()){ for(const [id,info] of Object.entries(snap.val())) list.push({id,name:info.name||`Player ${id}`}); }
-    list.sort((a,b)=>Number(a.id)-Number(b.id));
-    ul.innerHTML=list.map(p=>`<li><span class="dot"></span><strong style="min-width:62px;display:inline-block;">#${p.id}</strong> ${esc(p.name)}</li>`).join('');
+/* players panel */
+function renderPlayersLocal(){ q('#playersList').innerHTML=`<li><span class="dot"></span><strong style="min-width:62px;display:inline-block;">#${STATE.playerId||1}</strong> ${esc(STATE.playerName||'Local Player')}</li>`; }
+function wirePresenceFirebase(pid){
+  importFirebase().then(({db,ref,onValue,update,serverTimestamp})=>{
+    setInterval(()=>update(ref(db,`players/${pid}`),{lastActive:serverTimestamp()}),10000);
+    onValue(ref(db,`cards/${pid}`),snap=>{ if(snap.exists()){ const v=snap.val(); STATE.cards=[v[0],v[1],v[2]]; render(); }});
+    onValue(ref(db,'players'),snap=>{
+      const ul=q('#playersList'); const list=[]; if(snap.exists()){ for(const [id,info] of Object.entries(snap.val())) list.push({id,name:info.name||`Player ${id}`}); }
+      list.sort((a,b)=>Number(a.id)-Number(b.id)); ul.innerHTML=list.map(p=>`<li><span class="dot"></span><strong style="min-width:62px;display:inline-block;">#${p.id}</strong> ${esc(p.name)}</li>`).join('');
+    });
   });
 }
 
-/* allocation + bootstrap */
-async function ensurePlayerAssigned(uid){
-  const asn=await get(child(ref(db),`assignments/${uid}`));
-  if(asn.exists()) return asn.val().playerId;
-  let assigned=null;
-  await runTransaction(ref(db,'counters/nextPlayer'),curr=>{ const v=(typeof curr==='number'?curr:0); if(v>=10) return; assigned=(v||0)+1; return assigned; });
-  if(!assigned){ alert("All 10 player slots are already assigned."); throw new Error("players_full"); }
-  await set(ref(db,`assignments/${uid}`),{playerId:assigned}); return assigned;
+/* ---------- Firebase boot with graceful fallback ---------- */
+async function importFirebase(){
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js");
+  const { getDatabase, ref, child, get, set, update, push, onValue, runTransaction, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js");
+  return {db,ref,child,get,set,update,push,onValue,runTransaction,serverTimestamp};
 }
-async function ensurePlayerName(pid){
+import { initializeApp as _ia } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getDatabase as _gd, ref as _ref, child as _child, get as _get, set as _set, update as _update, push as _push, onValue as _onValue, runTransaction as _rt, serverTimestamp as _st } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+const firebaseConfig={apiKey:"AIzaSyDzNTPcHXIgb7T73yX0ngLyuJkSiyUd3dA",authDomain:"uslawshield-bingo.firebaseapp.com",databaseURL:"https://uslawshield-bingo-default-rtdb.firebaseio.com",projectId:"uslawshield-bingo",storageBucket:"uslawshield-bingo.firebasestorage.app",messagingSenderId:"227127069053",appId:"1:227127069053:web:be6acba57a6561ad9ce414",measurementId:"G-Z2FXPKS7EY"};
+const app=_ia(firebaseConfig); const db=_gd(app); const auth=getAuth(app);
+
+async function ensurePlayerAssigned(uid){
+  const asn=await _get(_child(_ref(db),`assignments/${uid}`)); if(asn.exists()) return asn.val().playerId;
+  let assigned=null; await _rt(_ref(db,'counters/nextPlayer'),curr=>{const v=(typeof curr==='number'?curr:0); if(v>=10) return; assigned=(v||0)+1; return assigned;});
+  if(!assigned) throw new Error("players_full"); await _set(_ref(db,`assignments/${uid}`),{playerId:assigned}); return assigned;
+}
+async function ensurePlayerNameFirebase(pid){
   const key=`usl:name:${pid}`; let name=localStorage.getItem(key);
   if(!name){ name=(prompt("Enter your display name (First & Last):","")||"").trim(); if(!name) name=`Player ${pid}`; localStorage.setItem(key,name); }
-  await update(ref(db,`players/${pid}`),{name,createdAt:serverTimestamp(),lastActive:serverTimestamp()}); STATE.playerName=name;
+  await _update(_ref(db,`players/${pid}`),{name,createdAt:_st(),lastActive:_st()}); return name;
 }
-async function ensureCards(pid){
-  const s=await get(ref(db,`cards/${pid}`));
-  if(s.exists()){ const v=s.val(); STATE.cards=[v[0],v[1],v[2]]; }
-  else { const three=[0,1,2].map(i=>buildBlankCard(`p${pid}-${i}`)); await set(ref(db,`cards/${pid}`),three); STATE.cards=three; }
+async function ensureCardsFirebase(pid){
+  const s=await _get(_ref(db,`cards/${pid}`)); if(s.exists()){ const v=s.val(); return [v[0],v[1],v[2]]; }
+  const three=[0,1,2].map(i=>buildBlankCard(`p${pid}-${i}`)); await _set(_ref(db,`cards/${pid}`),three); return three;
 }
 
-/* auth */
-onAuthStateChanged(getAuth(), async u=>{
-  if(!u){ try{ await signInAnonymously(getAuth()); }catch(e){ errBar('Firebase: '+(e.message||e)); } return; }
-  try{
-    STATE.playerId=await ensurePlayerAssigned(u.uid);
-    await ensurePlayerName(STATE.playerId);
-    await ensureCards(STATE.playerId);
+/* Local mode boot */
+function bootLocal(){
+  USE_LOCAL=true;
+  // allocate local slot + name
+  let pid=localStorage.getItem('usl:local:pid'); if(!pid){ pid='1'; localStorage.setItem('usl:local:pid',pid); }
+  STATE.playerId=Number(pid);
+  let name=localStorage.getItem('usl:name:'+pid); if(!name){ name=(prompt("Enter your display name (First & Last):","")||"").trim(); if(!name) name=`Player ${pid}`; localStorage.setItem('usl:name:'+pid,name); }
+  STATE.playerName=name;
+  const saved=loadLocalCards();
+  STATE.cards = saved || [0,1,2].map(i=>buildBlankCard(`local-${pid}-${i}`));
+  if(!saved) saveLocalCards();
+  render();
+  renderPlayersLocal();
+}
+
+/* Firebase boot */
+function bootFirebase(user){
+  (async ()=>{
+    STATE.playerId = await ensurePlayerAssigned(user.uid);
+    STATE.playerName = await ensurePlayerNameFirebase(STATE.playerId);
+    STATE.cards = await ensureCardsFirebase(STATE.playerId);
     render();
-    wirePresence(STATE.playerId);
-  }catch(e){ errBar('Firebase: '+(e.message||e)); if(e.message==='players_full') alert('Sorry — all 10 player slots are already taken.'); }
+    wirePresenceFirebase(STATE.playerId);
+  })().catch(e=>{ errBar('Firebase: '+(e.message||e)); bootLocal(); });
+}
+
+/* auth flow with fallback */
+onAuthStateChanged(auth, u=>{
+  if(!u){
+    signInAnonymously(auth).catch(e=>{ errBar('Firebase: '+(e.message||e)); bootLocal(); });
+    return;
+  }
+  bootFirebase(u);
 });
 </script>
 </body>
