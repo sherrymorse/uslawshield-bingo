@@ -1195,11 +1195,26 @@
         const expirationDate = new Date(data.expiresAt);
         
         if (expirationDate > new Date()) {
-          return data;
+          // Verify player still exists in players list
+          const playerRef = ref(database, 'players/' + playerId);
+          const playerSnapshot = await get(playerRef);
+          
+          if (playerSnapshot.exists()) {
+            return data;
+          } else {
+            // Game data exists but player was removed - clean up
+            await remove(gameRef);
+            localStorage.removeItem('uslBingoPlayerId');
+            return null;
+          }
         } else {
           await remove(gameRef);
           await remove(ref(database, 'players/' + playerId));
+          localStorage.removeItem('uslBingoPlayerId');
         }
+      } else {
+        // No game found - check if we should clear localStorage
+        localStorage.removeItem('uslBingoPlayerId');
       }
       return null;
     }
@@ -1668,6 +1683,9 @@
         renderCards();
         updatePlayerListPanel();
       } else {
+        // Clear any stale data and show login
+        gameState = null;
+        isAdmin = false;
         document.getElementById('nameModal').style.display = 'block';
         document.getElementById('nameInput').focus();
       }
@@ -1683,10 +1701,10 @@
           const players = snapshot.val();
           if (!players || !players[playerId]) {
             // Player was removed - force re-login
-            alert('You have been removed from the game. Please log in again.');
             gameState = null;
             isAdmin = false;
             localStorage.removeItem('uslBingoPlayerId');
+            alert('You have been removed from the game. Please log in again.');
             window.location.reload();
           }
         }
