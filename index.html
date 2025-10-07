@@ -1367,14 +1367,8 @@
       const playerInfo = document.getElementById('playerInfo');
       let infoText = `Welcome, ${gameState.playerName}! 🎯`;
       
-      if (isAdmin || isHiddenSpectator) {
+      if (isAdmin) {
         infoText += ' <span style="background: #d51e47; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">👑 ADMIN</span>';
-      }
-      if (isSpectator) {
-        infoText += ' <span style="background: #6c757d; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">SPECTATOR</span>';
-      }
-      if (isHiddenSpectator) {
-        infoText += ' <span style="background: #6c757d; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">HIDDEN SPECTATOR</span>';
       }
       
       playerInfo.innerHTML = infoText;
