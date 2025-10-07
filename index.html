@@ -854,21 +854,33 @@
       }, 300);
     }
     
-    // FIXED: Use real-time onValue instead of get() for player list
-    let playersListener = null;
-    let gamesListener = null;
+    // FIXED: Single persistent real-time listener for player list
+    let playerListInitialized = false;
     
     function updatePlayerListPanel() {
-      const panel = document.getElementById('playerListPanel');
+      // Only initialize listeners once
+      if (playerListInitialized) return;
+      playerListInitialized = true;
       
-      // Set up real-time listeners if not already set
-      if (!playersListener) {
-        playersListener = onValue(ref(database, 'players'), (playersSnapshot) => {
-          onValue(ref(database, 'games'), (gamesSnapshot) => {
-            renderPlayerList(playersSnapshot, gamesSnapshot);
-          }, { onlyOnce: true });
+      const playersRef = ref(database, 'players');
+      const gamesRef = ref(database, 'games');
+      
+      // Set up persistent listener for players
+      onValue(playersRef, (playersSnapshot) => {
+        // Get games data and render
+        get(gamesRef).then((gamesSnapshot) => {
+          renderPlayerList(playersSnapshot, gamesSnapshot);
         });
-      }
+      });
+      
+      // Also listen to games for bingo distance updates
+      onValue(gamesRef, () => {
+        get(playersRef).then((playersSnapshot) => {
+          get(gamesRef).then((gamesSnapshot) => {
+            renderPlayerList(playersSnapshot, gamesSnapshot);
+          });
+        });
+      });
     }
     
     function renderPlayerList(playersSnapshot, gamesSnapshot) {
