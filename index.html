@@ -679,12 +679,10 @@
     </select>
   </div>
   <div class="cards-container" id="cardsContainer"></div>
-  <!-- Active Players Panel -->
   <div class="active-players" id="activePlayers">
     <h3>🎮 Active Players</h3>
     <div class="player-list" id="playerListPanel"></div>
   </div>
-  <!-- Name Entry Modal -->
   <div id="nameModal" class="modal" style="display: none;">
     <div class="modal-content">
       <div class="modal-header">
@@ -711,7 +709,6 @@
       </div>
     </div>
   </div>
-  <!-- Member ID Modal -->
   <div id="memberModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -729,7 +726,6 @@
       </div>
     </div>
   </div>
-  <!-- Bingo Celebration Modal -->
   <div id="bingoModal" class="bingo-modal">
     <div class="bingo-modal-content">
       <div class="bingo-celebration">
@@ -748,7 +744,6 @@
       </div>
     </div>
   </div>
-  <!-- Admin Edit Modal -->
   <div id="adminEditModal" class="bingo-modal" style="display: none;">
     <div class="bingo-modal-content" style="max-width: 95%; max-height: 90vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -758,10 +753,10 @@
       <div id="adminEditContent"></div>
     </div>
   </div>
-  <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-app.js";
     import { getDatabase, ref, set, get, onValue, remove } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-database.js";
+    
     const firebaseConfig = {
       apiKey: "AIzaSyDzNTPcHXIgb7T73yX0ngLyuJkSiyUd3dA",
       authDomain: "uslawshield-bingo.firebaseapp.com",
@@ -772,8 +767,10 @@
       appId: "1:227127069053:web:be6acba57a6561ad9ce414",
       measurementId: "G-Z2FXPKS7EY"
     };
+    
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
+    
     const items = [
       'Single PR', 'Single PR', 'Single PR',
       'Dual PR', 'Dual PR', 'Dual PR',
@@ -793,9 +790,11 @@
       'Winback (monthly)', 'Winback (monthly)',
       'Winback (annual)'
     ];
+    
     const MAX_PLAYERS = 10;
-    const ADMIN_NAME = "Sherry Morse"; // Admin user
-    const ADMIN_PASSWORD = "Airport-1"; // Admin password
+    const ADMIN_NAME = "Sherry Morse";
+    const ADMIN_PASSWORD = "Airport-1";
+    
     let currentCell = null;
     let currentCardIndex = null;
     let gameState = null;
@@ -803,9 +802,10 @@
     let isAdmin = false;
     let isSpectator = false;
     let isHiddenSpectator = false;
-    let currentGameType = "Any Line"; // Default game type
+    let currentGameType = "Any Line";
     let offlineMode = false;
-    // Get or create player ID from localStorage
+    let playerListUpdateTimeout = null;
+    
     function getOrCreatePlayerId() {
       let id = localStorage.getItem('uslBingoPlayerId');
       if (!id) {
@@ -814,121 +814,147 @@
       }
       return id;
     }
-    // Check if player session is valid in Firebase
+    
     async function validatePlayerSession(playerId) {
       console.log('Validating session for player ID:', playerId);
       const playerRef = ref(database, 'players/' + playerId);
       const gameRef = ref(database, 'games/' + playerId);
+      
       try {
         const [playerSnapshot, gameSnapshot] = await Promise.all([
           get(playerRef),
           get(gameRef)
         ]);
-        console.log('Player exists:', playerSnapshot.exists());
-        console.log('Game exists:', gameSnapshot.exists());
+        
         if (playerSnapshot.exists() && gameSnapshot.exists()) {
           const playerData = playerSnapshot.val();
           const gameData = gameSnapshot.val();
-          console.log('Player data:', playerData);
-          console.log('Game data:', gameData);
           const expirationDate = new Date(playerData.expiresAt);
           const now = new Date();
-          console.log('Expiration date:', expirationDate);
-          console.log('Current date:', now);
-          console.log('Session expired?', expirationDate <= now);
+          
           if (expirationDate > now) {
             console.log('✅ Session is valid!');
             return { valid: true, playerData, gameData };
-          } else {
-            console.log('❌ Session expired');
           }
-        } else {
-          console.log('❌ Player or game data missing in Firebase');
         }
       } catch (error) {
         console.error('Error validating session:', error);
       }
+      
       return { valid: false };
     }
-    // Load player list from Firebase and calculate distances to bingo
-    function updatePlayerListPanel() {
-      const playersRef = ref(database, 'players');
-      const gamesRef = ref(database, 'games');
-      return Promise.all([
-        get(playersRef),
-        get(gamesRef)
-      ]).then(([playersSnapshot, gamesSnapshot]) => {
-        const panel = document.getElementById('playerListPanel');
-        const players = playersSnapshot.val();
-        const games = gamesSnapshot.val();
-        console.log('Players data from Firebase:', players);
-        console.log('Games data from Firebase:', games);
-        if (!players || Object.keys(players).length === 0) {
-          panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
-          return;
-        }
-        const now = new Date();
-        const playerArray = Object.values(players).filter(p => {
-          if (!p.expiresAt) return false;
-          const expirationDate = new Date(p.expiresAt);
-          return expirationDate > now;
-        }).sort((a, b) => {
-          return new Date(b.lastActive) - new Date(a.lastActive);
-        });
-        console.log('Active players:', playerArray);
-        if (playerArray.length === 0) {
-          panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
-          return;
-        }
-        let html = `<div class="game-status">🎮 Playing: ${currentGameType}</div>`;
-        playerArray.forEach((p, idx) => {
-          if (p.isHiddenSpectator) return; // Never show hidden spectator
-          if (p.isSpectator && !(isAdmin || isHiddenSpectator)) return; // Show spectator only to admin and hidden spectator
-          const playerGame = games && games[p.id];
-          const distanceToBingo = playerGame ? calculateMinDistanceToBingo(playerGame) : null;
-          let itemClass = 'player-list-item';
-          let statusText = '';
-          const playerIsAdmin = p.name === ADMIN_NAME;
-          if (playerIsAdmin) {
-            itemClass += ' admin';
-          } else if (distanceToBingo !== null) {
-            if (distanceToBingo === 1) {
-              itemClass += ' one-away';
-              statusText = '<div class="player-status">🔥 1 away from BINGO!</div>';
-            } else if (distanceToBingo === 2) {
-              itemClass += ' two-away';
-              statusText = '<div class="player-status">⚡ 2 away from BINGO</div>';
-            }
-          }
-          html += `<div class="${itemClass}">`;
-          html += `${idx + 1}. ${p.name}`;
-          if (playerIsAdmin) {
-            html += `<span class="admin-badge">ADMIN</span>`;
-          }
-          if (p.isSpectator) {
-            html += `<span class="admin-badge" style="background: #6c757d;">SPECTATOR</span>`;
-          }
-          html += statusText;
-          if ((isAdmin || isHiddenSpectator) && p.id !== playerId && !p.isSpectator && !p.isHiddenSpectator) {
-            html += `<div class="admin-controls">`;
-            html += `<button class="admin-btn" onclick="window.adminClearPlayer('${p.id}')">Clear</button>`;
-            html += `<button class="admin-btn" onclick="window.adminEditPlayer('${p.id}')">Edit</button>`;
-            html += `<button class="admin-btn" onclick="window.adminKickPlayer('${p.id}')">Kick</button>`;
-            html += `</div>`;
-          }
-          html += `</div>`;
-        });
-        panel.innerHTML = html;
-      }).catch(error => {
-        console.error('Error updating player list:', error);
-      });
+    
+    // FIXED: Debounced player list update with real-time data
+    function schedulePlayerListUpdate() {
+      if (playerListUpdateTimeout) {
+        clearTimeout(playerListUpdateTimeout);
+      }
+      playerListUpdateTimeout = setTimeout(() => {
+        updatePlayerListPanel();
+      }, 300);
     }
-    // Calculate minimum distance to any bingo pattern
+    
+    // FIXED: Use real-time onValue instead of get() for player list
+    let playersListener = null;
+    let gamesListener = null;
+    
+    function updatePlayerListPanel() {
+      const panel = document.getElementById('playerListPanel');
+      
+      // Set up real-time listeners if not already set
+      if (!playersListener) {
+        playersListener = onValue(ref(database, 'players'), (playersSnapshot) => {
+          onValue(ref(database, 'games'), (gamesSnapshot) => {
+            renderPlayerList(playersSnapshot, gamesSnapshot);
+          }, { onlyOnce: true });
+        });
+      }
+    }
+    
+    function renderPlayerList(playersSnapshot, gamesSnapshot) {
+      const panel = document.getElementById('playerListPanel');
+      const players = playersSnapshot.val();
+      const games = gamesSnapshot.val();
+      
+      console.log('🔄 Rendering player list - Players:', players ? Object.keys(players).length : 0);
+      
+      if (!players || Object.keys(players).length === 0) {
+        panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
+        return;
+      }
+      
+      const now = new Date();
+      const playerArray = Object.values(players).filter(p => {
+        if (!p.expiresAt) return false;
+        const expirationDate = new Date(p.expiresAt);
+        return expirationDate > now;
+      }).sort((a, b) => {
+        return new Date(b.lastActive) - new Date(a.lastActive);
+      });
+      
+      if (playerArray.length === 0) {
+        panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
+        return;
+      }
+      
+      let html = `<div class="game-status">🎮 Playing: ${currentGameType}</div>`;
+      
+      playerArray.forEach((p, idx) => {
+        if (p.isHiddenSpectator) return;
+        if (p.isSpectator && !(isAdmin || isHiddenSpectator)) return;
+        
+        const playerGame = games && games[p.id];
+        const distanceToBingo = playerGame ? calculateMinDistanceToBingo(playerGame) : null;
+        
+        let itemClass = 'player-list-item';
+        let statusText = '';
+        const playerIsAdmin = p.name === ADMIN_NAME;
+        
+        if (playerIsAdmin) {
+          itemClass += ' admin';
+        } else if (distanceToBingo !== null) {
+          if (distanceToBingo === 1) {
+            itemClass += ' one-away';
+            statusText = '<div class="player-status">🔥 1 away from BINGO!</div>';
+          } else if (distanceToBingo === 2) {
+            itemClass += ' two-away';
+            statusText = '<div class="player-status">⚡ 2 away from BINGO</div>';
+          }
+        }
+        
+        html += `<div class="${itemClass}">`;
+        html += `${idx + 1}. ${p.name}`;
+        
+        if (playerIsAdmin) {
+          html += `<span class="admin-badge">ADMIN</span>`;
+        }
+        if (p.isSpectator) {
+          html += `<span class="admin-badge" style="background: #6c757d;">SPECTATOR</span>`;
+        }
+        
+        html += statusText;
+        
+        if ((isAdmin || isHiddenSpectator) && p.id !== playerId && !p.isSpectator && !p.isHiddenSpectator) {
+          html += `<div class="admin-controls">`;
+          html += `<button class="admin-btn" onclick="window.adminClearPlayer('${p.id}')">Clear</button>`;
+          html += `<button class="admin-btn" onclick="window.adminEditPlayer('${p.id}')">Edit</button>`;
+          html += `<button class="admin-btn" onclick="window.adminKickPlayer('${p.id}')">Kick</button>`;
+          html += `</div>`;
+        }
+        
+        html += `</div>`;
+      });
+      
+      panel.innerHTML = html;
+    }
+    
     function calculateMinDistanceToBingo(playerGame) {
       if (!playerGame || !playerGame.cards) return null;
+      
       let minDistance = Infinity;
       playerGame.cards.forEach(card => {
         if (!card.marked) return;
+        
         const patterns = getBingoPatternsForMode(currentGameType);
         patterns.forEach(pattern => {
           const unmarkedCount = pattern.indices.filter(i => !card.marked[i]).length;
@@ -937,8 +963,10 @@
           }
         });
       });
+      
       return minDistance === Infinity ? null : minDistance;
     }
+    
     function getBingoPatternsForMode(mode) {
       const allPatterns = getAllBingoPatterns();
       const gamePatternsMap = {
@@ -950,10 +978,10 @@
       };
       return gamePatternsMap[mode] || allPatterns;
     }
-    // Get all possible bingo patterns
+    
     function getAllBingoPatterns() {
       const patterns = [];
-      // Rows
+      
       for (let row = 0; row < 5; row++) {
         const rowIndices = [];
         for (let col = 0; col < 5; col++) {
@@ -961,7 +989,7 @@
         }
         patterns.push({ indices: rowIndices, type: 'Row ' + (row + 1) });
       }
-      // Columns
+      
       for (let col = 0; col < 5; col++) {
         const colIndices = [];
         for (let row = 0; row < 5; row++) {
@@ -969,34 +997,33 @@
         }
         patterns.push({ indices: colIndices, type: 'Column ' + ['B', 'I', 'N', 'G', 'O'][col] });
       }
-      // Diagonals
+      
       patterns.push({ indices: [0, 6, 12, 18, 24], type: 'Diagonal \\' });
       patterns.push({ indices: [4, 8, 12, 16, 20], type: 'Diagonal /' });
-      // Four corners
       patterns.push({ indices: [0, 4, 20, 24], type: 'Four Corners' });
-      // T pattern
       patterns.push({ indices: [0, 1, 2, 3, 4, 7, 12, 17, 22], type: 'T Pattern' });
-      // X pattern
       patterns.push({ indices: [0, 4, 6, 8, 12, 16, 18, 20, 24], type: 'X Pattern' });
-      // Blackout
       patterns.push({ indices: Array.from({length: 25}, (_, i) => i), type: 'Blackout' });
+      
       return patterns;
     }
-    // Admin: Clear a player's cards
+    
     window.adminClearPlayer = async function(targetPlayerId) {
       if (!isAdmin && !isHiddenSpectator) {
         alert('Admin access only');
         return;
       }
       if (!confirm('Clear all progress for this player?')) return;
+      
       const gameRef = ref(database, 'games/' + targetPlayerId);
       const snapshot = await get(gameRef);
+      
       if (snapshot.exists()) {
         const targetGame = snapshot.val();
         targetGame.cards.forEach(card => {
           card.marked = new Array(25).fill(false);
           card.memberIds = new Array(25).fill(null);
-          card.marked[12] = true; // Keep FREE space
+          card.marked[12] = true;
         });
         await set(gameRef, targetGame);
         alert('Player cards cleared!');
@@ -1004,66 +1031,71 @@
         alert('No game data found for this player.');
       }
     }
-    // Admin: Kick a player
+    
     window.adminKickPlayer = async function(targetPlayerId) {
       if (!isAdmin && !isHiddenSpectator) {
         alert('Admin access only');
         return;
       }
       if (!confirm('Kick this player from the game? They will need to log in again.')) return;
+      
       await remove(ref(database, 'players/' + targetPlayerId));
       await remove(ref(database, 'games/' + targetPlayerId));
       alert('Player kicked!');
     }
-    // Admin: Edit a player's cards
+    
     window.adminEditPlayer = async function(targetPlayerId) {
       if (!isAdmin && !isHiddenSpectator) {
         alert('Admin access only');
         return;
       }
-      console.log('Fetching fresh data for player:', targetPlayerId);
+      
       const gameRef = ref(database, 'games/' + targetPlayerId);
       const playerRef = ref(database, 'players/' + targetPlayerId);
+      
       try {
         const [gameSnapshot, playerSnapshot] = await Promise.all([
           get(gameRef),
           get(playerRef)
         ]);
+        
         if (!gameSnapshot.exists() || !playerSnapshot.exists()) {
           throw new Error('Data not found');
         }
+        
         let targetGame = gameSnapshot.val();
         const targetPlayer = playerSnapshot.val();
-        console.log('Loaded game data:', targetGame);
-        console.log('Loaded player data:', targetPlayer);
-        // Convert to arrays if necessary
+        
         if (targetGame.cards && !Array.isArray(targetGame.cards)) {
           targetGame.cards = Object.values(targetGame.cards);
         }
+        
         targetGame.cards.forEach(card => {
           if (!Array.isArray(card.items)) card.items = Object.values(card.items || {});
           if (!Array.isArray(card.marked)) card.marked = Object.values(card.marked || {});
           if (!Array.isArray(card.memberIds)) card.memberIds = Object.values(card.memberIds || {});
         });
+        
         if (!targetGame || !targetGame.cards || targetGame.cards.length !== 3) {
           throw new Error('Invalid card data');
         }
+        
         showAdminEditModal(targetPlayerId, targetPlayer.name, targetGame);
       } catch (error) {
         console.error('Error loading player data:', error);
-        alert('Error loading player data: ' + error.message + '. Please try again or check if the player exists.');
+        alert('Error loading player data: ' + error.message);
       }
     }
+    
     function showAdminEditModal(targetPlayerId, playerName, targetGame) {
       const modal = document.getElementById('adminEditModal');
       const content = document.getElementById('adminEditContent');
-      console.log('Showing edit modal for:', playerName);
-      console.log('Target game data:', targetGame);
-      console.log('Number of cards:', targetGame.cards ? targetGame.cards.length : 'NO CARDS');
+      
       if (!targetGame.cards || targetGame.cards.length !== 3) {
         alert('Error: Player card data is missing or corrupted');
         return;
       }
+      
       let html = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">`;
       html += `<h2 style="font-family: 'Anton', sans-serif; color: #0e1d61; margin: 0;">👑 Admin Edit Mode</h2>`;
       html += `<button class="btn-secondary close-btn" onclick="closeAdminEdit()">Exit Edit Mode</button>`;
@@ -1075,16 +1107,16 @@
       html += `Your own cards are preserved. Changes here only affect ${playerName}'s cards.`;
       html += `</div>`;
       html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">`;
+      
       targetGame.cards.forEach((cardData, cardIndex) => {
-        console.log(`Rendering card ${cardIndex + 1}:`, cardData);
         html += `<div style="background: white; border: 3px solid #0e1d61; border-radius: 10px; padding: 15px;">`;
         html += `<h4 style="text-align: center; color: #d51e47; margin-bottom: 10px; font-family: 'Anton', sans-serif; font-size: 1.5em;">CARD ${cardIndex + 1}</h4>`;
         html += `<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #0e1d61; border: 2px solid #0e1d61; border-radius: 5px;">`;
-        // Header row
+        
         ['B', 'I', 'N', 'G', 'O'].forEach(letter => {
           html += `<div style="background: #0e1d61; color: #d51e47; font-weight: bold; padding: 10px; text-align: center; font-size: 1.5em; font-family: 'Anton', sans-serif;">${letter}</div>`;
         });
-        // Grid cells
+        
         cardData.items.forEach((item, cellIndex) => {
           const isMarked = cardData.marked[cellIndex];
           const memberId = cardData.memberIds[cellIndex];
@@ -1093,11 +1125,13 @@
           const textColor = isFree ? 'white' : '#0e1d61';
           const cursor = isFree ? 'default' : 'pointer';
           const hoverStyle = isFree ? '' : 'onmouseover="this.style.background=\'#f0f0f0\'" onmouseout="this.style.background=\'' + bgColor + '\'"';
+          
           html += `<div onclick="window.adminToggleCell('${targetPlayerId}', ${cardIndex}, ${cellIndex})"
                         ${hoverStyle}
                         style="background: ${bgColor}; color: ${textColor}; padding: 10px 5px; min-height: 80px;
                                display: flex; flex-direction: column; align-items: center; justify-content: center;
                                text-align: center; font-size: 0.8em; cursor: ${cursor}; position: relative; border: 1px solid #e0e0e0; font-weight: 600;">`;
+          
           if (isFree) {
             html += `<strong style="font-size: 1.1em;">FREE<br>SPACE</strong>`;
           } else {
@@ -1109,72 +1143,85 @@
               html += `<div style="position: absolute; top: 3px; right: 3px; background: #4caf50; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9em; font-weight: bold;">✓</div>`;
             }
           }
+          
           html += `</div>`;
         });
+        
         html += `</div></div>`;
       });
+      
       html += `</div>`;
       html += `<div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border: 2px solid #0e1d61; border-radius: 8px;">`;
       html += `<strong>📝 Instructions:</strong> Click any cell to toggle mark/unmark. When marking, you'll be prompted for a Member ID. Changes save automatically to Firebase.`;
       html += `</div>`;
+      
       content.innerHTML = html;
       modal.style.display = 'block';
     }
+    
     window.adminToggleCell = async function(targetPlayerId, cardIndex, cellIndex) {
       const gameRef = ref(database, 'games/' + targetPlayerId);
       const snapshot = await get(gameRef);
+      
       if (!snapshot.exists()) return;
+      
       const targetGame = snapshot.val();
       const cell = targetGame.cards[cardIndex];
-      if (cell.items[cellIndex] === 'FREE') return; // Can't toggle FREE space
+      
+      if (cell.items[cellIndex] === 'FREE') return;
+      
       const isCurrentlyMarked = cell.marked[cellIndex];
+      
       if (isCurrentlyMarked) {
-        // Unmark the cell
         cell.marked[cellIndex] = false;
         cell.memberIds[cellIndex] = null;
       } else {
-        // Mark the cell - prompt for member ID
         const memberId = prompt('Enter Member ID (or leave blank for no ID):');
         if (memberId !== null) {
           cell.marked[cellIndex] = true;
           cell.memberIds[cellIndex] = memberId.trim().toUpperCase() || 'ADMIN';
         } else {
-          return; // User cancelled
+          return;
         }
       }
+      
       await set(gameRef, targetGame);
-      // Refresh the modal
+      
       const playerSnapshot = await get(ref(database, 'players/' + targetPlayerId));
       if (playerSnapshot.exists()) {
         showAdminEditModal(targetPlayerId, playerSnapshot.val().name, targetGame);
       }
     }
+    
     window.closeAdminEdit = function() {
       document.getElementById('adminEditModal').style.display = 'none';
-      // Refresh player list and own cards if needed
       if (gameState) {
         renderCards();
-        updatePlayerListPanel();
+        schedulePlayerListUpdate();
       }
     }
-    // Admin: Clear all players from the system
+    
     window.adminClearAllPlayers = async function() {
       if (!isAdmin && !isHiddenSpectator) {
         alert('Admin access only');
         return;
       }
+      
       if (!confirm('⚠️ WARNING: This will remove ALL players from the game and force everyone to log in again.\n\nAre you sure you want to continue?')) {
         return;
       }
+      
       try {
         const playersRef = ref(database, 'players');
         const gamesRef = ref(database, 'games');
+        
         const [playersSnapshot, gamesSnapshot] = await Promise.all([
           get(playersRef),
           get(gamesRef)
         ]);
+        
         const removePromises = [];
-        // Remove all players except current admin
+        
         if (playersSnapshot.exists()) {
           const players = playersSnapshot.val();
           Object.keys(players).forEach(id => {
@@ -1183,7 +1230,7 @@
             }
           });
         }
-        // Remove all games except current admin
+        
         if (gamesSnapshot.exists()) {
           const games = gamesSnapshot.val();
           Object.keys(games).forEach(id => {
@@ -1192,79 +1239,83 @@
             }
           });
         }
+        
         await Promise.all(removePromises);
         alert('✅ All players have been removed from the game. They will need to log in again.');
-        updatePlayerListPanel();
+        schedulePlayerListUpdate();
       } catch (error) {
         console.error('Error clearing players:', error);
         alert('Error clearing players. Please try again.');
       }
     }
-    // Save game state to Firebase
-    async function saveGameState() {
+    
+    // FIXED: Silent timestamp update that won't trigger logout issues
+    async function saveGameState(silent = false) {
       if (offlineMode) {
         localStorage.setItem('offlineGameState', JSON.stringify(gameState));
-        return; // Don't save in offline mode
+        return;
       }
+      
       if (!gameState || !playerId) return;
+      
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + 7);
       gameState.expiresAt = expirationDate.toISOString();
-      // Save player game data
+      
       await set(ref(database, 'games/' + playerId), gameState);
-      // Update player in players list
-      await set(ref(database, 'players/' + playerId), {
+      
+      // FIXED: Use update instead of set to avoid triggering unnecessary listeners
+      const playerData = {
         id: playerId,
         name: gameState.playerName,
         expiresAt: expirationDate.toISOString(),
         lastActive: new Date().toISOString(),
         isSpectator: isSpectator || undefined,
         isHiddenSpectator: isHiddenSpectator || undefined
-      });
+      };
+      
+      await set(ref(database, 'players/' + playerId), playerData);
+      
+      if (!silent) {
+        console.log('💾 Game state saved for:', gameState.playerName);
+      }
     }
-    // Load game state from Firebase
+    
     async function loadGameState() {
       const storedPlayerId = localStorage.getItem('uslBingoPlayerId');
-      console.log('Stored player ID in localStorage:', storedPlayerId);
+      
       if (!storedPlayerId) {
-        console.log('No stored player ID found - new session');
         return null;
       }
+      
       playerId = storedPlayerId;
       const validation = await validatePlayerSession(playerId);
+      
       if (validation.valid) {
-        // Session is valid, return the game data
-        console.log('✅ Valid session found, restoring game state');
         return validation.gameData;
       } else {
-        // Session is invalid or expired
-        console.log('❌ Invalid session, clearing localStorage');
         localStorage.removeItem('uslBingoPlayerId');
         playerId = null;
         return null;
       }
     }
+    
     function generateCard() {
       const shuffled = [...items].sort(() => Math.random() - 0.5);
       const card = shuffled.slice(0, 24);
       card.splice(12, 0, 'FREE');
-      const hasAcwExpires = card.includes('< 3 ACW Expires');
-      if (!hasAcwExpires) {
-        const randomIndex = Math.floor(Math.random() * 24);
-        const targetIndex = randomIndex >= 12 ? randomIndex + 1 : randomIndex;
-        card[targetIndex] = '< 3 ACW Expires';
-      }
       return card;
     }
+    
     function initializeGame(playerName) {
-      // Generate new player ID if we don't have one
       if (!playerId) {
         playerId = getOrCreatePlayerId();
-        console.log('Generated new player ID:', playerId);
       }
+      
       isAdmin = (playerName === ADMIN_NAME);
       isSpectator = (playerName.toLowerCase() === 'spectator');
       isHiddenSpectator = (playerName === '[nucca]');
+      
       gameState = {
         playerId: playerId,
         playerName: isSpectator ? 'Spectator (Victoria)' : playerName,
@@ -1276,31 +1327,37 @@
         ],
         createdAt: new Date().toISOString()
       };
+      
       gameState.cards.forEach(card => {
         card.marked[12] = true;
       });
-      console.log('Saving new game state for player:', playerName);
+      
+      console.log('🎮 Initializing game for:', playerName);
+      
       if (!isHiddenSpectator) {
         saveGameState();
       }
+      
       showPlayerInfo();
       renderCards();
       document.getElementById('activePlayers').style.display = 'block';
-      updatePlayerListPanel();
+      
+      // FIXED: Force immediate update to show new player
+      schedulePlayerListUpdate();
+      
       if (isAdmin || isHiddenSpectator) {
         document.getElementById('gameTypeSelect').style.display = 'inline-block';
+        document.getElementById('adminClearAllBtn').style.display = 'inline-block';
+        document.getElementById('adminManageRequestsBtn').style.display = 'inline-block';
       }
-      // Force a refresh of player list after a short delay to ensure new player shows up
-      setTimeout(updatePlayerListPanel, 1000);
     }
+    
     function showPlayerInfo() {
       const playerInfo = document.getElementById('playerInfo');
       let infoText = `Welcome, ${gameState.playerName}! 🎯`;
+      
       if (isAdmin || isHiddenSpectator) {
         infoText += ' <span style="background: #d51e47; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">👑 ADMIN</span>';
-        // Show admin buttons
-        document.getElementById('adminClearAllBtn').style.display = 'inline-block';
-        document.getElementById('adminManageRequestsBtn').style.display = 'inline-block';
       }
       if (isSpectator) {
         infoText += ' <span style="background: #6c757d; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">SPECTATOR</span>';
@@ -1308,19 +1365,24 @@
       if (isHiddenSpectator) {
         infoText += ' <span style="background: #6c757d; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">HIDDEN SPECTATOR</span>';
       }
+      
       playerInfo.innerHTML = infoText;
       playerInfo.style.display = 'block';
     }
+    
     function renderCards() {
       const container = document.getElementById('cardsContainer');
       container.innerHTML = '';
+      
       if (!gameState || !gameState.cards) {
         console.error('No game state or cards to render');
         return;
       }
+      
       gameState.cards.forEach((cardData, cardIndex) => {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'bingo-card';
+        
         const header = `
           <div class="card-header">
             <div class="bingo-title">BINGO</div>
@@ -1328,17 +1390,21 @@
             <div class="shield-badge">★ Shield Nation Member ★</div>
           </div>
         `;
+        
         const grid = document.createElement('div');
         grid.className = 'bingo-grid';
+        
         ['B', 'I', 'N', 'G', 'O'].forEach(letter => {
           const headerCell = document.createElement('div');
           headerCell.className = 'bingo-header';
           headerCell.textContent = letter;
           grid.appendChild(headerCell);
         });
+        
         cardData.items.forEach((item, index) => {
           const cell = document.createElement('div');
           cell.className = 'bingo-cell';
+          
           if (item === 'FREE') {
             cell.className += ' free-space';
             cell.innerHTML = `
@@ -1361,6 +1427,7 @@
             cell.innerHTML = `<span class="cell-text">${item}</span>`;
             cell.onclick = () => handleCellClick(cardIndex, index);
           }
+          
           if (cardData.marked[index]) {
             cell.classList.add('marked');
             const memberId = cardData.memberIds[index];
@@ -1368,25 +1435,29 @@
               cell.setAttribute('data-member-id', memberId);
             }
           }
+          
           grid.appendChild(cell);
         });
+        
         cardDiv.innerHTML = header;
         cardDiv.appendChild(grid);
         container.appendChild(cardDiv);
       });
     }
+    
     function handleCellClick(cardIndex, cellIndex) {
       if (gameState.cards[cardIndex].marked[cellIndex]) {
         return;
       }
+      
       if (offlineMode) {
-        // In offline, mark without ID
         gameState.cards[cardIndex].marked[cellIndex] = true;
         gameState.cards[cardIndex].memberIds[cellIndex] = '';
         renderCards();
         checkForBingo(cardIndex);
         return;
       }
+      
       currentCardIndex = cardIndex;
       currentCell = cellIndex;
       document.getElementById('memberModal').style.display = 'block';
@@ -1394,42 +1465,52 @@
       document.getElementById('errorMessage').style.display = 'none';
       document.getElementById('memberIdInput').focus();
     }
+    
     function validateMemberId(memberId) {
       const trimmed = memberId.trim().toUpperCase();
       const regex = /^[A-Z]{2,3}\d+$/;
+      
       if (trimmed.length < 5 || trimmed.length > 10) {
         return false;
       }
+      
       return regex.test(trimmed);
     }
+    
     window.submitMemberId = function() {
       const input = document.getElementById('memberIdInput');
       const memberId = input.value.trim().toUpperCase();
+      
       if (!validateMemberId(memberId)) {
         document.getElementById('errorMessage').style.display = 'block';
         input.focus();
         return;
       }
+      
       const cardIdx = currentCardIndex;
       const cellIdx = currentCell;
+      
       gameState.cards[cardIdx].marked[cellIdx] = true;
       gameState.cards[cardIdx].memberIds[cellIdx] = memberId;
-      console.log('Marked cell', cellIdx, 'on card', cardIdx, 'with member ID', memberId);
+      
       saveGameState();
       closeModal();
       renderCards();
       checkForBingo(cardIdx);
-      // Update player list to refresh bingo distances
-      setTimeout(() => updatePlayerListPanel(), 500);
+      
+      schedulePlayerListUpdate();
     }
+    
     function closeModal() {
       document.getElementById('memberModal').style.display = 'none';
       currentCell = null;
       currentCardIndex = null;
     }
+    
     function checkForBingo(cardIndex) {
       const card = gameState.cards[cardIndex];
       const allPatterns = getAllBingoPatterns();
+      
       const gamePatternsMap = {
         'Any Line': allPatterns.filter(p => p.type.startsWith('Row') || p.type.startsWith('Column') || p.type.startsWith('Diagonal')),
         'Four Corners': allPatterns.filter(p => p.type === 'Four Corners'),
@@ -1437,72 +1518,91 @@
         'T': allPatterns.filter(p => p.type === 'T Pattern'),
         'Blackout': allPatterns.filter(p => p.type === 'Blackout')
       };
+      
       const patterns = gamePatternsMap[currentGameType] || allPatterns;
       const bingoPatterns = patterns.filter(pattern => pattern.indices.every(i => card.marked[i]));
+      
       if (bingoPatterns.length > 0) {
-        console.log('Showing bingo modal');
         showBingoModal(cardIndex, bingoPatterns);
       }
     }
+    
     function showBingoModal(cardIndex, patterns) {
       const modal = document.getElementById('bingoModal');
       const typeDiv = document.getElementById('bingoType');
       const memberList = document.getElementById('memberList');
+      
       const pattern = patterns[patterns.length - 1];
       typeDiv.textContent = pattern.type + ' - Card ' + (cardIndex + 1);
+      
       memberList.innerHTML = '';
+      
       pattern.indices.forEach(index => {
         const memberId = gameState.cards[cardIndex].memberIds[index];
         const item = gameState.cards[cardIndex].items[index];
+        
         if (memberId || item === 'FREE') {
           const memberItem = document.createElement('div');
           memberItem.className = 'member-item';
+          
           const row = Math.floor(index / 5) + 1;
           const col = ['B', 'I', 'N', 'G', 'O'][index % 5];
           const position = col + row;
+          
           memberItem.innerHTML = `
             <span class="member-position">${position}: ${item}</span>
             <span class="member-id">${memberId || 'FREE SPACE'}</span>
           `;
+          
           memberList.appendChild(memberItem);
         }
       });
+      
       modal.style.display = 'block';
     }
+    
     window.closeBingoModal = function() {
       document.getElementById('bingoModal').style.display = 'none';
     }
+    
     window.confirmClearProgress = function() {
       if (confirm('⚠️ Are you sure you want to clear ALL progress and start over?\n\nThis will:\n- Delete all marked squares\n- Remove all Member IDs\n- Reset all three cards\n- Keep your player name\n\nThis action cannot be undone!')) {
         clearAllProgress();
       }
     }
+    
     async function clearAllProgress() {
       if (!gameState) return;
+      
       gameState.cards.forEach(card => {
         card.marked = new Array(25).fill(false);
         card.memberIds = new Array(25).fill(null);
         card.marked[12] = true;
       });
+      
       await saveGameState();
       renderCards();
-      updatePlayerListPanel();
+      schedulePlayerListUpdate();
       alert('✅ All progress cleared! Your cards have been reset.');
     }
+    
     window.submitName = async function() {
       const input = document.getElementById('nameInput');
       const name = input.value.trim();
+      
       if (!name) {
         document.getElementById('nameError').style.display = 'block';
         document.getElementById('nameError').textContent = 'Please enter your name';
         input.focus();
         return;
       }
-      // Check if trying to be admin
+      
       const isAttemptingAdmin = (name === ADMIN_NAME);
+      
       if (isAttemptingAdmin) {
         const passwordInput = document.getElementById('adminPassword');
         const password = passwordInput.value;
+        
         if (password !== ADMIN_PASSWORD) {
           document.getElementById('nameError').style.display = 'block';
           document.getElementById('nameError').textContent = 'Incorrect admin password';
@@ -1510,10 +1610,12 @@
           return;
         }
       }
-      // Check for duplicate names (but allow admin to log back in)
+      
+      // Check for duplicate names
       if (!isAttemptingAdmin && name.toLowerCase() !== 'spectator' && name !== '[nucca]') {
         const playersRef = ref(database, 'players');
         const playersSnapshot = await get(playersRef);
+        
         if (playersSnapshot.exists()) {
           const players = playersSnapshot.val();
           const existingPlayer = Object.values(players).find(p => {
@@ -1522,6 +1624,7 @@
                    expirationDate > new Date() &&
                    p.id !== playerId;
           });
+          
           if (existingPlayer) {
             document.getElementById('nameError').style.display = 'block';
             document.getElementById('nameError').textContent = 'This name is already in use. Please choose a different name.';
@@ -1530,21 +1633,26 @@
           }
         }
       }
-      // Removed duplicate admin session removal to prevent accidental logouts on refresh/login
+      
       document.getElementById('nameModal').style.display = 'none';
       initializeGame(name);
     }
+    
     window.requestAccess = function() {
       const name = prompt('Enter your name for access request:');
       if (!name) return;
+      
       const token = Math.random().toString(36).substr(2, 8).toUpperCase();
       set(ref(database, 'requests/' + token), { name, timestamp: new Date().toISOString() });
       alert('Your request token: ' + token + '\nGive this to Sherry Morse to approve.');
     }
+    
     window.enterApprovalCode = async function() {
       const code = prompt('Enter the approval code from admin:');
       if (!code) return;
+      
       const snapshot = await get(ref(database, 'approved/' + code.toUpperCase()));
+      
       if (snapshot.exists()) {
         const { playerId } = snapshot.val();
         localStorage.setItem('uslBingoPlayerId', playerId);
@@ -1554,26 +1662,33 @@
         alert('Invalid or expired approval code');
       }
     }
+    
     window.manageRequests = async function() {
       const modal = document.getElementById('adminEditModal');
       modal.style.display = 'block';
       const content = document.getElementById('adminEditContent');
       content.innerHTML = '<h3>Pending Access Requests</h3>';
+      
       const snapshot = await get(ref(database, 'requests'));
+      
       if (snapshot.exists()) {
         const requests = snapshot.val();
         let html = '';
+        
         Object.entries(requests).forEach(([token, req]) => {
           html += `<div style="padding: 10px; border-bottom: 1px solid #ccc;">Name: ${req.name}<br>Time: ${req.timestamp}<br>Token: ${token}<br><button onclick="approveRequest('${token}', '${req.name}')">Approve</button></div>`;
         });
+        
         content.innerHTML += html;
       } else {
         content.innerHTML += 'No pending requests';
       }
     }
+    
     window.approveRequest = async function(token, name) {
       const approvalCode = Math.random().toString(36).substr(2, 8).toUpperCase();
       const newPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      
       const newGameState = {
         playerId: newPlayerId,
         playerName: name,
@@ -1585,9 +1700,12 @@
         ],
         createdAt: new Date().toISOString()
       };
+      
       newGameState.cards.forEach(card => card.marked[12] = true);
+      
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + 7);
+      
       await set(ref(database, 'games/' + newPlayerId), newGameState);
       await set(ref(database, 'players/' + newPlayerId), {
         id: newPlayerId,
@@ -1595,45 +1713,54 @@
         expiresAt: expirationDate.toISOString(),
         lastActive: new Date().toISOString()
       });
+      
       await set(ref(database, 'approved/' + approvalCode), { playerId: newPlayerId });
       await remove(ref(database, 'requests/' + token));
+      
       alert('Player approved! Give this approval code to the user: ' + approvalCode + '\nThey will enter it to join.');
       manageRequests();
     }
+    
     window.setGameType = async function(type) {
       if (!isAdmin && !isHiddenSpectator) return;
+      
       await set(ref(database, 'config/currentGameType'), type);
       alert('Game type set to ' + type);
     }
+    
     window.goOffline = function() {
       if (confirm('Switch to offline mode? No network, local only.')) {
         localStorage.setItem('offlineMode', 'true');
         window.location.reload();
       }
     }
+    
     window.goOnline = function() {
       localStorage.removeItem('offlineMode');
       window.location.reload();
     }
-    // Show/hide admin password field when admin name is entered
+    
     document.getElementById('nameInput').addEventListener('input', function(e) {
       const name = e.target.value.trim();
       const passwordSection = document.getElementById('adminPasswordSection');
+      
       if (name === ADMIN_NAME) {
         passwordSection.style.display = 'block';
       } else {
         passwordSection.style.display = 'none';
       }
     });
+    
     document.getElementById('memberIdInput').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         window.submitMemberId();
       }
     });
+    
     document.getElementById('nameInput').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
-        // If admin name and password field is visible, check if password is entered
         const name = document.getElementById('nameInput').value.trim();
+        
         if (name === ADMIN_NAME) {
           const passwordInput = document.getElementById('adminPassword');
           if (passwordInput.value) {
@@ -1646,24 +1773,29 @@
         }
       }
     });
+    
     document.getElementById('adminPassword').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         window.submitName();
       }
     });
+    
     window.onclick = function(event) {
       const memberModal = document.getElementById('memberModal');
       if (event.target === memberModal) {
         closeModal();
       }
     };
-    // Initialize app
+    
     window.onload = async function() {
       offlineMode = localStorage.getItem('offlineMode') === 'true';
+      
       if (offlineMode) {
         document.getElementById('activePlayers').style.display = 'none';
         document.getElementById('controls').innerHTML += '<button class="btn-secondary" onclick="goOnline()">Go Online</button>';
+        
         gameState = localStorage.getItem('offlineGameState') ? JSON.parse(localStorage.getItem('offlineGameState')) : null;
+        
         if (!gameState) {
           gameState = {
             playerName: 'Offline Player',
@@ -1677,33 +1809,37 @@
           gameState.cards.forEach(card => card.marked[12] = true);
           localStorage.setItem('offlineGameState', JSON.stringify(gameState));
         }
+        
         showPlayerInfo();
         renderCards();
         return;
       }
-      console.log('Page loading...');
+      
+      console.log('🚀 Loading application...');
+      
       const saved = await loadGameState();
+      
       if (saved && saved.playerName) {
-        // Valid session found - restore game
-        console.log('Restoring session for:', saved.playerName);
-        console.log('Loaded game state:', saved);
+        console.log('✅ Restoring session for:', saved.playerName);
+        
         gameState = saved;
-        // Convert to arrays if necessary
+        
         if (gameState.cards && !Array.isArray(gameState.cards)) {
           gameState.cards = Object.values(gameState.cards);
         }
+        
         gameState.cards.forEach(card => {
           if (!Array.isArray(card.items)) card.items = Object.values(card.items || {});
           if (!Array.isArray(card.marked)) card.marked = Object.values(card.marked || {});
           if (!Array.isArray(card.memberIds)) card.memberIds = Object.values(card.memberIds || {});
         });
+        
         isAdmin = (gameState.playerName === ADMIN_NAME);
         isSpectator = !!gameState.isSpectator;
         isHiddenSpectator = (gameState.playerName === '[nucca]');
-        // Verify cards exist
+        
         if (!gameState.cards || gameState.cards.length !== 3) {
           console.error('❌ Cards data is missing or invalid!');
-          // Force re-login if cards are corrupted
           localStorage.removeItem('uslBingoPlayerId');
           gameState = null;
           isAdmin = false;
@@ -1711,45 +1847,38 @@
           document.getElementById('nameInput').focus();
           return;
         }
-        console.log('Cards loaded:', gameState.cards.length, 'cards');
+        
         showPlayerInfo();
         renderCards();
         document.getElementById('activePlayers').style.display = 'block';
+        
+        // FIXED: Initialize player list with real-time updates
         updatePlayerListPanel();
+        
         if (isAdmin || isHiddenSpectator) {
           document.getElementById('gameTypeSelect').style.display = 'inline-block';
+          document.getElementById('adminClearAllBtn').style.display = 'inline-block';
+          document.getElementById('adminManageRequestsBtn').style.display = 'inline-block';
         }
-        // Update last active timestamp
-        const playerRef = ref(database, 'players/' + playerId);
-        const playerSnapshot = await get(playerRef);
-        if (playerSnapshot.exists()) {
-          const playerData = playerSnapshot.val();
-          playerData.lastActive = new Date().toISOString();
-          await set(playerRef, playerData);
-        }
+        
+        // FIXED: Silent timestamp update on restore
+        await saveGameState(true);
       } else {
-        // No valid session - show login
-        console.log('No valid session, showing login screen');
+        console.log('❌ No valid session, showing login');
         gameState = null;
         isAdmin = false;
         document.getElementById('nameModal').style.display = 'block';
         document.getElementById('nameInput').focus();
       }
-      // Set up real-time listener for player list updates
+      
+      // FIXED: Single listener for player removals
       const playersRef = ref(database, 'players');
       onValue(playersRef, (snapshot) => {
-        console.log('Player list changed, updating...');
-        // Update for everyone who is logged in
-        if (gameState) {
-          // Add slight delay to allow for data propagation
-          setTimeout(updatePlayerListPanel, 500);
-        }
-        // Only check for removal if we have an active game session
         if (gameState && playerId) {
           const players = snapshot.val();
+          
           if (!players || !players[playerId]) {
-            // Player was removed - force re-login
-            console.log('Player removed by admin');
+            console.log('❌ Player removed by admin');
             gameState = null;
             isAdmin = false;
             localStorage.removeItem('uslBingoPlayerId');
@@ -1758,19 +1887,15 @@
           }
         }
       });
-      // Also listen to games for bingo distance updates and card changes
-      const gamesRef = ref(database, 'games');
-      onValue(gamesRef, () => {
-        console.log('Games data changed, updating player list...');
-        if (gameState) {
-          setTimeout(updatePlayerListPanel, 500);
-        }
-      });
+      
       // Listen to game type changes
       const gameTypeRef = ref(database, 'config/currentGameType');
       onValue(gameTypeRef, (snapshot) => {
-        currentGameType = snapshot.val() || 'Any Line';
-        updatePlayerListPanel();
+        const newGameType = snapshot.val() || 'Any Line';
+        if (newGameType !== currentGameType) {
+          currentGameType = newGameType;
+          schedulePlayerListUpdate();
+        }
       });
     };
   </script>
