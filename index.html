@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>US LawShield Bingo</title>
+<style>
+  :root {
+    --bg:#0b0f14; --card:#121821; --accent:#c01c28; --muted:#6a7785; --ink:#e9eef6; --ink-soft:#c9d5e6; --good:#1eb980; --warn:#ffb020;
+    --shield:#c01c28; --shield-bg:rgba(192,28,40,0.1); --badge-bg:#fff; --badge-ink:#b31724;
+  }
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1200px;margin:30px auto 120px;padding:0 16px}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  header h1{margin:0;font-weight:700;letter-spacing:.5px}
+  .controls{display:flex;gap:10px;flex-wrap:wrap}
+  .controls button,.controls a{background:#1a2230;color:var(--ink);border:1px solid #2a3547;border-radius:10px;padding:10px 14px;cursor:pointer}
+  .controls button:hover{border-color:#39465f}
+  .controls .danger{background:#2a1214;border-color:#5a1b22;color:#ffdfe3}
+  .controls .primary{background:#162131;border-color:#2a3b57}
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(280px,1fr));gap:18px}
+  .card{background:var(--card);border:1px solid #1e2531;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.35);padding:12px 12px 16px}
+  .card h3{margin:0 0 8px;font-weight:600;color:var(--ink-soft)}
+  .board{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .cell{position:relative;background:#0d131c;border:1px solid #1e2633;border-radius:10px;min-height:58px;display:flex;align-items:center;justify-content:center;text-align:center;padding:6px;font-size:12.5px;line-height:1.25;cursor:pointer}
+  .cell:hover{border-color:#33425a}
+  .cell.free{background:#0f1622;border:1px dashed #3a4b66;color:#8fb3ff;font-weight:700}
+  .cell.disabled{opacity:.55;pointer-events:none}
+  .shield{position:absolute;inset:0;background:var(--shield-bg);border:2px solid var(--shield);border-radius:10px;pointer-events:none}
+  .badge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--badge-bg);color:var(--badge-ink);border:2px solid var(--shield);border-radius:8px;padding:3px 6px;font-weight:700;font-size:12px;pointer-events:none;max-width:95%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tiny{position:absolute;left:8px;bottom:6px;color:#9eb0c9;font-size:10px;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+  .legend{font-size:12px;color:var(--muted);margin:10px 0 0}
+  .players{position:fixed;right:16px;bottom:16px;background:#0e141d;border:1px solid #1e2734;border-radius:14px;padding:10px 12px;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+  .players h4{margin:0 0 6px;color:#9fb0c8;font-weight:600}
+  .players ul{list-style:none;padding:0;margin:0;max-height:220px;overflow:auto}
+  .players li{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px dashed #1f2a3a}
+  .players li:last-child{border-bottom:none}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--good)}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:2000}
+  .modal{width:min(680px,92vw);background:#0f1621;border:1px solid #243046;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.6);padding:18px}
+  .modal h3{margin:0 0 8px}
+  .modal p{margin:8px 0 0;color:#c2cfdf}
+  .modal .row{display:flex;gap:10px;margin-top:12px}
+  .modal input{flex:1;background:#0b121c;border:1px solid #223049;border-radius:10px;padding:12px 12px;color:var(--ink)}
+  .modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+  .btn{background:#172234;color:var(--ink);border:1px solid #2a3b57;border-radius:10px;padding:10px 14px;cursor:pointer}
+  .btn.primary{background:#16263f}
+  .btn.danger{background:#2a1214;border-color:#5a1b22;color:#ffdfe3}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0e141d;border:1px solid #273144;border-radius:10px;padding:10px 14px;color:#bcd0e9;display:none;z-index:3000}
+  .sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>US LawShield BINGO</h1>
+    <div class="controls">
+      <button id="btnRename" class="primary" title="Update your displayed name">Change Name</button>
+      <button id="btnClear" class="danger" title="Clear your 3 cards & marks on this account">Clear All Progress</button>
+      <a id="btnExport" class="primary" download="bingo-verification.png" href="#" title="Download the latest bingo verification image">Download Last Bingo</a>
+    </div>
+  </header>
+
+  <div class="legend">Mark a square by clicking it; you’ll be asked for a valid Member ID (2–3 letters + numbers, 5–10 chars total). Each player gets exactly three unique cards. Bingo types: Row/Column/Diagonal, Four Corners, T, X, and Blackout.</div>
+
+  <section id="cards" class="grid" aria-live="polite"></section>
+</div>
+
+<!-- Active players panel -->
+<aside class="players" aria-live="polite">
+  <h4>Active Players</h4>
+  <ul id="playersList"></ul>
+</aside>
+
+<!-- Member ID Modal -->
+<div id="idModal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="idModalTitle">
+  <div class="modal">
+    <h3 id="idModalTitle">Enter Member ID</h3>
+    <p>Format: 2–3 letters + numbers, 5–10 chars total. Example: <strong>AB12345</strong> or <strong>ABC1234567</strong>.</p>
+    <div class="row"><input id="memberInput" placeholder="ABC12345" maxlength="10" autocomplete="off" /></div>
+    <div class="btns">
+      <button class="btn" id="idCancel">Cancel</button>
+      <button class="btn primary" id="idSave">Save & Mark</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bingo Verification Modal -->
+<div id="verifyModal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="verifyTitle">
+  <div class="modal" id="verifyCard">
+    <h3 id="verifyTitle">Bingo Verified</h3>
+    <p id="verifyType">Type: —</p>
+    <div id="verifyList" style="margin-top:8px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px;white-space:pre-wrap;"></div>
+    <div class="btns">
+      <button class="btn" id="verifyClose">Close</button>
+      <button class="btn primary" id="verifyCopy">Copy Summary</button>
+      <button class="btn primary" id="verifySnap">Create Screenshot</button>
+    </div>
+  </div>
+</div>
+
+<!-- libs -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-cU4rQ6m0bWkP9h+5mJ6t3xeHhF8cP2WNdXGkQm2MAr8mL1kQ0u2s8e5q2tJrE7oL" crossorigin="anonymous"></script>
+
+<!-- Firebase (module) -->
+<script type="module">
+/** -------------------------
+ *  1) Firebase Bootstrap
+ *  -------------------------
+ *  Paste YOUR Firebase config below (from Project Settings → Your apps → Web).
+ *  You already created this in our earlier steps.
+ */
+const firebaseConfig = {
+  // 🔧 TODO: paste your real config here (keep keys; they are safe to expose in web apps)
+  apiKey: "PASTE_API_KEY",
+  authDomain: "uslawshield-bingo.firebaseapp.com",
+  databaseURL: "https://uslawshield-bingo-default-rtdb.firebaseio.com",
+  projectId: "uslawshield-bingo",
+  storageBucket: "uslawshield-bingo.firebasestorage.app",
+  messagingSenderId: "227127069053",
+  appId: "1:227127069053:web:be6acba57a6561ad9ce414",
+  measurementId: "G-Z2FXPKS7EY"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getDatabase, ref, child, get, set, update, push, onValue, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+const auth = getAuth(app);
+
+/** -------------------------
+ *  2) Game Config & Helpers
+ *  ------------------------- */
+const ALL_ITEMS = [
+  // core items (from your context)
+  "Single PR","Dual PR","Dual Monthly LOC","Single Monthly LOC","Single Annual LOC","Dual Annual LOC",
+  "Add Secondary Legacy (Monthly)","Add Secondary Legacy (Annual)","Conversion to Explore","Conversion to Navigate",
+  // your specific adds
+  "Save","Winback (monthly)","Winback (annual)"
+];
+// “< 3 ACW Expires” must appear exactly once on each card (not more, not zero)
+const ACW_ITEM = "< 3 ACW Expires";
+const FREE_POS = {r:2,c:2}; // center
+
+// Member ID: 2–3 letters + digits; total length 5–10
+const ID_RE = /^[A-Za-z]{2,3}\d{2,8}$/;
+
+const q = (s,el=document)=>el.querySelector(s);
+const qa = (s,el=document)=>[...el.querySelectorAll(s)];
+
+function uid(){ return Math.random().toString(36).slice(2); }
+function seedRand(seed){
+  // simple seeded generator (deterministic per player)
+  let h=0; for (let i=0;i<seed.length;i++) h=(h*31 + seed.charCodeAt(i))>>>0;
+  return ()=> (h = (1103515245*h + 12345) & 0x7fffffff) / 0x80000000;
+}
+function shuffleDet(arr, rng){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(rng()* (i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function saturdayThisWeek(){
+  const d=new Date(); const day=d.getDay(); // 0 Sun..6 Sat
+  const diff = (6 - day + 7)%7;
+  const sat = new Date(d); sat.setDate(d.getDate()+diff);
+  sat.setHours(23,59,59,999);
+  return sat.getTime();
+}
+
+/** -------------------------
+ *  3) Bingo Logic
+ *  ------------------------- */
+const LINES = (() => {
+  const lines=[];
+  // rows & cols
+  for(let r=0;r<5;r++){ lines.push([...Array(5)].map((_,c)=>[r,c])); }
+  for(let c=0;c<5;c++){ lines.push([...Array(5)].map((_,r)=>[r,c])); }
+  // diagonals
+  lines.push([[0,0],[1,1],[2,2],[3,3],[4,4]]);
+  lines.push([[0,4],[1,3],[2,2],[3,1],[0+4,0]]);
+  return lines;
+})();
+const FOUR_CORNERS = [[0,0],[0,4],[4,0],[4,4]];
+const T_PATTERN = ([...Array(5)].map((_,c)=>[0,c])).concat([[1,2],[2,2],[3,2],[4,2]]);
+const X_PATTERN = [[0,0],[1,1],[2,2],[3,3],[4,4],[0,4],[1,3],[3,1],[4,0]];
+
+function hasMarks(card){
+  return card.grid.some(row=>row.some(cell=>cell.marked || (cell.r===FREE_POS.r && cell.c===FREE_POS.c)));
+}
+function isMarked(card,r,c){
+  if(r===FREE_POS.r && c===FREE_POS.c) return true;
+  return !!card.grid[r][c].marked;
+}
+
+function findBingos(card){
+  if(!hasMarks(card)) return [];
+  const results=[];
+  // Rows/Cols/Diagonals
+  for(const line of LINES){
+    if(line.every(([r,c])=>isMarked(card,r,c))){
+      results.push({type:"Regular Bingo", cells:line});
+    }
+  }
+  // Four corners
+  if(FOUR_CORNERS.every(([r,c])=>isMarked(card,r,c))){
+    results.push({type:"Four Corners", cells:FOUR_CORNERS});
+  }
+  // T
+  if(T_PATTERN.every(([r,c])=>isMarked(card,r,c))){
+    results.push({type:"T Pattern", cells:T_PATTERN});
+  }
+  // X
+  if(X_PATTERN.every(([r,c])=>isMarked(card,r,c))){
+    results.push({type:"X Pattern", cells:X_PATTERN});
+  }
+  // Blackout
+  const all = [];
+  for(let r=0;r<5;r++) for(let c=0;c<5;c++) all.push([r,c]);
+  if(all.every(([r,c])=>isMarked(card,r,c))){
+    results.push({type:"BLACKOUT", cells:all});
+  }
+  return results;
+}
+
+/** -------------------------
+ *  4) UI Build
+ *  ------------------------- */
+const cardsEl = q('#cards');
+const idModal = q('#idModal');
+const memberInput = q('#memberInput');
+const idSave = q('#idSave');
+const idCancel = q('#idCancel');
+
+const verifyBg = q('#verifyModal');
+const verifyType = q('#verifyType');
+const verifyList = q('#verifyList');
+const verifyCard = q('#verifyCard');
+const verifySnap = q('#verifySnap');
+const verifyCopy = q('#verifyCopy');
+const verifyClose= q('#verifyClose');
+const btnClear = q('#btnClear');
+const btnRename = q('#btnRename');
+const btnExport = q('#btnExport');
+const playersList = q('#playersList');
+
+let DEVICE = { uid: null };
+let STATE = {
+  playerId: null,
+  playerName: null,
+  cards: [], // 3 cards
+  lastBingoPng: null,
+  activeCellTarget: null // {cardIndex,r,c}
+};
+
+function buildBlankCard(seedStr){
+  // Deterministic content:
+  const rng = seedRand(seedStr);
+  const pool = shuffleDet(ALL_ITEMS, rng);
+  // 25 cells total; reserve center FREE and exactly 1 ACW
+  // We'll take 24 non-FREE labels; among them, inject ACW exactly once (replace one slot).
+  const labels = pool.slice(0,24);
+  // Ensure ACW present exactly once
+  const chosenIndex = Math.floor(rng()*24);
+  labels[chosenIndex] = ACW_ITEM;
+
+  // Build 5x5, skipping center for FREE
+  const grid = [...Array(5)].map((_,r)=>[...Array(5)].map((_,c)=>({
+    r,c, item:null, marked:false, memberId:""
+  })));
+  let k=0;
+  for(let r=0;r<5;r++){
+    for(let c=0;c<5;c++){
+      if(r===FREE_POS.r && c===FREE_POS.c){ grid[r][c].item="FREE"; continue; }
+      grid[r][c].item = labels[k++];
+    }
+  }
+  return { grid };
+}
+
+function render(){
+  cardsEl.innerHTML="";
+  STATE.cards.forEach((card, idx)=>{
+    const cardEl=document.createElement('div');
+    cardEl.className='card';
+    cardEl.setAttribute('data-card', idx);
+    cardEl.innerHTML = `<h3>Card ${idx+1} of 3</h3><div class="board"></div>`;
+    const board = q('.board', cardEl);
+
+    for(let r=0;r<5;r++){
+      for(let c=0;c<5;c++){
+        const cell = card.grid[r][c];
+        const d = document.createElement('div');
+        d.className='cell';
+        if(r===FREE_POS.r && c===FREE_POS.c){ d.classList.add('free'); }
+        d.setAttribute('data-r', r); d.setAttribute('data-c', c);
+        d.setAttribute('title', cell.item);
+        d.innerHTML = `<div class="tiny"></div>`;
+        q('.tiny', d).textContent = cell.item;
+
+        if(cell.marked || (r===FREE_POS.r && c===FREE_POS.c)){
+          const s = document.createElement('div'); s.className='shield'; d.appendChild(s);
+        }
+        if(cell.memberId){
+          const b=document.createElement('div'); b.className='badge'; b.textContent=cell.memberId; d.appendChild(b);
+        }
+        // click handler (skip FREE)
+        if(!(r===FREE_POS.r && c===FREE_POS.c)){
+          d.addEventListener('click', ()=>{
+            STATE.activeCellTarget = { cardIndex: idx, r, c };
+            openIdModal();
+          });
+        } else {
+          d.classList.add('disabled');
+        }
+
+        board.appendChild(d);
+      }
+    }
+
+    cardsEl.appendChild(cardEl);
+  });
+}
+
+function openIdModal(){
+  memberInput.value="";
+  idModal.style.display='flex';
+  memberInput.focus();
+}
+function closeIdModal(){ idModal.style.display='none'; }
+
+function toast(msg,ms=1800){
+  let t=document.querySelector('.toast'); if(!t){ t=document.createElement('div');t.className='toast';document.body.appendChild(t); }
+  t.textContent=msg; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=>{t.style.display='none';},ms);
+}
+
+/** -------------------------
+ *  5) Firebase Data Model
+ *  -------------------------
+ *  /counters/nextPlayer -> number (used to allocate Player 1..10, max 10)
+ *  /assignments/{authUid} -> { playerId }
+ *  /players/{playerId} -> { name, createdAt, lastActive }
+ *  /cards/{playerId}/{0..2} -> card object { grid[5][5]... }
+ *  /bingos/{playerId}/{autoId} -> { type, at, entries:[{card,r,c,item,memberId}] }
+ */
+
+async function ensurePlayerAssigned(authUid){
+  // If this device already has an assignment, reuse it
+  const asn = await get(child(ref(db), `assignments/${authUid}`));
+  if(asn.exists()){
+    const playerId = asn.val().playerId;
+    return playerId;
+  }
+  // allocate sequential playerId 1..10
+  const counterRef = ref(db, 'counters/nextPlayer');
+  let assigned = null;
+  await runTransaction(counterRef, curr => {
+    const v = (typeof curr==='number'?curr:0);
+    if(v>=10) return; // cancel (no write), 10 allocated already
+    const next = (v||0)+1;
+    assigned = next;
+    return next;
+  });
+  if(!assigned){
+    alert("All 10 player slots are already assigned.");
+    throw new Error("players_full");
+  }
+  await set(ref(db, `assignments/${authUid}`), { playerId: assigned });
+  return assigned;
+}
+
+async function ensurePlayerName(playerId){
+  const key = `usl:name:${playerId}`;
+  let name = localStorage.getItem(key);
+  if(!name){
+    name = prompt("Enter your display name (First & Last):","") || "";
+    name = name.trim();
+    if(!name) name = `Player ${playerId}`;
+    localStorage.setItem(key, name);
+  }
+  await update(ref(db, `players/${playerId}`), {
+    name, createdAt: serverTimestamp(), lastActive: serverTimestamp()
+  });
+  STATE.playerName = name;
+}
+
+async function ensureCards(playerId){
+  const cardsSnap = await get(ref(db, `cards/${playerId}`));
+  if(cardsSnap.exists()){
+    STATE.cards = cardsSnap.val();
+    // Fix array holes to proper array
+    STATE.cards = [STATE.cards[0],STATE.cards[1],STATE.cards[2]];
+  } else {
+    // deterministically generate 3 cards based on playerId
+    const baseSeed = `p${playerId}-`;
+    const three = [0,1,2].map(i=>buildBlankCard(baseSeed + i));
+    await set(ref(db, `cards/${playerId}`), three);
+    STATE.cards = three;
+  }
+}
+
+function wirePresence(playerId){
+  // update lastActive every 10 seconds
+  setInterval(()=> {
+    update(ref(db, `players/${playerId}`), { lastActive: serverTimestamp() });
+  }, 10000);
+  // subscribe to cards updates in case another tab/device marks
+  onValue(ref(db, `cards/${playerId}`), snap=>{
+    if(snap.exists()){ STATE.cards = [snap.val()[0],snap.val()[1],snap.val()[2]]; render(); }
+  });
+  // subscribe players list
+  onValue(ref(db, `players`), snap=>{
+    const list = [];
+    if(snap.exists()){
+      const now = Date.now();
+      for(const [pid,info] of Object.entries(snap.val())){
+        list.push({ pid, name: info.name || `Player ${pid}`, lastActive: info.lastActive||0 });
+      }
+      list.sort((a,b)=>Number(a.pid)-Number(b.pid));
+    }
+    playersList.innerHTML = list.map(p=>`
+      <li><span class="dot" title="online"></span><strong style="min-width:62px;display:inline-block;">#${p.pid}</strong> ${escapeHtml(p.name)}</li>
+    `).join('');
+  });
+}
+
+function escapeHtml(str){ return (str||"").replace(/[&<>"']/g,s=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[s])); }
+
+/** -------------------------
+ *  6) Mark Cell (with Member ID)
+ *  ------------------------- */
+idSave.addEventListener('click', async ()=>{
+  const raw = (memberInput.value||"").trim();
+  if(!ID_RE.test(raw) || raw.length<5 || raw.length>10){
+    toast("Invalid Member ID. Use 2–3 letters + numbers, 5–10 chars total.");
+    return;
+  }
+  const t = STATE.activeCellTarget;
+  if(!t){ closeIdModal(); return; }
+
+  const card = STATE.cards[t.cardIndex];
+  const cell = card.grid[t.r][t.c];
+  cell.marked = true;
+  cell.memberId = raw.toUpperCase();
+
+  await update(ref(db, `cards/${STATE.playerId}/${t.cardIndex}/grid/${t.r}/${t.c}`), {
+    marked: true, memberId: cell.memberId
+  });
+
+  closeIdModal();
+  render();
+  await checkForBingoAndNotify(t.cardIndex);
+});
+idCancel.addEventListener('click', ()=>{ closeIdModal(); });
+
+/** -------------------------
+ *  7) Bingo Verify Modal
+ *  ------------------------- */
+async function checkForBingoAndNotify(cardIndex){
+  const card = STATE.cards[cardIndex];
+  const bingos = findBingos(card);
+  if(bingos.length===0) return;
+
+  // Prefer highest value type order
+  const order = ["BLACKOUT","X Pattern","T Pattern","Four Corners","Regular Bingo"];
+  bingos.sort((a,b)=>order.indexOf(a.type)-order.indexOf(b.type));
+  const hit = bingos[0];
+
+  // Gather entries with member IDs for those cells
+  const entries = hit.cells.map(([r,c])=>{
+    const cell = card.grid[r][c];
+    return {
+      card: cardIndex+1,
+      r, c,
+      item: cell.item,
+      memberId: (r===FREE_POS.r && c===FREE_POS.c) ? "FREE" : (cell.memberId || "")
+    };
+  });
+
+  // Write verification record
+  const recRef = push(ref(db, `bingos/${STATE.playerId}`));
+  await set(recRef, {
+    type: hit.type,
+    at: serverTimestamp(),
+    entries
+  });
+
+  // Show modal
+  verifyType.textContent = `Type: ${hit.type}`;
+  verifyList.textContent = entries.map(e=>`Card ${e.card} [${e.r+1},${e.c+1}]  •  ${e.item}  •  ${e.memberId}`).join("\n");
+  verifyBg.style.display='flex';
+}
+
+verifyClose.addEventListener('click', ()=>{ verifyBg.style.display='none'; });
+verifyCopy.addEventListener('click', async ()=>{
+  const s = `US LawShield BINGO — ${verifyType.textContent}\n${verifyList.textContent}`;
+  try{ await navigator.clipboard.writeText(s); toast("Copied verification to clipboard"); }catch{ toast("Copy failed"); }
+});
+verifySnap.addEventListener('click', async ()=>{
+  // screenshot the verifyCard
+  const canvas = await html2canvas(verifyCard, {backgroundColor:"#0f1621",scale:2});
+  const data = canvas.toDataURL("image/png");
+  STATE.lastBingoPng = data;
+  btnExport.href = data;
+  toast("Verification image ready (Download Last Bingo)");
+});
+
+/** -------------------------
+ *  8) Clear / Rename / Export
+ *  ------------------------- */
+btnClear.addEventListener('click', async ()=>{
+  if(!confirm("This will CLEAR all three cards and Member IDs for your player. Continue?")) return;
+  // rebuild deterministic fresh cards
+  const three = [0,1,2].map(i=>buildBlankCard(`p${STATE.playerId}-${i}`));
+  await set(ref(db, `cards/${STATE.playerId}`), three);
+  STATE.cards = three;
+  render();
+  toast("All progress cleared");
+});
+
+btnRename.addEventListener('click', async ()=>{
+  const current = STATE.playerName || `Player ${STATE.playerId}`;
+  const next = (prompt("Enter new display name:", current) || "").trim();
+  if(!next) return;
+  localStorage.setItem(`usl:name:${STATE.playerId}`, next);
+  STATE.playerName = next;
+  await update(ref(db, `players/${STATE.playerId}`), { name: next, lastActive: serverTimestamp() });
+  toast("Name updated");
+});
+
+/** -------------------------
+ *  9) Init Auth → Assign Player → Load Cards
+ *  ------------------------- */
+onAuthStateChanged(auth, async (u)=>{
+  if(!u){
+    await signInAnonymously(auth);
+    return;
+  }
+  DEVICE.uid = u.uid;
+
+  try{
+    const playerId = await ensurePlayerAssigned(DEVICE.uid);
+    STATE.playerId = playerId;
+    await ensurePlayerName(playerId);
+    await ensureCards(playerId);
+    render();
+    wirePresence(playerId);
+  }catch(e){
+    console.error(e);
+    if(e.message==="players_full"){
+      alert("Sorry — all 10 player slots are already taken.");
+    }
+  }
+});
+</script>
+</body>
+</html>
