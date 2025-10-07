@@ -813,24 +813,46 @@
 
     // Check if player session is valid in Firebase
     async function validatePlayerSession(playerId) {
+      console.log('Validating session for player ID:', playerId);
+      
       const playerRef = ref(database, 'players/' + playerId);
       const gameRef = ref(database, 'games/' + playerId);
       
-      const [playerSnapshot, gameSnapshot] = await Promise.all([
-        get(playerRef),
-        get(gameRef)
-      ]);
-      
-      // Both player and game must exist and be valid
-      if (playerSnapshot.exists() && gameSnapshot.exists()) {
-        const playerData = playerSnapshot.val();
-        const gameData = gameSnapshot.val();
+      try {
+        const [playerSnapshot, gameSnapshot] = await Promise.all([
+          get(playerRef),
+          get(gameRef)
+        ]);
         
-        // Check if session hasn't expired
-        const expirationDate = new Date(playerData.expiresAt);
-        if (expirationDate > new Date()) {
-          return { valid: true, playerData, gameData };
+        console.log('Player exists:', playerSnapshot.exists());
+        console.log('Game exists:', gameSnapshot.exists());
+        
+        // Both player and game must exist and be valid
+        if (playerSnapshot.exists() && gameSnapshot.exists()) {
+          const playerData = playerSnapshot.val();
+          const gameData = gameSnapshot.val();
+          
+          console.log('Player data:', playerData);
+          console.log('Game data:', gameData);
+          
+          // Check if session hasn't expired
+          const expirationDate = new Date(playerData.expiresAt);
+          const now = new Date();
+          console.log('Expiration date:', expirationDate);
+          console.log('Current date:', now);
+          console.log('Session expired?', expirationDate <= now);
+          
+          if (expirationDate > now) {
+            console.log('✅ Session is valid!');
+            return { valid: true, playerData, gameData };
+          } else {
+            console.log('❌ Session expired');
+          }
+        } else {
+          console.log('❌ Player or game data missing in Firebase');
         }
+      } catch (error) {
+        console.error('Error validating session:', error);
       }
       
       return { valid: false };
@@ -1057,17 +1079,33 @@
       const modal = document.getElementById('adminEditModal');
       const content = document.getElementById('adminEditContent');
       
-      let html = `<h3 style="color: #d51e47; margin-bottom: 20px;">Editing: ${playerName}</h3>`;
+      console.log('Showing edit modal for:', playerName);
+      console.log('Target game data:', targetGame);
+      console.log('Number of cards:', targetGame.cards ? targetGame.cards.length : 'NO CARDS');
+      
+      if (!targetGame.cards || targetGame.cards.length !== 3) {
+        alert('Error: Player card data is missing or corrupted');
+        return;
+      }
+      
+      let html = `<div style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px;">`;
+      html += `<strong>⚠️ Admin Edit Mode</strong><br>`;
+      html += `Editing: <strong>${playerName}</strong><br>`;
+      html += `Your own cards are preserved. Changes here only affect ${playerName}'s cards.`;
+      html += `</div>`;
+      
       html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">`;
       
       targetGame.cards.forEach((cardData, cardIndex) => {
+        console.log(`Rendering card ${cardIndex + 1}:`, cardData);
+        
         html += `<div style="background: white; border: 3px solid #0e1d61; border-radius: 10px; padding: 15px;">`;
-        html += `<h4 style="text-align: center; color: #d51e47; margin-bottom: 10px;">Card ${cardIndex + 1}</h4>`;
+        html += `<h4 style="text-align: center; color: #d51e47; margin-bottom: 10px; font-family: 'Anton', sans-serif; font-size: 1.5em;">CARD ${cardIndex + 1}</h4>`;
         html += `<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #0e1d61; border: 2px solid #0e1d61; border-radius: 5px;">`;
         
         // Header row
         ['B', 'I', 'N', 'G', 'O'].forEach(letter => {
-          html += `<div style="background: #0e1d61; color: #d51e47; font-weight: bold; padding: 8px; text-align: center; font-size: 1.2em;">${letter}</div>`;
+          html += `<div style="background: #0e1d61; color: #d51e47; font-weight: bold; padding: 10px; text-align: center; font-size: 1.5em; font-family: 'Anton', sans-serif;">${letter}</div>`;
         });
         
         // Grid cells
@@ -1079,21 +1117,23 @@
           const bgColor = isFree ? 'linear-gradient(135deg, #d51e47 0%, #e7d386 100%)' : (isMarked ? '#e3f2fd' : 'white');
           const textColor = isFree ? 'white' : '#0e1d61';
           const cursor = isFree ? 'default' : 'pointer';
+          const hoverStyle = isFree ? '' : 'onmouseover="this.style.background=\'#f0f0f0\'" onmouseout="this.style.background=\'' + bgColor + '\'"';
           
-          html += `<div onclick="adminToggleCell('${targetPlayerId}', ${cardIndex}, ${cellIndex})" 
-                        style="background: ${bgColor}; color: ${textColor}; padding: 10px 5px; min-height: 70px; 
+          html += `<div onclick="window.adminToggleCell('${targetPlayerId}', ${cardIndex}, ${cellIndex})" 
+                        ${hoverStyle}
+                        style="background: ${bgColor}; color: ${textColor}; padding: 10px 5px; min-height: 80px; 
                                display: flex; flex-direction: column; align-items: center; justify-content: center; 
-                               text-align: center; font-size: 0.75em; cursor: ${cursor}; position: relative; border: 1px solid #e0e0e0;">`;
+                               text-align: center; font-size: 0.8em; cursor: ${cursor}; position: relative; border: 1px solid #e0e0e0; font-weight: 600;">`;
           
           if (isFree) {
-            html += `<strong>FREE<br>SPACE</strong>`;
+            html += `<strong style="font-size: 1.1em;">FREE<br>SPACE</strong>`;
           } else {
-            html += `<div style="font-weight: 600;">${item}</div>`;
+            html += `<div style="font-weight: 700; line-height: 1.2;">${item}</div>`;
             if (isMarked && memberId) {
-              html += `<div style="background: #d51e47; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.9em; margin-top: 3px; font-family: monospace;">${memberId}</div>`;
+              html += `<div style="background: #d51e47; color: white; padding: 3px 6px; border-radius: 3px; font-size: 0.85em; margin-top: 5px; font-family: monospace; font-weight: 700;">${memberId}</div>`;
             }
             if (isMarked) {
-              html += `<div style="position: absolute; top: 2px; right: 2px; background: #4caf50; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em;">✓</div>`;
+              html += `<div style="position: absolute; top: 3px; right: 3px; background: #4caf50; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9em; font-weight: bold;">✓</div>`;
             }
           }
           
@@ -1104,8 +1144,8 @@
       });
       
       html += `</div>`;
-      html += `<div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px;">`;
-      html += `<strong>Instructions:</strong> Click any cell to toggle mark/unmark. Changes save automatically.`;
+      html += `<div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border: 2px solid #0e1d61; border-radius: 8px;">`;
+      html += `<strong>📝 Instructions:</strong> Click any cell to toggle mark/unmark. When marking, you'll be prompted for a Member ID. Changes save automatically to Firebase.`;
       html += `</div>`;
       
       content.innerHTML = html;
@@ -1233,24 +1273,30 @@
 
     // Load game state from Firebase
     async function loadGameState() {
-      playerId = getOrCreatePlayerId();
+      const storedPlayerId = localStorage.getItem('uslBingoPlayerId');
+      console.log('Stored player ID in localStorage:', storedPlayerId);
       
-      // First, validate if this player session exists in Firebase
+      if (!storedPlayerId) {
+        console.log('No stored player ID found - new session');
+        return null;
+      }
+      
+      playerId = storedPlayerId;
+      
+      // Validate if this player session exists in Firebase
       const validation = await validatePlayerSession(playerId);
       
       if (validation.valid) {
         // Session is valid, return the game data
-        console.log('Valid session found for player:', playerId);
+        console.log('✅ Valid session found, restoring game state');
         return validation.gameData;
       } else {
         // Session is invalid or expired
-        console.log('No valid session found for player:', playerId);
+        console.log('❌ Invalid session, clearing localStorage');
         
         // Clean up localStorage since session is invalid
         localStorage.removeItem('uslBingoPlayerId');
-        
-        // Generate a new player ID for fresh login
-        playerId = getOrCreatePlayerId();
+        playerId = null;
         
         return null;
       }
@@ -1272,6 +1318,12 @@
     }
 
     function initializeGame(playerName) {
+      // Generate new player ID if we don't have one
+      if (!playerId) {
+        playerId = getOrCreatePlayerId();
+        console.log('Generated new player ID:', playerId);
+      }
+      
       isAdmin = (playerName === ADMIN_NAME);
       
       gameState = {
@@ -1290,6 +1342,7 @@
         card.marked[12] = true;
       });
       
+      console.log('Saving new game state for player:', playerName);
       saveGameState();
       showPlayerInfo();
       renderCards();
@@ -1717,8 +1770,25 @@
       if (saved && saved.playerName) {
         // Valid session found - restore game
         console.log('Restoring session for:', saved.playerName);
+        console.log('Loaded game state:', saved);
+        
         gameState = saved;
         isAdmin = (gameState.playerName === ADMIN_NAME);
+        
+        // Verify cards exist
+        if (!gameState.cards || gameState.cards.length !== 3) {
+          console.error('❌ Cards data is missing or invalid!');
+          // Force re-login if cards are corrupted
+          localStorage.removeItem('uslBingoPlayerId');
+          gameState = null;
+          isAdmin = false;
+          document.getElementById('nameModal').style.display = 'block';
+          document.getElementById('nameInput').focus();
+          return;
+        }
+        
+        console.log('Cards loaded:', gameState.cards.length, 'cards');
+        
         showPlayerInfo();
         renderCards();
         updatePlayerListPanel();
