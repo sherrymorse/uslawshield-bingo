@@ -1794,6 +1794,8 @@
     };
     
     window.onload = async function() {
+      console.log('Page loading...');
+      
       offlineMode = localStorage.getItem('offlineMode') === 'true';
       
       if (offlineMode) {
@@ -1821,7 +1823,14 @@
         return;
       }
       
-      console.log('Page loading...');
+      // Show login modal immediately for new users
+      const storedPlayerId = localStorage.getItem('uslBingoPlayerId');
+      if (!storedPlayerId) {
+        console.log('No stored player ID - showing login');
+        document.getElementById('nameModal').style.display = 'block';
+        document.getElementById('nameInput').focus();
+        return;
+      }
       
       const saved = await loadGameState();
       
