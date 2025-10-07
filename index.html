@@ -302,7 +302,7 @@
       background: #f0f8ff !important;
     }
     
-    .bingo-cell.marked::after {
+    .bingo-cell.marked::before {
       content: '';
       position: absolute;
       top: 50%;
@@ -314,9 +314,29 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-      opacity: 0.9;
-      animation: markAnimation 0.3s ease-out;
-      pointer-events: none;
+      opacity: 0.3;
+      z-index: 1;
+    }
+    
+    .bingo-cell.marked::after {
+      content: attr(data-member-id);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: monospace;
+      font-size: 0.75em;
+      font-weight: 700;
+      color: #d51e47;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 3px 6px;
+      border-radius: 4px;
+      border: 2px solid #d51e47;
+      z-index: 2;
+      max-width: 90%;
+      text-align: center;
+      word-wrap: break-word;
+      line-height: 1.2;
     }
     
     @keyframes markAnimation {
@@ -590,7 +610,6 @@
   <div class="player-info" id="playerInfo" style="display: none;"></div>
 
   <div class="controls">
-    <button class="btn-primary" onclick="checkAllCardsForBingo()">Check All Cards for Bingo</button>
     <button class="btn-secondary" onclick="window.print()">Print Cards (PDF)</button>
     <button class="btn-secondary" onclick="confirmClearProgress()" style="background: #dc3545; color: white; border-color: #dc3545;">Clear All Progress</button>
   </div>
@@ -868,6 +887,10 @@
           
           if (cardData.marked[index]) {
             cell.classList.add('marked');
+            const memberId = cardData.memberIds[index];
+            if (memberId) {
+              cell.setAttribute('data-member-id', memberId);
+            }
           }
           
           grid.appendChild(cell);
@@ -1070,6 +1093,29 @@
         console.log('Checking card', i);
         checkForBingo(i);
       }
+    }
+
+    function confirmClearProgress() {
+      if (confirm('⚠️ Are you sure you want to clear ALL progress and start over?\n\nThis will:\n- Delete all marked squares\n- Remove all Member IDs\n- Reset all three cards\n- Keep your player name\n\nThis action cannot be undone!')) {
+        clearAllProgress();
+      }
+    }
+
+    function clearAllProgress() {
+      if (!gameState) return;
+      
+      // Reset all cards
+      gameState.cards.forEach(card => {
+        card.marked = new Array(25).fill(false);
+        card.memberIds = new Array(25).fill(null);
+        // Keep FREE space marked
+        card.marked[12] = true;
+      });
+      
+      saveGameState();
+      renderCards();
+      
+      alert('✅ All progress cleared! Your cards have been reset.');
     }
 
     function submitName() {
