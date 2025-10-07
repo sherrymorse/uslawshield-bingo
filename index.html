@@ -1764,13 +1764,16 @@
       window.location.reload();
     }
     
-    // Admin-only logout that clears session and forces fresh login
-    window.adminForceLogout = function() {
-      console.log('🚨 Admin force logout initiated');
-      localStorage.clear();
-      sessionStorage.clear();
-      location.href = location.href;
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const btn = document.getElementById('adminLogoutBtn');
+      if (btn) {
+        btn.onclick = function() {
+          localStorage.clear();
+          sessionStorage.clear();
+          window.location.href = window.location.href.split('?')[0];
+        };
+      }
+    });
     
     document.getElementById('nameInput').addEventListener('input', function(e) {
       const name = e.target.value.trim();
@@ -1848,22 +1851,6 @@
       }
       
       console.log('🚀 Loading application...');
-      
-      // CRITICAL: Check if we have a stored player ID and if it's admin, show logout button immediately
-      const storedPlayerId = localStorage.getItem('uslBingoPlayerId');
-      if (storedPlayerId) {
-        // Check if this is admin by looking at stored game state
-        const playerRef = ref(database, 'players/' + storedPlayerId);
-        get(playerRef).then(snapshot => {
-          if (snapshot.exists()) {
-            const playerData = snapshot.val();
-            if (playerData.name === ADMIN_NAME || playerData.name === '[nucca]') {
-              console.log('🔓 Admin detected, showing logout button early');
-              document.getElementById('adminLogoutBtn').style.display = 'inline-block';
-            }
-          }
-        });
-      }
       
       const saved = await loadGameState();
       
