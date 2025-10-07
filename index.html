@@ -89,11 +89,13 @@
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.98);
       border: 3px solid #0e1d61;
       border-radius: 10px;
       padding: 15px;
-      max-width: 250px;
+      max-width: 320px;
+      max-height: 500px;
+      overflow-y: auto;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       z-index: 100;
     }
@@ -107,20 +109,83 @@
       letter-spacing: 1px;
     }
     
+    .game-status {
+      background: linear-gradient(135deg, #e7d386 0%, #d4af37 100%);
+      color: #0e1d61;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 0.85em;
+      font-weight: 700;
+      text-align: center;
+    }
+    
     .player-list {
       font-size: 0.85em;
       color: #333;
-      max-height: 200px;
-      overflow-y: auto;
     }
     
     .player-list-item {
-      padding: 5px 0;
-      border-bottom: 1px solid #e0e0e0;
+      padding: 8px;
+      margin-bottom: 6px;
+      border-radius: 5px;
+      background: #f8f9fa;
+      border-left: 4px solid #0e1d61;
+      position: relative;
     }
     
-    .player-list-item:last-child {
-      border-bottom: none;
+    .player-list-item.admin {
+      border-left-color: #d51e47;
+      background: #fff5f5;
+    }
+    
+    .player-list-item.one-away {
+      border-left-color: #ffa500;
+      background: #fff8e1;
+      font-weight: 600;
+    }
+    
+    .player-list-item.two-away {
+      border-left-color: #4caf50;
+      background: #f1f8f4;
+    }
+    
+    .player-status {
+      font-size: 0.75em;
+      color: #666;
+      margin-top: 3px;
+    }
+    
+    .admin-badge {
+      display: inline-block;
+      background: #d51e47;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.7em;
+      margin-left: 5px;
+      font-weight: 700;
+    }
+    
+    .admin-controls {
+      margin-top: 5px;
+      display: flex;
+      gap: 5px;
+    }
+    
+    .admin-btn {
+      font-size: 0.7em;
+      padding: 3px 8px;
+      background: #0e1d61;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: 'Oswald', sans-serif;
+    }
+    
+    .admin-btn:hover {
+      background: #d51e47;
     }
     
     .controls {
@@ -299,7 +364,15 @@
     
     .bingo-cell.marked {
       position: relative;
-      background: #f0f8ff !important;
+      background: linear-gradient(135deg, rgba(240, 248, 255, 0.95) 0%, rgba(230, 240, 255, 0.95) 100%) !important;
+    }
+    
+    .bingo-cell.marked .cell-text {
+      position: relative;
+      z-index: 1;
+      font-size: 0.75em;
+      color: #0e1d61;
+      opacity: 0.7;
     }
     
     .bingo-cell.marked::before {
@@ -308,35 +381,33 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 80%;
-      height: 80%;
+      width: 60%;
+      height: 60%;
       background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjExNSIgdmlld0JveD0iMCAwIDEwMCAxMTUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPCEtLSBPdXRlciBTaGllbGQgLS0+CiAgPHBhdGggZD0iTTUwIDVMMTAgMjBWNTBDMTAgNzAgMjAgOTUgNTAgMTEwQzgwIDk1IDkwIDcwIDkwIDUwVjIwTDUwIDVaIiBmaWxsPSIjMWUxZTFlIiBzdHJva2U9IiMxZTFlMWUiIHN0cm9rZS13aWR0aD0iMiIvPgogIDxwYXRoIGQ9Ik01MCA4TDEzIDIyVjUwQzEzIDY5IDE5IDkyIDUwIDEwNkM4MSA5MiA4NyA2OSA4NyA1MFYyMkw1MCA4WiIgZmlsbD0iI2Q1MWU0NyIvPgogIDwhLS0gQ3JlYW0gU2VjdGlvbiAtLT4KICA8cGF0aCBkPSJNNTAgNTVMMTMgNTBWNTBDMTMgNjkgMTkgOTIgNTAgMTA2QzgxIDkyIDg3IDY5IDg3IDUwVjUwTDUwIDU1WiIgZmlsbD0iI2Y0ZTVjMiIvPgogIDwhLS0gQmFubmVyIC0tPgogIDxyZWN0IHg9IjIwIiB5PSIzNSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjEyIiBmaWxsPSIjMGUxZDYxIiByeD0iMiIvPgogIDx0ZXh0IHg9IjUwIiB5PSI0NCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjgiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VS5TLiBMYXdTaGllbGQ8L3RleHQ+CiAgPCEtLSBTY2FsZXMgb2YgSnVzdGljZSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1MCwgNzApIHNjYWxlKDAuMykiPgogICAgPGxpbmUgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjQwIiBzdHJva2U9IiMwZTFkNjEiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgPGxpbmUgeDE9Ii0zMCIgeTE9IjAiIHgyPSIzMCIgeTI9IjAiIHN0cm9rZT0iIzBlMWQ2MSIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgICA8Y2lyY2xlIGN4PSItMzAiIGN5PSItNSIgcj0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGUxZDYxIiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIDxjaXJjbGUgY3g9IjMwIiBjeT0iLTUiIHI9IjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBlMWQ2MSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPC9nPgo8L3N2Zz4=');
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-      opacity: 0.3;
-      z-index: 1;
+      opacity: 0.25;
+      z-index: 2;
+      pointer-events: none;
     }
     
     .bingo-cell.marked::after {
       content: attr(data-member-id);
       position: absolute;
-      top: 50%;
+      bottom: 5px;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translateX(-50%);
       font-family: monospace;
-      font-size: 0.75em;
+      font-size: 0.7em;
       font-weight: 700;
-      color: #d51e47;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 3px 6px;
-      border-radius: 4px;
-      border: 2px solid #d51e47;
-      z-index: 2;
-      max-width: 90%;
-      text-align: center;
-      word-wrap: break-word;
-      line-height: 1.2;
+      color: white;
+      background: #d51e47;
+      padding: 2px 6px;
+      border-radius: 3px;
+      z-index: 3;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     
     .modal {
@@ -705,10 +776,13 @@
     ];
 
     const MAX_PLAYERS = 10;
+    const ADMIN_NAME = "Sherry Morse"; // Admin user
     let currentCell = null;
     let currentCardIndex = null;
     let gameState = null;
     let playerId = null;
+    let isAdmin = false;
+    let currentGameType = "Any Line"; // Default game type
 
     // Get or create player ID from localStorage
     function getOrCreatePlayerId() {
@@ -720,26 +794,184 @@
       return id;
     }
 
-    // Load player list from Firebase
+    // Load player list from Firebase and calculate distances to bingo
     function updatePlayerListPanel() {
       const playersRef = ref(database, 'players');
-      onValue(playersRef, (snapshot) => {
+      const gamesRef = ref(database, 'games');
+      
+      Promise.all([
+        get(playersRef),
+        get(gamesRef)
+      ]).then(([playersSnapshot, gamesSnapshot]) => {
         const panel = document.getElementById('playerListPanel');
-        const players = snapshot.val();
+        const players = playersSnapshot.val();
+        const games = gamesSnapshot.val();
+        
+        console.log('Players data from Firebase:', players);
         
         if (!players || Object.keys(players).length === 0) {
           panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
-        } else {
-          const playerArray = Object.values(players).filter(p => {
-            const expirationDate = new Date(p.expiresAt);
-            return expirationDate > new Date();
-          });
-          
-          panel.innerHTML = playerArray.map((p, idx) => 
-            `<div class="player-list-item">${idx + 1}. ${p.name}</div>`
-          ).join('');
+          return;
         }
+        
+        const now = new Date();
+        const playerArray = Object.values(players).filter(p => {
+          if (!p.expiresAt) return false;
+          const expirationDate = new Date(p.expiresAt);
+          return expirationDate > now;
+        }).sort((a, b) => {
+          return new Date(a.lastActive) - new Date(b.lastActive);
+        });
+        
+        console.log('Active players:', playerArray);
+        
+        if (playerArray.length === 0) {
+          panel.innerHTML = '<div style="color: #999; font-style: italic;">No active players yet</div>';
+          return;
+        }
+        
+        // Add game status at top
+        let html = `<div class="game-status">🎮 Playing: ${currentGameType}</div>`;
+        
+        playerArray.forEach((p, idx) => {
+          const playerGame = games && games[p.id];
+          const distanceToBingo = playerGame ? calculateMinDistanceToBingo(playerGame) : null;
+          
+          let itemClass = 'player-list-item';
+          let statusText = '';
+          
+          const playerIsAdmin = p.name === ADMIN_NAME;
+          
+          if (playerIsAdmin) {
+            itemClass += ' admin';
+          } else if (distanceToBingo !== null) {
+            if (distanceToBingo === 1) {
+              itemClass += ' one-away';
+              statusText = '<div class="player-status">🔥 1 away from BINGO!</div>';
+            } else if (distanceToBingo === 2) {
+              itemClass += ' two-away';
+              statusText = '<div class="player-status">⚡ 2 away from BINGO</div>';
+            }
+          }
+          
+          html += `<div class="${itemClass}">`;
+          html += `${idx + 1}. ${p.name}`;
+          
+          if (playerIsAdmin) {
+            html += `<span class="admin-badge">ADMIN</span>`;
+          }
+          
+          html += statusText;
+          
+          // Show admin controls if current user is admin and this is not the admin's own card
+          if (isAdmin && p.id !== playerId) {
+            html += `<div class="admin-controls">`;
+            html += `<button class="admin-btn" onclick="adminClearPlayer('${p.id}')">Clear</button>`;
+            html += `<button class="admin-btn" onclick="adminEditPlayer('${p.id}')">Edit</button>`;
+            html += `</div>`;
+          }
+          
+          html += `</div>`;
+        });
+        
+        panel.innerHTML = html;
       });
+    }
+    
+    // Calculate minimum distance to any bingo pattern
+    function calculateMinDistanceToBingo(playerGame) {
+      if (!playerGame ||!playerGame.cards) return null;
+      
+      let minDistance = Infinity;
+      
+      playerGame.cards.forEach(card => {
+        if (!card.marked) return;
+        
+        const patterns = getAllBingoPatterns();
+        
+        patterns.forEach(pattern => {
+          const unmarkedCount = pattern.indices.filter(i => !card.marked[i]).length;
+          if (unmarkedCount < minDistance) {
+            minDistance = unmarkedCount;
+          }
+        });
+      });
+      
+      return minDistance === Infinity ? null : minDistance;
+    }
+    
+    // Get all possible bingo patterns
+    function getAllBingoPatterns() {
+      const patterns = [];
+      
+      // Rows
+      for (let row = 0; row < 5; row++) {
+        const rowIndices = [];
+        for (let col = 0; col < 5; col++) {
+          rowIndices.push(row * 5 + col);
+        }
+        patterns.push({ indices: rowIndices });
+      }
+      
+      // Columns
+      for (let col = 0; col < 5; col++) {
+        const colIndices = [];
+        for (let row = 0; row < 5; row++) {
+          colIndices.push(row * 5 + col);
+        }
+        patterns.push({ indices: colIndices });
+      }
+      
+      // Diagonals
+      patterns.push({ indices: [0, 6, 12, 18, 24] });
+      patterns.push({ indices: [4, 8, 12, 16, 20] });
+      
+      // Four corners
+      patterns.push({ indices: [0, 4, 20, 24] });
+      
+      // T pattern
+      patterns.push({ indices: [0, 1, 2, 3, 4, 7, 12, 17, 22] });
+      
+      // X pattern
+      patterns.push({ indices: [0, 4, 6, 8, 12, 16, 18, 20, 24] });
+      
+      return patterns;
+    }
+    
+    // Admin: Clear a player's cards
+    window.adminClearPlayer = async function(targetPlayerId) {
+      if (!isAdmin) {
+        alert('Admin access only');
+        return;
+      }
+      
+      if (!confirm('Clear all progress for this player?')) return;
+      
+      const gameRef = ref(database, 'games/' + targetPlayerId);
+      const snapshot = await get(gameRef);
+      
+      if (snapshot.exists()) {
+        const targetGame = snapshot.val();
+        targetGame.cards.forEach(card => {
+          card.marked = new Array(25).fill(false);
+          card.memberIds = new Array(25).fill(null);
+          card.marked[12] = true; // Keep FREE space
+        });
+        
+        await set(gameRef, targetGame);
+        alert('Player cards cleared!');
+      }
+    }
+    
+    // Admin: Edit a player's cards
+    window.adminEditPlayer = async function(targetPlayerId) {
+      if (!isAdmin) {
+        alert('Admin access only');
+        return;
+      }
+      
+      alert('Admin Edit Mode: You can now click on any cell in any player\'s cards to mark/unmark them. This feature will be available in the next update.');
+      // TODO: Implement modal to show player's cards and allow editing
     }
 
     // Save game state to Firebase
@@ -798,9 +1030,12 @@
     }
 
     function initializeGame(playerName) {
+      isAdmin = (playerName === ADMIN_NAME);
+      
       gameState = {
         playerId: playerId,
         playerName: playerName,
+        isAdmin: isAdmin,
         cards: [
           { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
           { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
@@ -816,11 +1051,16 @@
       saveGameState();
       showPlayerInfo();
       renderCards();
+      updatePlayerListPanel();
     }
 
     function showPlayerInfo() {
       const playerInfo = document.getElementById('playerInfo');
-      playerInfo.textContent = `Welcome, ${gameState.playerName}! 🎯`;
+      let infoText = `Welcome, ${gameState.playerName}! 🎯`;
+      if (isAdmin) {
+        infoText += ' <span style="background: #d51e47; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">👑 ADMIN</span>';
+      }
+      playerInfo.innerHTML = infoText;
       playerInfo.style.display = 'block';
     }
 
@@ -873,7 +1113,7 @@
               <span class="free-space-text">FREE<br>SPACE</span>
             `;
           } else {
-            cell.textContent = item;
+            cell.innerHTML = `<span class="cell-text">${item}</span>`;
             cell.onclick = () => handleCellClick(cardIndex, index);
           }
           
@@ -942,6 +1182,9 @@
       renderCards();
       
       checkForBingo(cardIdx);
+      
+      // Update player list to refresh bingo distances
+      setTimeout(() => updatePlayerListPanel(), 500);
     }
 
     function closeModal() {
@@ -1091,9 +1334,9 @@
       
       await saveGameState();
       renderCards();
+      updatePlayerListPanel();
       
-      alert('✅ All progress cleared! Refreshing page to ensure sync...');
-      window.location.reload(true);
+      alert('✅ All progress cleared! Your cards have been reset.');
     }
 
     window.submitName = async function() {
@@ -1132,17 +1375,29 @@
     // Initialize app
     window.onload = async function() {
       playerId = getOrCreatePlayerId();
-      updatePlayerListPanel();
       
       const saved = await loadGameState();
       if (saved) {
         gameState = saved;
+        isAdmin = (gameState.playerName === ADMIN_NAME);
         showPlayerInfo();
         renderCards();
       } else {
         document.getElementById('nameModal').style.display = 'block';
         document.getElementById('nameInput').focus();
       }
+      
+      // Set up real-time listener for player list updates
+      const playersRef = ref(database, 'players');
+      onValue(playersRef, () => {
+        updatePlayerListPanel();
+      });
+      
+      // Also listen to games for bingo distance updates
+      const gamesRef = ref(database, 'games');
+      onValue(gamesRef, () => {
+        updatePlayerListPanel();
+      });
     };
   </script>
 </body>
