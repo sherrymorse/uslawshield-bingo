@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -668,6 +669,7 @@
     <button class="btn-secondary" onclick="window.print()">Print Cards (PDF)</button>
     <button class="btn-secondary" onclick="confirmClearProgress()" style="background: #dc3545; color: white; border-color: #dc3545;">Clear All Progress</button>
     <button id="adminClearAllBtn" class="btn-secondary" onclick="adminClearAllPlayers()" style="background: #8b0000; color: white; border-color: #8b0000; display: none;">🚫 Remove All Players</button>
+    <button id="adminManageRequestsBtn" class="btn-secondary" onclick="manageRequests()" style="display: none;">Manage Requests</button>
   </div>
   <div class="cards-container" id="cardsContainer"></div>
   <!-- Active Players Panel -->
@@ -693,6 +695,12 @@
       </div>
       <div class="modal-footer">
         <button class="btn-primary" onclick="submitName()">Start Playing</button>
+      </div>
+      <div style="text-align: center; margin-top: 15px;">
+        <button class="btn-secondary" style="background: #ffc107; color: #0e1d61;" onclick="requestAccess()">Request Access if Having Issues</button>
+      </div>
+      <div style="text-align: center; margin-top: 10px;">
+        <button class="btn-secondary" onclick="enterApprovalCode()">Enter Approval Code</button>
       </div>
     </div>
   </div>
@@ -855,7 +863,7 @@
           const expirationDate = new Date(p.expiresAt);
           return expirationDate > now;
         }).sort((a, b) => {
-          return new Date(b.lastActive) - new Date(a.lastActive); // Changed to descending for most recent first
+          return new Date(b.lastActive) - new Date(a.lastActive);
         });
         console.log('Active players:', playerArray);
         if (playerArray.length === 0) {
@@ -890,6 +898,7 @@
             html += `<div class="admin-controls">`;
             html += `<button class="admin-btn" onclick="window.adminClearPlayer('${p.id}')">Clear</button>`;
             html += `<button class="admin-btn" onclick="window.adminEditPlayer('${p.id}')">Edit</button>`;
+            html += `<button class="admin-btn" onclick="window.adminKickPlayer('${p.id}')">Kick</button>`;
             html += `</div>`;
           }
           html += `</div>`;
@@ -965,6 +974,18 @@
         alert('Player cards cleared!');
       }
     }
+    // Admin: Kick a player
+    window.adminKickPlayer = async function(targetPlayerId) {
+      if (!isAdmin) {
+        alert('Admin access only');
+        return;
+      }
+      if (!confirm('Kick this player from the game? They will need to log in again.')) return;
+      await remove(ref(database, 'players/' + targetPlayerId));
+      await remove(ref(database, 'games/' + targetPlayerId));
+      alert('Player kicked!');
+      updatePlayerListPanel();
+    }
     // Admin: Edit a player's cards
     window.adminEditPlayer = async function(targetPlayerId) {
       if (!isAdmin) {
@@ -1009,7 +1030,12 @@
         alert('Error: Player card data is missing or corrupted');
         return;
       }
-      let html = `<div style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px;">`;
+      let html = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">`;
+      html += `<h2 style="font-family: 'Anton', sans-serif; color: #0e1d61; margin: 0;">👑 Admin Edit Mode</h2>`;
+      html += `<button class="btn-secondary close-btn" onclick="closeAdminEdit()">Exit Edit Mode</button>`;
+      html += `<button class="btn-secondary" style="background: #8b0000; color: white; border-color: #8b0000;" onclick="adminKickPlayer('${targetPlayerId}'); closeAdminEdit()">Kick Player</button>`;
+      html += `</div>`;
+      html += `<div style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px;">`;
       html += `<strong>⚠️ Admin Edit Mode</strong><br>`;
       html += `Editing: <strong>${playerName}</strong><br>`;
       html += `Your own cards are preserved. Changes here only affect ${playerName}'s cards.`;
@@ -1167,8 +1193,11 @@
       playerId = storedPlayerId;
       const validation = await validatePlayerSession(playerId);
       if (validation.valid) {
+        // Session is valid, return the game data
+        console.log('✅ Valid session found, restoring game state');
         return validation.gameData;
       } else {
+        // Session is invalid or expired
         console.log('❌ Invalid session, clearing localStorage');
         localStorage.removeItem('uslBingoPlayerId');
         playerId = null;
@@ -1219,8 +1248,9 @@
       let infoText = `Welcome, ${gameState.playerName}! 🎯`;
       if (isAdmin) {
         infoText += ' <span style="background: #d51e47; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">👑 ADMIN</span>';
-        // Show admin clear all button
+        // Show admin buttons
         document.getElementById('adminClearAllBtn').style.display = 'inline-block';
+        document.getElementById('adminManageRequestsBtn').style.display = 'inline-block';
       }
       playerInfo.innerHTML = infoText;
       playerInfo.style.display = 'block';
@@ -1434,7 +1464,7 @@
       document.getElementById('bingoModal').style.display = 'none';
     }
     window.confirmClearProgress = function() {
-      if (confirm('⚠️ Are you sure you want to clear ALL progress and start over?\n\nThis will:\n- Delete all marked squares\n- Remove all Member IDs\n- Reset all three cards\n- Keep your player name\n\nThis action cannot be undone!')) {
+      if (confirm('⚠️ Are you sure you want to clear ALL progress and start over?\n\nThis will:\n- Delete all all marked squares\n- Remove all Member IDs\n- Reset all three cards\n- Keep your player name\n\nThis action cannot be undone!')) {
         clearAllProgress();
       }
     }
@@ -1513,6 +1543,72 @@
       }
       document.getElementById('nameModal').style.display = 'none';
       initializeGame(name);
+    }
+    window.requestAccess = function() {
+      const name = prompt('Enter your name for access request:');
+      if (!name) return;
+      const token = Math.random().toString(36).substr(2, 8).toUpperCase();
+      set(ref(database, 'requests/' + token), { name, timestamp: new Date().toISOString() });
+      alert('Your request token: ' + token + '\nGive this to Sherry Morse to approve.');
+    }
+    window.enterApprovalCode = async function() {
+      const code = prompt('Enter the approval code from admin:');
+      if (!code) return;
+      const snapshot = await get(ref(database, 'approved/' + code.toUpperCase()));
+      if (snapshot.exists()) {
+        const { playerId } = snapshot.val();
+        localStorage.setItem('uslBingoPlayerId', playerId);
+        await remove(ref(database, 'approved/' + code));
+        window.location.reload();
+      } else {
+        alert('Invalid or expired approval code');
+      }
+    }
+    window.manageRequests = async function() {
+      const modal = document.getElementById('adminEditModal');
+      modal.style.display = 'block';
+      const content = document.getElementById('adminEditContent');
+      content.innerHTML = '<h3>Pending Access Requests</h3>';
+      const snapshot = await get(ref(database, 'requests'));
+      if (snapshot.exists()) {
+        const requests = snapshot.val();
+        let html = '';
+        Object.entries(requests).forEach(([token, req]) => {
+          html += `<div style="padding: 10px; border-bottom: 1px solid #ccc;">Name: ${req.name}<br>Time: ${req.timestamp}<br>Token: ${token}<br><button onclick="approveRequest('${token}', '${req.name}')">Approve</button></div>`;
+        });
+        content.innerHTML += html;
+      } else {
+        content.innerHTML += 'No pending requests';
+      }
+    }
+    window.approveRequest = async function(token, name) {
+      const approvalCode = Math.random().toString(36).substr(2, 8).toUpperCase();
+      const newPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const newGameState = {
+        playerId: newPlayerId,
+        playerName: name,
+        isAdmin: false,
+        cards: [
+          { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
+          { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
+          { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) }
+        ],
+        createdAt: new Date().toISOString()
+      };
+      newGameState.cards.forEach(card => card.marked[12] = true);
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 7);
+      await set(ref(database, 'games/' + newPlayerId), newGameState);
+      await set(ref(database, 'players/' + newPlayerId), {
+        id: newPlayerId,
+        name: name,
+        expiresAt: expirationDate.toISOString(),
+        lastActive: new Date().toISOString()
+      });
+      await set(ref(database, 'approved/' + approvalCode), { playerId: newPlayerId });
+      await remove(ref(database, 'requests/' + token));
+      alert('Player approved! Give this approval code to the user: ' + approvalCode + '\nThey will enter it to join.');
+      manageRequests();
     }
     // Show/hide admin password field when admin name is entered
     document.getElementById('nameInput').addEventListener('input', function(e) {
@@ -1594,7 +1690,6 @@
         console.log('No valid session, showing login screen');
         gameState = null;
         isAdmin = false;
-        localStorage.removeItem('uslBingoPlayerId'); // Clear any invalid stored ID
         document.getElementById('nameModal').style.display = 'block';
         document.getElementById('nameInput').focus();
       }
@@ -1602,6 +1697,7 @@
       const playersRef = ref(database, 'players');
       onValue(playersRef, (snapshot) => {
         console.log('Player list changed, updating...');
+        // Update for everyone who is logged in
         if (gameState) {
           updatePlayerListPanel();
         }
@@ -1631,3 +1727,4 @@
   </script>
 </body>
 </html>
+```
