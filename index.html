@@ -846,6 +846,7 @@
       const card = gameState.cards[cardIndex];
       const bingoPatterns = [];
       
+      // Check rows
       for (let row = 0; row < 5; row++) {
         const rowIndices = [];
         let rowComplete = true;
@@ -854,11 +855,10 @@
           rowIndices.push(index);
           if (!card.marked[index]) {
             rowComplete = false;
-            break;
           }
         }
         if (rowComplete) {
-          bingoPatterns.push({ type: 'Row ' + (row + 1), indices: rowIndices });
+          bingoPatterns.push({ type: 'BINGO - Row ' + (row + 1), indices: rowIndices });
         }
       }
       
