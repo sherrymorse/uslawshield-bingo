@@ -669,6 +669,7 @@
   <div class="controls">
     <button class="btn-secondary" onclick="window.print()">Print Cards (PDF)</button>
     <button class="btn-secondary" onclick="confirmClearProgress()" style="background: #dc3545; color: white; border-color: #dc3545;">Clear All Progress</button>
+    <button id="adminClearAllBtn" class="btn-secondary" onclick="adminClearAllPlayers()" style="background: #8b0000; color: white; border-color: #8b0000; display: none;">🚫 Remove All Players</button>
   </div>
 
   <div class="cards-container" id="cardsContainer"></div>
@@ -1110,6 +1111,58 @@
         updatePlayerListPanel();
       }
     }
+    
+    // Admin: Clear all players from the system
+    window.adminClearAllPlayers = async function() {
+      if (!isAdmin) {
+        alert('Admin access only');
+        return;
+      }
+      
+      if (!confirm('⚠️ WARNING: This will remove ALL players from the game and force everyone to log in again.\n\nAre you sure you want to continue?')) {
+        return;
+      }
+      
+      try {
+        const playersRef = ref(database, 'players');
+        const gamesRef = ref(database, 'games');
+        
+        const [playersSnapshot, gamesSnapshot] = await Promise.all([
+          get(playersRef),
+          get(gamesRef)
+        ]);
+        
+        const removePromises = [];
+        
+        // Remove all players except current admin
+        if (playersSnapshot.exists()) {
+          const players = playersSnapshot.val();
+          Object.keys(players).forEach(id => {
+            if (id !== playerId) {
+              removePromises.push(remove(ref(database, 'players/' + id)));
+            }
+          });
+        }
+        
+        // Remove all games except current admin
+        if (gamesSnapshot.exists()) {
+          const games = gamesSnapshot.val();
+          Object.keys(games).forEach(id => {
+            if (id !== playerId) {
+              removePromises.push(remove(ref(database, 'games/' + id)));
+            }
+          });
+        }
+        
+        await Promise.all(removePromises);
+        
+        alert('✅ All players have been removed from the game. They will need to log in again.');
+        updatePlayerListPanel();
+      } catch (error) {
+        console.error('Error clearing players:', error);
+        alert('Error clearing players. Please try again.');
+      }
+    }
 
     // Save game state to Firebase
     async function saveGameState() {
@@ -1196,6 +1249,8 @@
       let infoText = `Welcome, ${gameState.playerName}! 🎯`;
       if (isAdmin) {
         infoText += ' <span style="background: #d51e47; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9em;">👑 ADMIN</span>';
+        // Show admin clear all button
+        document.getElementById('adminClearAllBtn').style.display = 'inline-block';
       }
       playerInfo.innerHTML = infoText;
       playerInfo.style.display = 'block';
@@ -1528,22 +1583,23 @@
       // If admin is attempting to log in, check if they already have an active session
       if (isAttemptingAdmin) {
         const playersRef = ref(database, 'players');
+        const gamesRef = ref(database, 'games');
         const playersSnapshot = await get(playersRef);
         
         if (playersSnapshot.exists()) {
           const players = playersSnapshot.val();
-          const existingAdmin = Object.values(players).find(p => {
-            const expirationDate = new Date(p.expiresAt);
-            return p.name === ADMIN_NAME && 
-                   expirationDate > new Date() &&
-                   p.id !== playerId;
+          
+          // Remove ALL existing admin sessions
+          const removePromises = [];
+          Object.entries(players).forEach(([id, p]) => {
+            if (p.name === ADMIN_NAME && id !== playerId) {
+              removePromises.push(remove(ref(database, 'players/' + id)));
+              removePromises.push(remove(ref(database, 'games/' + id)));
+            }
           });
           
-          if (existingAdmin) {
-            // Admin is already logged in from another session
-            // Allow them to take over by clearing the old session
-            await remove(ref(database, 'players/' + existingAdmin.id));
-            await remove(ref(database, 'games/' + existingAdmin.id));
+          if (removePromises.length > 0) {
+            await Promise.all(removePromises);
           }
         }
       }
@@ -1618,9 +1674,21 @@
       
       // Set up real-time listener for player list updates
       const playersRef = ref(database, 'players');
-      onValue(playersRef, () => {
+      onValue(playersRef, (snapshot) => {
         if (gameState) {
           updatePlayerListPanel();
+        } else {
+          // If we were logged in but our player data was removed, force re-login
+          if (playerId) {
+            const players = snapshot.val();
+            if (!players || !players[playerId]) {
+              alert('You have been removed from the game. Please log in again.');
+              gameState = null;
+              isAdmin = false;
+              localStorage.removeItem('uslBingoPlayerId');
+              window.location.reload();
+            }
+          }
         }
       });
       
