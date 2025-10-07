@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>US LawShield BINGO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Anton&family=Oswald:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Oswald', sans-serif;
+      background: linear-gradient(135deg, #0e1d61 0%, #1a2a7a 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+      padding: 30px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .main-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 3.8em;
+      font-weight: 900;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+    }
+    
+    .subtitle {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.4em;
+      font-weight: 700;
+      color: #0e1d61;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 15px 0;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+    
+    .tagline {
+      font-family: 'PT Sans', sans-serif;
+      font-size: 1.1em;
+      font-weight: 700;
+      color: #e7d386;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 10px;
+    }
+    
+    .player-info {
+      text-align: center;
+      color: white;
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(231, 211, 134, 0.2);
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    
+    .controls {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    button {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1em;
+      font-weight: 700;
+      padding: 12px 30px;
+      margin: 0 10px 10px 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #d51e47 0%, #b01838 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(213, 30, 71, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(213, 30, 71, 0.6);
+    }
+    
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #0e1d61;
+      border: 2px solid #0e1d61;
+    }
+    
+    .btn-secondary:hover {
+      background: #0e1d61;
+      color: white;
+    }
+    
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 30px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    
+    .bingo-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      page-break-after: always;
+      border: 4px solid #0e1d61;
+    }
+    
+    .card-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .bingo-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 4em;
+      font-weight: 900;
+      color: #d51e47;
+      letter-spacing: 15px;
+      text-shadow: 4px 4px 0px rgba(213, 30, 71, 0.3),
+                   6px 6px 0px rgba(213, 30, 71, 0.2);
+      margin-bottom: 10px;
+    }
+    
+    .card-number {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.3em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #d51e47 0%, #0e1d61 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+    }
+    
+    .shield-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #e7d386 0%, #d4af37 100%);
+      color: #0e1d61;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 3px;
+      background: #0e1d61;
+      border: 3px solid #0e1d61;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .bingo-header {
+      background: #0e1d61;
+      color: #d51e47;
+      font-family: 'Anton', sans-serif;
+      font-size: 36px;
+      font-weight: 400;
+      padding: 15px;
+      text-align: center;
+      border: 2px solid #e7d386;
+    }
+    
+    .bingo-cell {
+      background: white;
+      padding: 12px 8px;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: #0e1d61;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .bingo-cell:hover:not(.free-space):not(.marked) {
+      background: #f0f0f0;
+      transform: scale(1.02);
+    }
+    
+    .free-space {
+      background: linear-gradient(135deg, #d51e47 0%, #e7d386 100%);
+      color: white;
+      font-weight: 700;
+      font-size: 1em;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .free-space-text {
+      position: relative;
+      z-index: 2;
+    }
+    
+    .free-space svg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70%;
+      height: 70%;
+      opacity: 0.7;
+      z-index: 1;
+    }
+    
+    .bingo-cell.marked {
+      position: relative;
+    }
+    
+    .bingo-cell.marked::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 80%;
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjExNSIgdmlld0JveD0iMCAwIDEwMCAxMTUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPCEtLSBPdXRlciBTaGllbGQgLS0+CiAgPHBhdGggZD0iTTUwIDVMMTAgMjBWNTBDMTAgNzAgMjAgOTUgNTAgMTEwQzgwIDk1IDkwIDcwIDkwIDUwVjIwTDUwIDVaIiBmaWxsPSIjMWUxZTFlIiBzdHJva2U9IiMxZTFlMWUiIHN0cm9rZS13aWR0aD0iMiIvPgogIDxwYXRoIGQ9Ik01MCA4TDEzIDIyVjUwQzEzIDY5IDE5IDkyIDUwIDEwNkM4MSA5MiA4NyA2OSA4NyA1MFYyMkw1MCA4WiIgZmlsbD0iI2Q1MWU0NyIvPgogIDwhLS0gQ3JlYW0gU2VjdGlvbiAtLT4KICA8cGF0aCBkPSJNNTAgNTVMMTMgNTBWNTBDMTMgNjkgMTkgOTIgNTAgMTA2QzgxIDkyIDg3IDY5IDg3IDUwVjUwTDUwIDU1WiIgZmlsbD0iI2Y0ZTVjMiIvPgogIDwhLS0gQmFubmVyIC0tPgogIDxyZWN0IHg9IjIwIiB5PSIzNSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjEyIiBmaWxsPSIjMGUxZDYxIiByeD0iMiIvPgogIDx0ZXh0IHg9IjUwIiB5PSI0NCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjgiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VS5TLiBMYXdTaGllbGQ8L3RleHQ+CiAgPCEtLSBTY2FsZXMgb2YgSnVzdGljZSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1MCwgNzApIHNjYWxlKDAuMykiPgogICAgPGxpbmUgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjQwIiBzdHJva2U9IiMwZTFkNjEiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgPGxpbmUgeDE9Ii0zMCIgeTE9IjAiIHgyPSIzMCIgeTI9IjAiIHN0cm9rZT0iIzBlMWQ2MSIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgICA8Y2lyY2xlIGN4PSItMzAiIGN5PSItNSIgcj0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGUxZDYxIiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIDxjaXJjbGUgY3g9IjMwIiBjeT0iLTUiIHI9IjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBlMWQ2MSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPC9nPgo8L3N2Zz4=');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.9;
+      animation: markAnimation 0.3s ease-out;
+      pointer-events: none;
+    }
+    
+    @keyframes markAnimation {
+      0% {
+        transform: translate(-50%, -50%) scale(0) rotate(-10deg);
+        opacity: 0;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.3) rotate(5deg);
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 0.9;
+      }
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 30px;
+      border: 4px solid #0e1d61;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.8em;
+      color: #0e1d61;
+      margin-bottom: 10px;
+    }
+    
+    .modal-body {
+      margin: 20px 0;
+    }
+    
+    .modal-body label {
+      display: block;
+      font-weight: 700;
+      color: #0e1d61;
+      margin-bottom: 8px;
+      font-size: 1.1em;
+    }
+    
+    .modal-body input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1em;
+      border: 2px solid #0e1d61;
+      border-radius: 8px;
+      font-family: 'Oswald', sans-serif;
+    }
+    
+    .modal-body input[type="text"]#memberIdInput {
+      text-transform: uppercase;
+      font-family: monospace;
+    }
+    
+    .modal-body input:focus {
+      outline: none;
+      border-color: #d51e47;
+      box-shadow: 0 0 10px rgba(213, 30, 71, 0.3);
+    }
+    
+    .error-message {
+      color: #d51e47;
+      font-size: 0.9em;
+      margin-top: 8px;
+      display: none;
+      font-weight: 600;
+    }
+    
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .close-btn {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .close-btn:hover {
+      background: #5a6268;
+    }
+    
+    .bingo-modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+    }
+    
+    .bingo-modal-content {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      margin: 5% auto;
+      padding: 40px;
+      border: 6px solid #d51e47;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+    
+    .bingo-celebration {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .bingo-celebration h2 {
+      font-family: 'Anton', sans-serif;
+      font-size: 4em;
+      color: #d51e47;
+      text-shadow: 3px 3px 0px #0e1d61;
+      margin-bottom: 10px;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .bingo-type {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.8em;
+      color: #0e1d61;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: linear-gradient(135deg, #e7d386 0%, #d4af37 100%);
+      border-radius: 10px;
+      text-align: center;
+    }
+    
+    .verification-details {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      border: 3px solid #0e1d61;
+      margin-bottom: 20px;
+    }
+    
+    .verification-details h3 {
+      font-family: 'Oswald', sans-serif;
+      color: #0e1d61;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+    }
+    
+    .member-list {
+      display: grid;
+      gap: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .member-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 15px;
+      background: #f8f9fa;
+      border-left: 4px solid #d51e47;
+      border-radius: 5px;
+      font-family: 'Oswald', sans-serif;
+    }
+    
+    .member-position {
+      font-weight: 700;
+      color: #0e1d61;
+    }
+    
+    .member-id {
+      font-weight: 600;
+      color: #d51e47;
+      font-family: monospace;
+    }
+    
+    .screenshot-note {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #856404;
+      text-align: center;
+    }
+    
+    @media print {
+      body {
+        background: white;
+      }
+      .header, .controls, .player-info {
+        display: none;
+      }
+      .bingo-card {
+        box-shadow: none;
+        page-break-after: always;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .cards-container {
+        grid-template-columns: 1fr;
+      }
+      .main-title {
+        font-size: 2.5em;
+      }
+      .bingo-title {
+        font-size: 3em;
+        letter-spacing: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-container">
+      <svg width="80" height="90" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 5L10 20V50C10 70 20 95 50 110C80 95 90 70 90 50V20L50 5Z" fill="#1e1e1e" stroke="#1e1e1e" stroke-width="2"/>
+        <path d="M50 8L13 22V50C13 69 19 92 50 106C81 92 87 69 87 50V22L50 8Z" fill="#d51e47"/>
+        <path d="M50 55L13 50V50C13 69 19 92 50 106C81 92 87 69 87 50V50L50 55Z" fill="#f4e5c2"/>
+        <rect x="20" y="35" width="60" height="12" fill="#0e1d61" rx="2"/>
+        <text x="50" y="44" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle">U.S. LawShield</text>
+        <g transform="translate(50, 70) scale(0.3)">
+          <line x1="0" y1="0" x2="0" y2="40" stroke="#0e1d61" stroke-width="3"/>
+          <line x1="-30" y1="0" x2="30" y2="0" stroke="#0e1d61" stroke-width="3"/>
+          <circle cx="-30" cy="-5" r="8" fill="none" stroke="#0e1d61" stroke-width="2"/>
+          <circle cx="30" cy="-5" r="8" fill="none" stroke="#0e1d61" stroke-width="2"/>
+        </g>
+      </svg>
+      <h1 class="main-title">U.S. LAWSHIELD</h1>
+    </div>
+    <div class="subtitle">EMPLOYEE ENGAGEMENT BINGO</div>
+    <p class="tagline">LEGAL DEFENSE FOR SELF DEFENSE®</p>
+  </div>
+
+  <div class="player-info" id="playerInfo" style="display: none;"></div>
+
+  <div class="controls">
+    <button class="btn-secondary" onclick="window.print()">Print Cards (PDF)</button>
+  </div>
+
+  <div class="cards-container" id="cardsContainer"></div>
+
+  <!-- Name Entry Modal -->
+  <div id="nameModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Welcome to U.S. LawShield BINGO!</h2>
+        <p style="color: #666; font-size: 0.95em;">Please enter your name to get started</p>
+      </div>
+      <div class="modal-body">
+        <label for="nameInput">Your Name:</label>
+        <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off">
+        <div class="error-message" id="nameError">Please enter your name</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="submitName()">Start Playing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member ID Modal -->
+  <div id="memberModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Enter Member ID</h2>
+        <p style="color: #666; font-size: 0.95em;">Required to mark this square</p>
+      </div>
+      <div class="modal-body">
+        <label for="memberIdInput">Member ID:</label>
+        <input type="text" id="memberIdInput" placeholder="e.g., ABC123456" maxlength="10" autocomplete="off">
+        <div class="error-message" id="errorMessage">Invalid Member ID. Must be 2-3 letters followed by numbers (5-10 characters total)</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="submitMemberId()">Submit</button>
+        <button class="btn-secondary close-btn" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bingo Celebration Modal -->
+  <div id="bingoModal" class="bingo-modal">
+    <div class="bingo-modal-content">
+      <div class="bingo-celebration">
+        <h2>🎉 BINGO! 🎉</h2>
+      </div>
+      <div class="bingo-type" id="bingoType"></div>
+      <div class="screenshot-note">
+        📸 Screenshot this verification for admin approval
+      </div>
+      <div class="verification-details">
+        <h3>Verified Member IDs:</h3>
+        <div class="member-list" id="memberList"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="closeBingoModal()">Continue Playing</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const items = [
+      'Single PR', 'Single PR', 'Single PR',
+      'Dual PR', 'Dual PR', 'Dual PR',
+      'Dual Monthly LOC', 'Dual Monthly LOC',
+      'Single Monthly LOC', 'Single Monthly LOC',
+      'Single Annual LOC', 'Single Annual LOC',
+      'Dual Annual LOC',
+      'Add Secondary Legacy (Monthly)',
+      'Add Secondary Legacy (Annual)',
+      'Conversion to Explore',
+      'Conversion to Navigate',
+      'Conversion to Discover',
+      'Add E-Shield', 'Add E-Shield',
+      'LSLP (monthly)', 'LSLP (monthly)',
+      'LSLP (Annual)',
+      'Save', 'Save',
+      'Winback (monthly)', 'Winback (monthly)',
+      'Winback (annual)'
+    ];
+
+    const MAX_PLAYERS = 10;
+    let currentCell = null;
+    let currentCardIndex = null;
+    let gameState = null;
+
+    function getGlobalPlayerCount() {
+      let count = localStorage.getItem('uslBingoGlobalPlayerCount');
+      return count ? parseInt(count) : 0;
+    }
+
+    function incrementGlobalPlayerCount() {
+      let count = getGlobalPlayerCount();
+      if (count < MAX_PLAYERS) {
+        count++;
+        localStorage.setItem('uslBingoGlobalPlayerCount', count.toString());
+      }
+      return count;
+    }
+
+    function getOrCreatePlayerId() {
+      let playerId = localStorage.getItem('uslBingoPlayerId');
+      if (!playerId) {
+        const playerNumber = incrementGlobalPlayerCount();
+        playerId = 'player_' + playerNumber;
+        localStorage.setItem('uslBingoPlayerId', playerId);
+      }
+      return playerId;
+    }
+
+    function saveGameState() {
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 7);
+      
+      gameState.expiresAt = expirationDate.toISOString();
+      localStorage.setItem('uslBingoGame_' + gameState.playerId, JSON.stringify(gameState));
+    }
+
+    function loadGameState() {
+      const playerId = getOrCreatePlayerId();
+      const savedGame = localStorage.getItem('uslBingoGame_' + playerId);
+      
+      if (savedGame) {
+        const parsed = JSON.parse(savedGame);
+        const expirationDate = new Date(parsed.expiresAt);
+        
+        if (expirationDate > new Date()) {
+          return parsed;
+        } else {
+          localStorage.removeItem('uslBingoGame_' + playerId);
+        }
+      }
+      return null;
+    }
+
+    function generateCard() {
+      const shuffled = [...items].sort(() => Math.random() - 0.5);
+      const card = shuffled.slice(0, 24);
+      card.splice(12, 0, 'FREE');
+      
+      const hasAcwExpires = card.includes('< 3 ACW Expires');
+      if (!hasAcwExpires) {
+        const randomIndex = Math.floor(Math.random() * 24);
+        const targetIndex = randomIndex >= 12 ? randomIndex + 1 : randomIndex;
+        card[targetIndex] = '< 3 ACW Expires';
+      }
+      
+      return card;
+    }
+
+    function initializeGame(playerName) {
+      const playerId = getOrCreatePlayerId();
+      
+      gameState = {
+        playerId: playerId,
+        playerName: playerName,
+        cards: [
+          { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
+          { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) },
+          { items: generateCard(), marked: new Array(25).fill(false), memberIds: new Array(25).fill(null) }
+        ],
+        createdAt: new Date().toISOString()
+      };
+      
+      gameState.cards.forEach(card => {
+        card.marked[12] = true;
+      });
+      
+      saveGameState();
+      showPlayerInfo();
+      renderCards();
+    }
+
+    function showPlayerInfo() {
+      const playerInfo = document.getElementById('playerInfo');
+      playerInfo.textContent = `Welcome, ${gameState.playerName}! 🎯`;
+      playerInfo.style.display = 'block';
+    }
+
+    function renderCards() {
+      const container = document.getElementById('cardsContainer');
+      container.innerHTML = '';
+      
+      gameState.cards.forEach((cardData, cardIndex) => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'bingo-card';
+        
+        const header = `
+          <div class="card-header">
+            <div class="bingo-title">BINGO</div>
+            <div class="card-number">Card ${cardIndex + 1} of 3</div>
+            <div class="shield-badge">★ Shield Nation Member ★</div>
+          </div>
+        `;
+        
+        const grid = document.createElement('div');
+        grid.className = 'bingo-grid';
+        
+        ['B', 'I', 'N', 'G', 'O'].forEach(letter => {
+          const headerCell = document.createElement('div');
+          headerCell.className = 'bingo-header';
+          headerCell.textContent = letter;
+          grid.appendChild(headerCell);
+        });
+        
+        cardData.items.forEach((item, index) => {
+          const cell = document.createElement('div');
+          cell.className = 'bingo-cell';
+          
+          if (item === 'FREE') {
+            cell.className += ' free-space';
+            cell.innerHTML = `
+              <svg width="100" height="115" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 5L10 20V50C10 70 20 95 50 110C80 95 90 70 90 50V20L50 5Z" fill="#1e1e1e" stroke="#1e1e1e" stroke-width="2"/>
+                <path d="M50 8L13 22V50C13 69 19 92 50 106C81 92 87 69 87 50V22L50 8Z" fill="#d51e47"/>
+                <path d="M50 55L13 50V50C13 69 19 92 50 106C81 92 87 69 87 50V50L50 55Z" fill="#f4e5c2"/>
+                <rect x="20" y="35" width="60" height="12" fill="#0e1d61" rx="2"/>
+                <text x="50" y="44" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="white" text-anchor="middle">U.S. LawShield</text>
+                <g transform="translate(50, 70) scale(0.3)">
+                  <line x1="0" y1="0" x2="0" y2="40" stroke="#0e1d61" stroke-width="3"/>
+                  <line x1="-30" y1="0" x2="30" y2="0" stroke="#0e1d61" stroke-width="3"/>
+                  <circle cx="-30" cy="-5" r="8" fill="none" stroke="#0e1d61" stroke-width="2"/>
+                  <circle cx="30" cy="-5" r="8" fill="none" stroke="#0e1d61" stroke-width="2"/>
+                </g>
+              </svg>
+              <span class="free-space-text">FREE<br>SPACE</span>
+            `;
+          } else {
+            cell.textContent = item;
+            cell.onclick = () => handleCellClick(cardIndex, index);
+          }
+          
+          if (cardData.marked[index]) {
+            cell.classList.add('marked');
+          }
+          
+          grid.appendChild(cell);
+        });
+        
+        cardDiv.innerHTML = header;
+        cardDiv.appendChild(grid);
+        container.appendChild(cardDiv);
+      });
+    }
+
+    function handleCellClick(cardIndex, cellIndex) {
+      if (gameState.cards[cardIndex].marked[cellIndex]) {
+        return;
+      }
+      
+      currentCardIndex = cardIndex;
+      currentCell = cellIndex;
+      
+      document.getElementById('memberModal').style.display = 'block';
+      document.getElementById('memberIdInput').value = '';
+      document.getElementById('errorMessage').style.display = 'none';
+      document.getElementById('memberIdInput').focus();
+    }
+
+    function validateMemberId(memberId) {
+      const trimmed = memberId.trim().toUpperCase();
+      const regex = /^[A-Z]{2,3}\d+$/;
+      
+      if (trimmed.length < 5 || trimmed.length > 10) {
+        return false;
+      }
+      
+      return regex.test(trimmed);
+    }
+
+    function submitMemberId() {
+      const input = document.getElementById('memberIdInput');
+      const memberId = input.value.trim().toUpperCase();
+      
+      if (!validateMemberId(memberId)) {
+        document.getElementById('errorMessage').style.display = 'block';
+        input.focus();
+        return;
+      }
+      
+      gameState.cards[currentCardIndex].marked[currentCell] = true;
+      gameState.cards[currentCardIndex].memberIds[currentCell] = memberId;
+      
+      saveGameState();
+      closeModal();
+      renderCards();
+      
+      setTimeout(() => checkForBingo(currentCardIndex), 300);
+    }
+
+    function closeModal() {
+      document.getElementById('memberModal').style.display = 'none';
+      currentCell = null;
+      currentCardIndex = null;
+    }
+
+    function checkForBingo(cardIndex) {
+      const card = gameState.cards[cardIndex];
+      const bingoPatterns = [];
+      
+      for (let row = 0; row < 5; row++) {
+        const rowIndices = [];
+        let rowComplete = true;
+        for (let col = 0; col < 5; col++) {
+          const index = row * 5 + col;
+          rowIndices.push(index);
+          if (!card.marked[index]) {
+            rowComplete = false;
+            break;
+          }
+        }
+        if (rowComplete) {
+          bingoPatterns.push({ type: 'Row ' + (row + 1), indices: rowIndices });
+        }
+      }
+      
+      for (let col = 0; col < 5; col++) {
+        const colIndices = [];
+        let colComplete = true;
+        for (let row = 0; row < 5; row++) {
+          const index = row * 5 + col;
+          colIndices.push(index);
+          if (!card.marked[index]) {
+            colComplete = false;
+            break;
+          }
+        }
+        if (colComplete) {
+          bingoPatterns.push({ type: 'Column ' + ['B', 'I', 'N', 'G', 'O'][col], indices: colIndices });
+        }
+      }
+      
+      const diagonal1 = [0, 6, 12, 18, 24];
+      if (diagonal1.every(i => card.marked[i])) {
+        bingoPatterns.push({ type: 'Diagonal (Top-Left to Bottom-Right)', indices: diagonal1 });
+      }
+      
+      const diagonal2 = [4, 8, 12, 16, 20];
+      if (diagonal2.every(i => card.marked[i])) {
+        bingoPatterns.push({ type: 'Diagonal (Top-Right to Bottom-Left)', indices: diagonal2 });
+      }
+      
+      const fourCorners = [0, 4, 20, 24];
+      if (fourCorners.every(i => card.marked[i])) {
+        bingoPatterns.push({ type: 'Four Corners', indices: fourCorners });
+      }
+      
+      const tPattern = [0, 1, 2, 3, 4, 12, 17, 22];
+      if (tPattern.every(i => card.marked[i])) {
+        bingoPatterns.push({ type: 'T Pattern', indices: tPattern });
+      }
+      
+      const xPattern = [0, 4, 6, 8, 12, 16, 18, 20, 24];
+      if (xPattern.every(i => card.marked[i])) {
+        bingoPatterns.push({ type: 'X Pattern', indices: xPattern });
+      }
+      
+      let allMarked = true;
+      for (let i = 0; i < 25; i++) {
+        if (!card.marked[i]) {
+          allMarked = false;
+          break;
+        }
+      }
+      if (allMarked) {
+        bingoPatterns.push({ type: 'BLACKOUT (Full Card)', indices: Array.from({length: 25}, (_, i) => i) });
+      }
+      
+      if (bingoPatterns.length > 0) {
+        showBingoModal(cardIndex, bingoPatterns);
+      }
+    }
+
+    function showBingoModal(cardIndex, patterns) {
+      const modal = document.getElementById('bingoModal');
+      const typeDiv = document.getElementById('bingoType');
+      const memberList = document.getElementById('memberList');
+      
+      const pattern = patterns[patterns.length - 1];
+      
+      typeDiv.textContent = pattern.type + ' - Card ' + (cardIndex + 1);
+      
+      memberList.innerHTML = '';
+      pattern.indices.forEach(index => {
+        const memberId = gameState.cards[cardIndex].memberIds[index];
+        const item = gameState.cards[cardIndex].items[index];
+        
+        if (memberId) {
+          const memberItem = document.createElement('div');
+          memberItem.className = 'member-item';
+          
+          const row = Math.floor(index / 5) + 1;
+          const col = ['B', 'I', 'N', 'G', 'O'][index % 5];
+          const position = col + row;
+          
+          memberItem.innerHTML = `
+            <span class="member-position">${position}: ${item}</span>
+            <span class="member-id">${memberId}</span>
+          `;
+          memberList.appendChild(memberItem);
+        }
+      });
+      
+      modal.style.display = 'block';
+    }
+
+    function closeBingoModal() {
+      document.getElementById('bingoModal').style.display = 'none';
+    }
+
+    function submitName() {
+      const input = document.getElementById('nameInput');
+      const name = input.value.trim();
+      
+      if (!name) {
+        document.getElementById('nameError').style.display = 'block';
+        input.focus();
+        return;
+      }
+      
+      document.getElementById('nameModal').style.display = 'none';
+      initializeGame(name);
+    }
+
+    document.getElementById('memberIdInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        submitMemberId();
+      }
+    });
+
+    document.getElementById('nameInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        submitName();
+      }
+    });
+
+    window.onclick = function(event) {
+      const memberModal = document.getElementById('memberModal');
+      if (event.target === memberModal) {
+        closeModal();
+      }
+    };
+
+    window.onload = function() {
+      const saved = loadGameState();
+      if (saved) {
+        gameState = saved;
+        showPlayerInfo();
+        renderCards();
+      } else {
+        document.getElementById('nameModal').style.display = 'block';
+        document.getElementById('nameInput').focus();
+      }
+    };
+  </script>
+</body>
+</html>
